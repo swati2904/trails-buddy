@@ -150,6 +150,19 @@ const Map = () => {
     });
   };
 
+  // Custom icons for different difficulty levels
+  const easyIcon = new L.DivIcon({
+    html: '<div style="background-color: green; width: 20px; height: 20px;"></div>',
+  });
+
+  const moderateIcon = new L.DivIcon({
+    html: '<div style="background-color: orange; width: 20px; height: 20px; border-radius: 50%;"></div>',
+  });
+
+  const hardIcon = new L.DivIcon({
+    html: '<div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid red;"></div>',
+  });
+
   // Custom icon for user location
   const userLocationIcon = new L.Icon({
     iconUrl:
@@ -222,18 +235,47 @@ const Map = () => {
           </Marker>
         )}
 
-        {filteredTrails.map((trail) => (
-          <Polyline key={trail.id} positions={trail.latlngs} color='blue'>
-            <Popup>
-              <strong>{trail.name}</strong>
-              <br />
-              Difficulty: {trail.difficulty}
-              <br />
-              Length: {trail.length}
-              <br />
-            </Popup>
-          </Polyline>
-        ))}
+        {filteredTrails.map((trail) => {
+          let icon;
+          switch (trail.difficulty) {
+            case 'hiking':
+              icon = easyIcon;
+              break;
+            case 'mountain_hiking':
+              icon = moderateIcon;
+              break;
+            case 'demanding_mountain_hiking':
+              icon = hardIcon;
+              break;
+            default:
+              icon = null;
+          }
+
+          return (
+            <Polyline key={trail.id} positions={trail.latlngs} color='blue'>
+              <Popup>
+                <strong>{trail.name}</strong>
+                <br />
+                Difficulty: {trail.difficulty}
+                <br />
+                Length: {trail.length}
+                <br />
+              </Popup>
+              {icon && (
+                <Marker position={trail.latlngs[0]} icon={icon}>
+                  <Popup>
+                    <strong>{trail.name}</strong>
+                    <br />
+                    Difficulty: {trail.difficulty}
+                    <br />
+                    Length: {trail.length}
+                    <br />
+                  </Popup>
+                </Marker>
+              )}
+            </Polyline>
+          );
+        })}
       </MapContainer>
     </div>
   );
