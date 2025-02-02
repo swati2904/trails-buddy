@@ -10,6 +10,7 @@ import {
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
+import TrailDetailsModal from './TrailDetailsModal'; // Import the new modal component
 
 // Custom hook to update the map center
 const SetMapCenter = ({ center }) => {
@@ -30,6 +31,8 @@ const Map = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [userLocationName, setUserLocationName] = useState('');
   const [mapCenter, setMapCenter] = useState([37.7749, -122.4194]); // Default: San Francisco
+  const [selectedTrail, setSelectedTrail] = useState(null); // State to store the selected trail
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal visibility
 
   useEffect(() => {
     const bbox = [37.6, -123, 37.9, -122]; // Adjusted bounding box to cover a specific area
@@ -73,6 +76,12 @@ const Map = () => {
                   name: trail.tags.name || 'Unnamed Trail',
                   difficulty: trail.tags.sac_scale || 'Unknown',
                   length: trail.tags.length || 'N/A',
+                  bicycle: trail.tags.bicycle || 'No',
+                  dog: trail.tags.dog || 'No',
+                  highway: trail.tags.highway || 'N/A',
+                  trail_visibility: trail.tags.trail_visibility || 'N/A',
+                  elevation_grade: trail.tags.elevation_grade || 'N/A',
+                  total_distance: trail.tags.total_distance || 'N/A',
                 };
               }
               console.log('Trail has no nodes:', trail);
@@ -175,108 +184,138 @@ const Map = () => {
     shadowSize: [41, 41],
   });
 
+  const handleTrailClick = (trail) => {
+    setSelectedTrail(trail);
+    setIsModalOpen(true);
+  };
+
   return (
-    <div style={{ padding: '10px' }}>
-      <h1>Interactive Hiking Trails Map</h1>
+    <div style={{ display: 'flex', height: '100vh' }}>
+      <div style={{ flex: isModalOpen ? 0.7 : 1, transition: 'flex 0.3s' }}>
+        <h1>Interactive Hiking Trails Map</h1>
 
-      {/* Search Bar */}
-      <div>
-        <input
-          type='text'
-          placeholder='Search for trails'
-          onChange={(e) => setSearchTerm(e.target.value)}
-          value={searchTerm}
-        />
-      </div>
+        {/* Search Bar */}
+        <div>
+          <input
+            type='text'
+            placeholder='Search for trails'
+            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
+          />
+        </div>
 
-      {/* Filter Buttons */}
-      <div>
-        <button onClick={() => handleDifficultyFilter('hiking')}>Easy</button>
-        <button onClick={() => handleDifficultyFilter('mountain_hiking')}>
-          Moderate
-        </button>
-        <button
-          onClick={() => handleDifficultyFilter('demanding_mountain_hiking')}
+        {/* Filter Buttons */}
+        <div>
+          <button onClick={() => handleDifficultyFilter('hiking')}>Easy</button>
+          <button onClick={() => handleDifficultyFilter('mountain_hiking')}>
+            Moderate
+          </button>
+          <button
+            onClick={() => handleDifficultyFilter('demanding_mountain_hiking')}
+          >
+            Hard
+          </button>
+          <button onClick={() => handleDifficultyFilter(null)}>Show All</button>
+        </div>
+
+        <button onClick={handleGetLocation}>Get My Location</button>
+
+        <MapContainer
+          center={mapCenter}
+          zoom={13}
+          style={{ height: '80vh', width: '100%' }}
         >
-          Hard
-        </button>
-        <button onClick={() => handleDifficultyFilter(null)}>Show All</button>
+          <SetMapCenter center={mapCenter} />
+          <TileLayer
+            url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+
+          {userLocation && (
+            <Marker position={userLocation} icon={userLocationIcon}>
+              <Popup>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div
+                    style={{
+                      backgroundColor: 'blue',
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      marginRight: '5px',
+                    }}
+                  ></div>
+                  <span>{userLocationName}</span>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {filteredTrails.map((trail) => {
+            let icon;
+            switch (trail.difficulty) {
+              case 'hiking':
+                icon = easyIcon;
+                break;
+              case 'mountain_hiking':
+                icon = moderateIcon;
+                break;
+              case 'demanding_mountain_hiking':
+                icon = hardIcon;
+                break;
+              default:
+                icon = null;
+            }
+
+            return (
+              <Polyline
+                key={trail.id}
+                positions={trail.latlngs}
+                color='blue'
+                eventHandlers={{
+                  click: () => handleTrailClick(trail),
+                }}
+              >
+                <Popup>
+                  <strong>{trail.name}</strong>
+                  <br />
+                  Difficulty: {trail.difficulty}
+                  <br />
+                  Length: {trail.length}
+                  <br />
+                  <button onClick={() => handleTrailClick(trail)}>
+                    View Details
+                  </button>
+                </Popup>
+                {icon && (
+                  <Marker position={trail.latlngs[0]} icon={icon}>
+                    <Popup>
+                      <strong>{trail.name}</strong>
+                      <br />
+                      Difficulty: {trail.difficulty}
+                      <br />
+                      Length: {trail.length}
+                      <br />
+                      <button onClick={() => handleTrailClick(trail)}>
+                        View Details
+                      </button>
+                    </Popup>
+                  </Marker>
+                )}
+              </Polyline>
+            );
+          })}
+        </MapContainer>
       </div>
 
-      <button onClick={handleGetLocation}>Get My Location</button>
-
-      <MapContainer
-        center={mapCenter}
-        zoom={13}
-        style={{ height: '80vh', width: '100%' }}
-      >
-        <SetMapCenter center={mapCenter} />
-        <TileLayer
-          url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-
-        {userLocation && (
-          <Marker position={userLocation} icon={userLocationIcon}>
-            <Popup>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div
-                  style={{
-                    backgroundColor: 'blue',
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    marginRight: '5px',
-                  }}
-                ></div>
-                <span>{userLocationName}</span>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-
-        {filteredTrails.map((trail) => {
-          let icon;
-          switch (trail.difficulty) {
-            case 'hiking':
-              icon = easyIcon;
-              break;
-            case 'mountain_hiking':
-              icon = moderateIcon;
-              break;
-            case 'demanding_mountain_hiking':
-              icon = hardIcon;
-              break;
-            default:
-              icon = null;
-          }
-
-          return (
-            <Polyline key={trail.id} positions={trail.latlngs} color='blue'>
-              <Popup>
-                <strong>{trail.name}</strong>
-                <br />
-                Difficulty: {trail.difficulty}
-                <br />
-                Length: {trail.length}
-                <br />
-              </Popup>
-              {icon && (
-                <Marker position={trail.latlngs[0]} icon={icon}>
-                  <Popup>
-                    <strong>{trail.name}</strong>
-                    <br />
-                    Difficulty: {trail.difficulty}
-                    <br />
-                    Length: {trail.length}
-                    <br />
-                  </Popup>
-                </Marker>
-              )}
-            </Polyline>
-          );
-        })}
-      </MapContainer>
+      {isModalOpen && (
+        <div style={{ flex: 0.3, padding: '10px', overflowY: 'auto' }}>
+          <TrailDetailsModal
+            isOpen={isModalOpen}
+            onRequestClose={() => setIsModalOpen(false)}
+            trail={selectedTrail}
+          />
+        </div>
+      )}
     </div>
   );
 };
