@@ -5,9 +5,22 @@ import {
   Marker,
   Popup,
   Polyline,
+  useMap,
 } from 'react-leaflet';
+import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
+
+// Custom hook to update the map center
+const SetMapCenter = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+};
 
 const Map = () => {
   const [trailData, setTrailData] = useState([]);
@@ -15,11 +28,11 @@ const Map = () => {
   const [filteredTrails, setFilteredTrails] = useState([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
-
-  const position = [37.7749, -122.4194]; // Default: San Francisco
+  const [userLocationName, setUserLocationName] = useState('');
+  const [mapCenter, setMapCenter] = useState([37.7749, -122.4194]); // Default: San Francisco
 
   useEffect(() => {
-    const bbox = [37.6, -123, 37.9, -122]; // [lat_min, lon_min, lat_max, lon_max]
+    const bbox = [37.6, -123, 37.9, -122]; // Adjusted bounding box to cover a specific area
 
     axios
       .get('https://overpass-api.de/api/interpreter', {
@@ -116,10 +129,38 @@ const Map = () => {
   };
 
   const handleGetLocation = () => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      setUserLocation([position.coords.latitude, position.coords.longitude]);
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const userLoc = [position.coords.latitude, position.coords.longitude];
+      setUserLocation(userLoc);
+      setMapCenter(userLoc);
+
+      // Reverse geocode to get location name
+      const response = await axios.get(
+        'https://nominatim.openstreetmap.org/reverse',
+        {
+          params: {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+            format: 'json',
+          },
+        }
+      );
+      const locationName = response.data.display_name;
+      setUserLocationName(locationName);
     });
   };
+
+  // Custom icon for user location
+  const userLocationIcon = new L.Icon({
+    iconUrl:
+      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl:
+      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
 
   return (
     <div style={{ padding: '10px' }}>
@@ -152,18 +193,32 @@ const Map = () => {
       <button onClick={handleGetLocation}>Get My Location</button>
 
       <MapContainer
-        center={position}
+        center={mapCenter}
         zoom={13}
         style={{ height: '80vh', width: '100%' }}
       >
+        <SetMapCenter center={mapCenter} />
         <TileLayer
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
         {userLocation && (
-          <Marker position={userLocation}>
-            <Popup>Your Current Location</Popup>
+          <Marker position={userLocation} icon={userLocationIcon}>
+            <Popup>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div
+                  style={{
+                    backgroundColor: 'blue',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    marginRight: '5px',
+                  }}
+                ></div>
+                <span>{userLocationName}</span>
+              </div>
+            </Popup>
           </Marker>
         )}
 
