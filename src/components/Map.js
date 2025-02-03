@@ -1,4 +1,6 @@
+// filepath: /D:/swati/trails-buddy/src/components/Map.js
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, Route, Routes } from 'react-router-dom';
 import {
   MapContainer,
   TileLayer,
@@ -11,7 +13,8 @@ import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import TrailDetailsModal from './TrailDetailsModal';
-import SelectedTrailMap from './SelectedTrailMap'; // Import the new component
+import SelectedTrailMap from './SelectedTrailMap';
+import TrailPage from './TrailPage';
 
 // Custom hook to update the map center
 const SetMapCenter = ({ center }) => {
@@ -26,18 +29,19 @@ const SetMapCenter = ({ center }) => {
 
 const Map = () => {
   const [trailData, setTrailData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [filteredTrails, setFilteredTrails] = useState([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [userLocationName, setUserLocationName] = useState('');
-  const [mapCenter, setMapCenter] = useState([37.7749, -122.4194]); // Default: San Francisco
-  const [selectedTrail, setSelectedTrail] = useState(null); // State to store the selected trail
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal visibility
-  const [showSelectedTrailMap, setShowSelectedTrailMap] = useState(false); // State to control the selected trail map visibility
+  const [mapCenter, setMapCenter] = useState([37.7749, -122.4194]);
+  const [selectedTrail, setSelectedTrail] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSelectedTrailMap, setShowSelectedTrailMap] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const bbox = [37.6, -123, 37.9, -122]; // Adjusted bounding box to cover a specific area
+    const bbox = [37.6, -123, 37.9, -122];
 
     axios
       .get('https://overpass-api.de/api/interpreter', {
@@ -52,7 +56,6 @@ const Map = () => {
         },
       })
       .then(async (response) => {
-        console.log('Data fetched from Overpass API', response.data);
         if (response.data && response.data.elements) {
           const trails = await Promise.all(
             response.data.elements.map(async (trail) => {
@@ -86,16 +89,12 @@ const Map = () => {
                   total_distance: trail.tags.total_distance || 'N/A',
                 };
               }
-              console.log('Trail has no nodes:', trail);
               return null;
             })
           );
           const validTrails = trails.filter((trail) => trail !== null);
-          console.log('Processed trail data:', validTrails);
           setTrailData(validTrails);
           setFilteredTrails(validTrails);
-        } else {
-          console.error('Unexpected response format', response.data);
         }
       })
       .catch((error) => {
@@ -105,25 +104,10 @@ const Map = () => {
 
   useEffect(() => {
     if (trailData.length === 0) {
-      console.log('No trail data available yet.');
       return;
     }
 
-    console.log(
-      'Filtering trails with searchTerm:',
-      searchTerm,
-      'and selectedDifficulty:',
-      selectedDifficulty
-    );
-    console.log('Trail Data:', trailData);
-
     let filtered = trailData;
-
-    if (searchTerm) {
-      filtered = filtered.filter((trail) =>
-        trail.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
 
     if (selectedDifficulty) {
       filtered = filtered.filter(
@@ -131,12 +115,11 @@ const Map = () => {
       );
     }
 
-    console.log('Filtered Trails:', filtered);
     setFilteredTrails(filtered);
-  }, [searchTerm, selectedDifficulty, trailData]);
+  }, [selectedDifficulty, trailData]);
 
-  const handleDifficultyFilter = (difficulty) => {
-    setSelectedDifficulty(difficulty);
+  const handleDifficultyFilter = (event) => {
+    setSelectedDifficulty(event.target.value);
   };
 
   const handleGetLocation = () => {
@@ -145,7 +128,6 @@ const Map = () => {
       setUserLocation(userLoc);
       setMapCenter(userLoc);
 
-      // Reverse geocode to get location name
       const response = await axios.get(
         'https://nominatim.openstreetmap.org/reverse',
         {
@@ -161,7 +143,6 @@ const Map = () => {
     });
   };
 
-  // Custom icons for different difficulty levels
   const easyIcon = new L.DivIcon({
     html: '<div style="background-color: green; width: 20px; height: 20px;"></div>',
   });
@@ -174,7 +155,6 @@ const Map = () => {
     html: '<div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid red;"></div>',
   });
 
-  // Custom icon for user location
   const userLocationIcon = new L.Icon({
     iconUrl:
       'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -188,166 +168,133 @@ const Map = () => {
 
   const handleTrailClick = (trail) => {
     setSelectedTrail(trail);
-    setIsModalOpen(true);
-  };
-
-  const handleViewTrail = (trail) => {
-    setSelectedTrail(trail);
-    setShowSelectedTrailMap(true);
-  };
-
-  const handleCloseSelectedTrailMap = () => {
-    setShowSelectedTrailMap(false);
+    navigate(`/trail/${trail.id}`);
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      {!showSelectedTrailMap ? (
-        <div style={{ flex: isModalOpen ? 0.7 : 1, transition: 'flex 0.3s' }}>
-          <h1>Interactive Hiking Trails Map</h1>
-
-          {/* Search Bar */}
-          <div>
-            <input
-              type='text'
-              placeholder='Search for trails'
-              onChange={(e) => setSearchTerm(e.target.value)}
-              value={searchTerm}
-            />
-          </div>
-
-          {/* Filter Buttons */}
-          <div>
-            <button onClick={() => handleDifficultyFilter('hiking')}>
-              Easy
-            </button>
-            <button onClick={() => handleDifficultyFilter('mountain_hiking')}>
-              Moderate
-            </button>
-            <button
-              onClick={() =>
-                handleDifficultyFilter('demanding_mountain_hiking')
-              }
+    <div style={{ height: '100vh', width: '100%' }}>
+      <Routes>
+        <Route
+          path='/trail/:id'
+          element={<TrailPage trailData={trailData} />}
+        />
+        <Route
+          path='/'
+          element={
+            <div
+              style={{ height: '100%', width: '100%', position: 'relative' }}
             >
-              Hard
-            </button>
-            <button onClick={() => handleDifficultyFilter(null)}>
-              Show All
-            </button>
-          </div>
+              <MapContainer
+                center={mapCenter}
+                zoom={13}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <SetMapCenter center={mapCenter} />
+                <TileLayer
+                  url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
 
-          <button onClick={handleGetLocation}>Get My Location</button>
+                {userLocation && (
+                  <Marker position={userLocation} icon={userLocationIcon}>
+                    <Popup>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div
+                          style={{
+                            backgroundColor: 'blue',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '50%',
+                            marginRight: '5px',
+                          }}
+                        ></div>
+                        <span>{userLocationName}</span>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
 
-          <MapContainer
-            center={mapCenter}
-            zoom={13}
-            style={{ height: '80vh', width: '100%' }}
-          >
-            <SetMapCenter center={mapCenter} />
-            <TileLayer
-              url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
+                {filteredTrails.map((trail) => {
+                  let icon;
+                  switch (trail.difficulty) {
+                    case 'hiking':
+                      icon = easyIcon;
+                      break;
+                    case 'mountain_hiking':
+                      icon = moderateIcon;
+                      break;
+                    case 'demanding_mountain_hiking':
+                      icon = hardIcon;
+                      break;
+                    default:
+                      icon = null;
+                  }
 
-            {userLocation && (
-              <Marker position={userLocation} icon={userLocationIcon}>
-                <Popup>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div
-                      style={{
-                        backgroundColor: 'blue',
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        marginRight: '5px',
+                  return (
+                    <Polyline
+                      key={trail.id}
+                      positions={trail.latlngs}
+                      color='blue'
+                      eventHandlers={{
+                        click: () => handleTrailClick(trail),
                       }}
-                    ></div>
-                    <span>{userLocationName}</span>
-                  </div>
-                </Popup>
-              </Marker>
-            )}
-
-            {filteredTrails.map((trail) => {
-              let icon;
-              switch (trail.difficulty) {
-                case 'hiking':
-                  icon = easyIcon;
-                  break;
-                case 'mountain_hiking':
-                  icon = moderateIcon;
-                  break;
-                case 'demanding_mountain_hiking':
-                  icon = hardIcon;
-                  break;
-                default:
-                  icon = null;
-              }
-
-              return (
-                <Polyline
-                  key={trail.id}
-                  positions={trail.latlngs}
-                  color='blue'
-                  eventHandlers={{
-                    click: () => handleTrailClick(trail),
-                  }}
-                >
-                  <Popup>
-                    <strong>{trail.name}</strong>
-                    <br />
-                    Difficulty: {trail.difficulty}
-                    <br />
-                    Length: {trail.length}
-                    <br />
-                    <button onClick={() => handleTrailClick(trail)}>
-                      View Details
-                    </button>
-                    <br />
-                    <button onClick={() => handleViewTrail(trail)}>
-                      View Trail
-                    </button>
-                  </Popup>
-                  {icon && (
-                    <Marker position={trail.latlngs[0]} icon={icon}>
+                    >
                       <Popup>
-                        <strong>{trail.name}</strong>
+                        <Link to={`/trail/${trail.id}`}>
+                          <strong>{trail.name}</strong>
+                        </Link>
                         <br />
                         Difficulty: {trail.difficulty}
                         <br />
                         Length: {trail.length}
-                        <br />
-                        <button onClick={() => handleTrailClick(trail)}>
-                          View Details
-                        </button>
-                        <br />
-                        <button onClick={() => handleViewTrail(trail)}>
-                          View Trail
-                        </button>
                       </Popup>
-                    </Marker>
-                  )}
-                </Polyline>
-              );
-            })}
-          </MapContainer>
-        </div>
-      ) : (
-        <SelectedTrailMap
-          trail={selectedTrail}
-          onClose={handleCloseSelectedTrailMap}
-        />
-      )}
+                      {icon && (
+                        <Marker position={trail.latlngs[0]} icon={icon}>
+                          <Popup>
+                            <Link to={`/trail/${trail.id}`}>
+                              <strong>{trail.name}</strong>
+                            </Link>
+                            <br />
+                            Difficulty: {trail.difficulty}
+                            <br />
+                            Length: {trail.length}
+                          </Popup>
+                        </Marker>
+                      )}
+                    </Polyline>
+                  );
+                })}
+              </MapContainer>
 
-      {isModalOpen && (
-        <div style={{ flex: 0.3, padding: '10px', overflowY: 'auto' }}>
-          <TrailDetailsModal
-            isOpen={isModalOpen}
-            onRequestClose={() => setIsModalOpen(false)}
-            trail={selectedTrail}
-          />
-        </div>
-      )}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  left: '60px',
+                  zIndex: 1000,
+                }}
+              >
+                <select
+                  onChange={handleDifficultyFilter}
+                  value={selectedDifficulty}
+                  style={{
+                    width: '200px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    padding: '5px',
+                    fontSize: '16px',
+                  }}
+                >
+                  <option value=''>Show All</option>
+                  <option value='hiking'>Easy</option>
+                  <option value='mountain_hiking'>Moderate</option>
+                  <option value='demanding_mountain_hiking'>Hard</option>
+                </select>
+              </div>
+            </div>
+          }
+        />
+      </Routes>
     </div>
   );
 };
