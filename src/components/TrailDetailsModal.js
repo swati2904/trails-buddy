@@ -3,18 +3,16 @@ import Modal from 'react-modal';
 
 const customStyles = {
   content: {
-    top: '0',
+    top: '1px',
     left: 'auto',
-    right: '0',
-    bottom: '0',
-    width: '30%',
-    height: '100%',
-    padding: '20px',
-    borderRadius: '0',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    right: '10px',
+    width: '27%',
+    bottom: '1px',
+    cursor: 'pointer',
+    border: '5px solid green',
   },
   overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.73)',
   },
 };
 

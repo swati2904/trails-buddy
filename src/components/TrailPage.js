@@ -16,7 +16,7 @@ const TrailPage = ({ trailData }) => {
 
   const handleClose = () => {
     setIsModalOpen(false);
-    navigate('/'); // Navigate back to the main map page
+    navigate('/');
   };
 
   if (!trail) {
@@ -26,7 +26,7 @@ const TrailPage = ({ trailData }) => {
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <div style={{ flex: 0.7 }}>
-        <SelectedTrailMap trail={trail} onClose={handleClose} />
+        <SelectedTrailMap trail={trail} />
       </div>
       <div style={{ flex: 0.3, padding: '20px', overflowY: 'auto' }}>
         <TrailDetailsModal

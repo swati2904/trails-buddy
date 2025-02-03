@@ -23,7 +23,7 @@ const FitBounds = ({ trail }) => {
   return null;
 };
 
-const SelectedTrailMap = ({ trail, onClose }) => {
+const SelectedTrailMap = ({ trail }) => {
   const startIcon = new L.DivIcon({
     html: '<div style="background-color: blue; width: 20px; height: 20px; border-radius: 50%;"></div>',
   });
@@ -34,17 +34,6 @@ const SelectedTrailMap = ({ trail, onClose }) => {
 
   return (
     <div style={{ height: '100vh', width: '100%' }}>
-      <button
-        onClick={onClose}
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          zIndex: 1000,
-        }}
-      >
-        Close
-      </button>
       <MapContainer
         center={trail.latlngs[0]}
         zoom={13}
