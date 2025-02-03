@@ -1,4 +1,3 @@
-// filepath: /D:/swati/trails-buddy/src/components/Map.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, Route, Routes } from 'react-router-dom';
 import {
@@ -12,9 +11,8 @@ import {
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
-import TrailDetailsModal from './TrailDetailsModal';
-import SelectedTrailMap from './SelectedTrailMap';
 import TrailPage from './TrailPage';
+import GetLocationButton from './GetLocationButton';
 
 // Custom hook to update the map center
 const SetMapCenter = ({ center }) => {
@@ -35,8 +33,6 @@ const Map = () => {
   const [userLocationName, setUserLocationName] = useState('');
   const [mapCenter, setMapCenter] = useState([37.7749, -122.4194]);
   const [selectedTrail, setSelectedTrail] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showSelectedTrailMap, setShowSelectedTrailMap] = useState(false);
 
   const navigate = useNavigate();
 
@@ -122,38 +118,10 @@ const Map = () => {
     setSelectedDifficulty(event.target.value);
   };
 
-  const handleGetLocation = () => {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const userLoc = [position.coords.latitude, position.coords.longitude];
-      setUserLocation(userLoc);
-      setMapCenter(userLoc);
-
-      const response = await axios.get(
-        'https://nominatim.openstreetmap.org/reverse',
-        {
-          params: {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-            format: 'json',
-          },
-        }
-      );
-      const locationName = response.data.display_name;
-      setUserLocationName(locationName);
-    });
+  const handleTrailClick = (trail) => {
+    setSelectedTrail(trail);
+    navigate(`/trail/${trail.id}`);
   };
-
-  const easyIcon = new L.DivIcon({
-    html: '<div style="background-color: green; width: 20px; height: 20px;"></div>',
-  });
-
-  const moderateIcon = new L.DivIcon({
-    html: '<div style="background-color: orange; width: 20px; height: 20px; border-radius: 50%;"></div>',
-  });
-
-  const hardIcon = new L.DivIcon({
-    html: '<div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid red;"></div>',
-  });
 
   const userLocationIcon = new L.Icon({
     iconUrl:
@@ -166,10 +134,17 @@ const Map = () => {
     shadowSize: [41, 41],
   });
 
-  const handleTrailClick = (trail) => {
-    setSelectedTrail(trail);
-    navigate(`/trail/${trail.id}`);
-  };
+  const easyIcon = new L.DivIcon({
+    html: '<div style="background-color: green; width: 20px; height: 20px;"></div>',
+  });
+
+  const moderateIcon = new L.DivIcon({
+    html: '<div style="background-color: orange; width: 20px; height: 20px; border-radius: 50%;"></div>',
+  });
+
+  const hardIcon = new L.DivIcon({
+    html: '<div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid red;"></div>',
+  });
 
   return (
     <div style={{ height: '100vh', width: '100%' }}>
@@ -272,6 +247,8 @@ const Map = () => {
                   top: '10px',
                   left: '60px',
                   zIndex: 1000,
+                  display: 'flex',
+                  gap: '10px',
                 }}
               >
                 <select
@@ -290,6 +267,11 @@ const Map = () => {
                   <option value='mountain_hiking'>Moderate</option>
                   <option value='demanding_mountain_hiking'>Hard</option>
                 </select>
+                <GetLocationButton
+                  setUserLocation={setUserLocation}
+                  setMapCenter={setMapCenter}
+                  setUserLocationName={setUserLocationName}
+                />
               </div>
             </div>
           }

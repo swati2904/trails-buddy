@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SelectedTrailMap from './SelectedTrailMap';
-import TrailDetailsModal from './TrailDetailsModal'; // Reuse the modal component for trail details
+import TrailDetailsModal from './TrailDetailsModal';
 
 const TrailPage = ({ trailData }) => {
   const { id } = useParams();
