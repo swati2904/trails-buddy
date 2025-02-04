@@ -1,70 +1,45 @@
-# Getting Started with Create React App
+# Trails Buddy
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Trails Buddy is a React application that helps users find and explore hiking trails. The app uses the Overpass API to fetch trail data and displays it on an interactive map using Leaflet.
 
-## Available Scripts
 
-In the project directory, you can run:
+##  🚀 Features
 
-### `npm start`
+🌐 Interactive Map: Dive into our dynamic map powered by Leaflet, where you can explore trails with just a few clicks.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+🔍 Trail Details: Access comprehensive information about each trail, including distance, difficulty, elevation gain, and user reviews.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+📍 Current Location: Easily check your current location.
 
-### `npm test`
+🗺️ Trail Markers: Visualize trailheads, routes, and markers, making navigation a breeze.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
 
-### `npm run build`
+Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository:
+   ```sh
+   https://github.com/swati2904/trails-buddy
+   cd trails-buddy
+   ```
+2. Install the dependencies:
+    ```sh
+    npm install
+    ```
+3. you can run:
+    ```sh
+    npm start
+    ```
+    Runs the app in the development mode.
+    Open http://localhost:3000 to view it in your browser.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+4. Tech Stack
+  
+    <ul>
+      <li>React</li>
+      <li>Leaflet</li>
+      <li>Overpass API</li>
+      <li>GIS</li>
+    </ul>
