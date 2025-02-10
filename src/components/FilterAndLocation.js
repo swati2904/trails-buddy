@@ -1,4 +1,5 @@
 import React from 'react';
+import { Picker, Item } from '@adobe/react-spectrum';
 import GetLocationButton from './GetLocationButton';
 
 const FilterAndLocation = ({
@@ -8,6 +9,10 @@ const FilterAndLocation = ({
   setMapCenter,
   setUserLocationName,
 }) => {
+  const onSelectionChange = (key) => {
+    handleDifficultyFilter(key);
+  };
+
   return (
     <div
       style={{
@@ -19,22 +24,17 @@ const FilterAndLocation = ({
         gap: '10px',
       }}
     >
-      <select
-        onChange={handleDifficultyFilter}
-        value={selectedDifficulty}
-        style={{
-          width: '200px',
-          height: '40px',
-          borderRadius: '10px',
-          padding: '5px',
-          fontSize: '16px',
-        }}
+      <Picker
+        // label='Select Difficulty'
+        selectedKey={selectedDifficulty}
+        onSelectionChange={onSelectionChange}
+        width='size-2000'
       >
-        <option value=''>Show All</option>
-        <option value='hiking'>Easy</option>
-        <option value='mountain_hiking'>Moderate</option>
-        <option value='demanding_mountain_hiking'>Hard</option>
-      </select>
+        <Item key=''>Show All</Item>
+        <Item key='hiking'>Easy</Item>
+        <Item key='mountain_hiking'>Moderate</Item>
+        <Item key='demanding_mountain_hiking'>Hard</Item>
+      </Picker>
       <GetLocationButton
         setUserLocation={setUserLocation}
         setMapCenter={setMapCenter}

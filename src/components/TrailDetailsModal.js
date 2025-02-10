@@ -1,5 +1,6 @@
 import React from 'react';
 import Modal from 'react-modal';
+import { Heading, Text, Button } from '@adobe/react-spectrum';
 
 const customStyles = {
   content: {
@@ -12,12 +13,16 @@ const customStyles = {
     border: '5px solid green',
   },
   overlay: {
-    backgroundColor: 'rgba(255, 255, 255, 0.73)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
 };
 
 const TrailDetailsModal = ({ isOpen, onRequestClose, trail }) => {
   if (!trail) return null;
+
+  const handleModalClick = (e) => {
+    e.stopPropagation();
+  };
 
   return (
     <Modal
@@ -25,26 +30,20 @@ const TrailDetailsModal = ({ isOpen, onRequestClose, trail }) => {
       onRequestClose={onRequestClose}
       contentLabel='Trail Details'
       style={customStyles}
+      onClick={(e) => e.stopPropagation()}
     >
       <div
+        onClick={handleModalClick}
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        <h2>{trail.name}</h2>
-        <button
-          onClick={onRequestClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '1.5rem',
-            cursor: 'pointer',
-          }}
-        >
+        <Heading level={2}>{trail.name}</Heading>
+        <Button variant='secondary' onPress={onRequestClose}>
           &times;
-        </button>
+        </Button>
       </div>
       <p>Difficulty: {trail.difficulty}</p>
       <p>Length: {trail.length}</p>

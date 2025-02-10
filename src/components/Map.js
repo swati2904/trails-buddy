@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, Route, Routes } from 'react-router-dom';
+import { useNavigate, Route, Routes } from 'react-router-dom';
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
@@ -96,8 +96,8 @@ const Map = () => {
     setFilteredTrails(filtered);
   }, [selectedDifficulty, trailData]);
 
-  const handleDifficultyFilter = (event) => {
-    setSelectedDifficulty(event.target.value);
+  const handleDifficultyFilter = (selectedKey) => {
+    setSelectedDifficulty(selectedKey);
   };
 
   const handleTrailClick = (trail) => {
