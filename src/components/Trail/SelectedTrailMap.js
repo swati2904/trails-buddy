@@ -33,7 +33,7 @@ const SelectedTrailMap = ({ trail }) => {
   });
 
   return (
-    <div style={{ height: '100vh', width: '100%' }}>
+    <div style={{ height: '100vh' }}>
       <MapContainer
         center={trail.latlngs[0]}
         zoom={13}

@@ -6,24 +6,14 @@ import {
   Marker,
   Popup,
   Polyline,
-  useMap,
 } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
-import TrailPage from './TrailPage';
-import GetLocationButton from './GetLocationButton';
-
-// Custom hook to update the map center
-const SetMapCenter = ({ center }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (center) {
-      map.setView(center, map.getZoom());
-    }
-  }, [center, map]);
-  return null;
-};
+import TrailPage from '../Trail/TrailPage';
+import GetLocationButton from '../Location/GetLocationButton';
+import SetMapCenter from './SetMapCenter';
+import { Picker, Item, Flex, View } from '@adobe/react-spectrum';
 
 const Map = () => {
   const [trailData, setTrailData] = useState([]);
@@ -32,7 +22,6 @@ const Map = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [userLocationName, setUserLocationName] = useState('');
   const [mapCenter, setMapCenter] = useState([37.7749, -122.4194]);
-  const [selectedTrail, setSelectedTrail] = useState(null);
 
   const navigate = useNavigate();
 
@@ -62,10 +51,10 @@ const Map = () => {
                   {
                     params: {
                       data: `
-                      [out:json];
-                      node(id:${nodeIds});
-                      out body;
-                    `,
+                        [out:json];
+                        node(id:${nodeIds});
+                        out body;
+                      `,
                     },
                   }
                 );
@@ -114,12 +103,11 @@ const Map = () => {
     setFilteredTrails(filtered);
   }, [selectedDifficulty, trailData]);
 
-  const handleDifficultyFilter = (event) => {
-    setSelectedDifficulty(event.target.value);
+  const handleDifficultyFilter = (value) => {
+    setSelectedDifficulty(value);
   };
 
   const handleTrailClick = (trail) => {
-    setSelectedTrail(trail);
     navigate(`/trail/${trail.id}`);
   };
 
@@ -147,7 +135,7 @@ const Map = () => {
   });
 
   return (
-    <div style={{ height: '100vh', width: '100%' }}>
+    <View height='100vh' width='100%'>
       <Routes>
         <Route
           path='/trail/:id'
@@ -156,9 +144,7 @@ const Map = () => {
         <Route
           path='/'
           element={
-            <div
-              style={{ height: '100%', width: '100%', position: 'relative' }}
-            >
+            <View height='100%' width='100%' position='relative'>
               <MapContainer
                 center={mapCenter}
                 zoom={13}
@@ -241,43 +227,35 @@ const Map = () => {
                 })}
               </MapContainer>
 
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '10px',
-                  left: '60px',
-                  zIndex: 1000,
-                  display: 'flex',
-                  gap: '10px',
-                }}
+              <Flex
+                position='absolute'
+                top='10px'
+                left='60px'
+                zIndex={1000}
+                gap='10px'
               >
-                <select
-                  onChange={handleDifficultyFilter}
-                  value={selectedDifficulty}
-                  style={{
-                    width: '200px',
-                    height: '40px',
-                    borderRadius: '10px',
-                    padding: '5px',
-                    fontSize: '16px',
-                  }}
+                <Picker
+                  label='Filter by Difficulty'
+                  selectedKey={selectedDifficulty}
+                  onSelectionChange={handleDifficultyFilter}
+                  width='size-2000'
                 >
-                  <option value=''>Show All</option>
-                  <option value='hiking'>Easy</option>
-                  <option value='mountain_hiking'>Moderate</option>
-                  <option value='demanding_mountain_hiking'>Hard</option>
-                </select>
+                  <Item key=''>Show All</Item>
+                  <Item key='hiking'>Easy</Item>
+                  <Item key='mountain_hiking'>Moderate</Item>
+                  <Item key='demanding_mountain_hiking'>Hard</Item>
+                </Picker>
                 <GetLocationButton
                   setUserLocation={setUserLocation}
                   setMapCenter={setMapCenter}
                   setUserLocationName={setUserLocationName}
                 />
-              </div>
-            </div>
+              </Flex>
+            </View>
           }
         />
       </Routes>
-    </div>
+    </View>
   );
 };
 
