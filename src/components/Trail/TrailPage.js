@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import SelectedTrailMap from './SelectedTrailMap';
-import TrailDetailsModal from './TrailDetailsModal';
-import ReviewSection from './ReviewSection';
-import CommentSection from './CommentSection';
 import { View, Flex } from '@adobe/react-spectrum';
+import { TrailDataContext } from '../../contexts/TrailDataContext';
+import SelectedTrailMap from './TrailDetails/SelectedTrailMap';
+import TrailDetailsModal from './TrailDetails/TrailDetailsModal';
+import ReviewSection from './TrailDetails/ReviewSection';
+import CommentSection from './TrailDetails/CommentSection';
 
-const TrailPage = ({ trailData }) => {
+const TrailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { trailData } = useContext(TrailDataContext);
   const [trail, setTrail] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const selectedTrail = trailData.find((t) => t.id === parseInt(id));
@@ -22,15 +24,13 @@ const TrailPage = ({ trailData }) => {
     navigate('/');
   };
 
-  if (!trail) {
-    return <div>Loading...</div>;
-  }
+  if (!trail) return <View padding='size-200'>Loading...</View>;
 
   return (
     <View padding='size-200' overflow='auto'>
       <Flex direction='column' gap='size-200' height='100%'>
         <Flex gap='size-200' flex='1'>
-          <View flex='1 1 80%' height='100%'>
+          <View flex='1 1 80%' height='70vh'>
             <SelectedTrailMap trail={trail} />
           </View>
           <View
@@ -42,7 +42,7 @@ const TrailPage = ({ trailData }) => {
           >
             <TrailDetailsModal
               isOpen={isModalOpen}
-              onRequestClose={handleClose}
+              onClose={handleClose}
               trail={trail}
             />
           </View>

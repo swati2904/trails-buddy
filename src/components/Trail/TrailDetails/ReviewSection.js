@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Dialog,
   DialogTrigger,
+  Dialog,
   Heading,
   Content,
   Button,
@@ -14,37 +14,37 @@ const ReviewSection = () => {
     { rating: 5, comment: 'Amazing trail!' },
     { rating: 4, comment: 'Great experience.' },
     { rating: 3, comment: 'It was okay.' },
-    { rating: 2, comment: 'Not the best.' },
-    { rating: 1, comment: 'Terrible experience.' },
   ]);
 
   const overallRating = (
-    reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+    reviews.reduce((acc, { rating }) => acc + rating, 0) / reviews.length
   ).toFixed(1);
 
   return (
     <div>
-      <h2>Reviews</h2>
-      <p>Overall Rating: {overallRating} stars</p>
-      <div>
-        {reviews.map((review, index) => (
-          <div key={index}>
-            <Text>
-              {'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)}
-            </Text>
-            <p>{review.comment}</p>
-          </div>
-        ))}
-      </div>
+      <Heading level={3}>Reviews</Heading>
+      <Text>Overall Rating: {overallRating} stars</Text>
+      {reviews.map((review, index) => (
+        <div key={index} style={{ margin: '10px 0' }}>
+          <Text>
+            {'★'.repeat(review.rating)}
+            {'☆'.repeat(5 - review.rating)}
+          </Text>
+          <Text>{review.comment}</Text>
+        </div>
+      ))}
       <DialogTrigger>
-        <Button variant='cta'>Review Trail</Button>
+        <Button variant='cta' marginTop='size-100'>
+          Review Trail
+        </Button>
         {(close) => (
           <Dialog>
             <Heading>Review Trail</Heading>
             <Content>
               <TextArea
-                label='How was the trail?'
-                placeholder='Write your review here...'
+                label='Your Review'
+                placeholder='Share your experience...'
+                width='100%'
               />
               <Button
                 variant='cta'
@@ -52,6 +52,7 @@ const ReviewSection = () => {
                   alert('Thank you for your review!');
                   close();
                 }}
+                marginTop='size-100'
               >
                 Submit
               </Button>
