@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Route, Routes } from 'react-router-dom';
+import { Link, useNavigate, Route, Routes } from 'react-router-dom';
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap,
+} from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import TrailPage from './TrailPage';
-import TrailMap from './TrailMap';
-import FilterAndLocation from './FilterAndLocation';
+import GetLocationButton from './GetLocationButton';
+
+// Custom hook to update the map center
+const SetMapCenter = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+};
 
 const Map = () => {
   const [trailData, setTrailData] = useState([]);
@@ -96,8 +114,8 @@ const Map = () => {
     setFilteredTrails(filtered);
   }, [selectedDifficulty, trailData]);
 
-  const handleDifficultyFilter = (selectedKey) => {
-    setSelectedDifficulty(selectedKey);
+  const handleDifficultyFilter = (event) => {
+    setSelectedDifficulty(event.target.value);
   };
 
   const handleTrailClick = (trail) => {
@@ -141,24 +159,120 @@ const Map = () => {
             <div
               style={{ height: '100%', width: '100%', position: 'relative' }}
             >
-              <TrailMap
-                mapCenter={mapCenter}
-                userLocation={userLocation}
-                userLocationIcon={userLocationIcon}
-                userLocationName={userLocationName}
-                filteredTrails={filteredTrails}
-                handleTrailClick={handleTrailClick}
-                easyIcon={easyIcon}
-                moderateIcon={moderateIcon}
-                hardIcon={hardIcon}
-              />
-              <FilterAndLocation
-                handleDifficultyFilter={handleDifficultyFilter}
-                selectedDifficulty={selectedDifficulty}
-                setUserLocation={setUserLocation}
-                setMapCenter={setMapCenter}
-                setUserLocationName={setUserLocationName}
-              />
+              <MapContainer
+                center={mapCenter}
+                zoom={13}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <SetMapCenter center={mapCenter} />
+                <TileLayer
+                  url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+
+                {userLocation && (
+                  <Marker position={userLocation} icon={userLocationIcon}>
+                    <Popup>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div
+                          style={{
+                            backgroundColor: 'blue',
+                            width: '10px',
+                            height: '10px',
+                            borderRadius: '50%',
+                            marginRight: '5px',
+                          }}
+                        ></div>
+                        <span>{userLocationName}</span>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )}
+
+                {filteredTrails.map((trail) => {
+                  let icon;
+                  switch (trail.difficulty) {
+                    case 'hiking':
+                      icon = easyIcon;
+                      break;
+                    case 'mountain_hiking':
+                      icon = moderateIcon;
+                      break;
+                    case 'demanding_mountain_hiking':
+                      icon = hardIcon;
+                      break;
+                    default:
+                      icon = null;
+                  }
+
+                  return (
+                    <Polyline
+                      key={trail.id}
+                      positions={trail.latlngs}
+                      color='blue'
+                      eventHandlers={{
+                        click: () => handleTrailClick(trail),
+                      }}
+                    >
+                      <Popup>
+                        <Link to={`/trail/${trail.id}`}>
+                          <strong>{trail.name}</strong>
+                        </Link>
+                        <br />
+                        Difficulty: {trail.difficulty}
+                        <br />
+                        Length: {trail.length}
+                      </Popup>
+                      {icon && (
+                        <Marker position={trail.latlngs[0]} icon={icon}>
+                          <Popup>
+                            <Link to={`/trail/${trail.id}`}>
+                              <strong>{trail.name}</strong>
+                            </Link>
+                            <br />
+                            Difficulty: {trail.difficulty}
+                            <br />
+                            Length: {trail.length}
+                          </Popup>
+                        </Marker>
+                      )}
+                    </Polyline>
+                  );
+                })}
+              </MapContainer>
+
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  left: '60px',
+                  zIndex: 1000,
+                  display: 'flex',
+                  gap: '10px',
+                }}
+              >
+                <select
+                  onChange={handleDifficultyFilter}
+                  value={selectedDifficulty}
+                  style={{
+                    width: '200px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    padding: '5px',
+                    fontSize: '16px',
+                  }}
+                >
+                  <option value=''>Show All</option>
+                  <option value='hiking'>Easy</option>
+                  <option value='mountain_hiking'>Moderate</option>
+                  <option value='demanding_mountain_hiking'>Hard</option>
+                </select>
+                <GetLocationButton
+                  setUserLocation={setUserLocation}
+                  setMapCenter={setMapCenter}
+                  setUserLocationName={setUserLocationName}
+                />
+              </div>
             </div>
           }
         />

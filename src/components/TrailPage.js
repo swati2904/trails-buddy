@@ -1,15 +1,13 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SelectedTrailMap from './SelectedTrailMap';
 import TrailDetailsModal from './TrailDetailsModal';
-import { TrailDataContext } from './TrailDataProvider';
 
-const TrailPage = () => {
+const TrailPage = ({ trailData }) => {
   const { id } = useParams();
   const [trail, setTrail] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
-  const trailData = useContext(TrailDataContext);
 
   useEffect(() => {
     const selectedTrail = trailData.find((t) => t.id === parseInt(id));

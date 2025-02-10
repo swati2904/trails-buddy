@@ -1,6 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import { Button } from '@adobe/react-spectrum';
 
 const GetLocationButton = ({
   setUserLocation,
@@ -29,13 +28,18 @@ const GetLocationButton = ({
   };
 
   return (
-    <Button
-      variant='cta'
-      onPress={handleGetLocation}
-      style={{ borderRadius: '10%' }}
+    <button
+      onClick={handleGetLocation}
+      style={{
+        height: '40px',
+        borderRadius: '10px',
+        padding: '5px 10px',
+        fontSize: '16px',
+        cursor: 'pointer',
+      }}
     >
       Get My Location
-    </Button>
+    </button>
   );
 };
 
