@@ -6,11 +6,15 @@ import {
 } from '@adobe/react-spectrum';
 import { UserLocationProvider } from '../contexts/UserLocationContext';
 import { TrailDataContext } from '../contexts/TrailDataContext';
+import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import Map from './Map/Map';
 import TrailPage from './Trail/TrailPage';
+import Header from './Header/Header';
+import AuthModal from './Auth/AuthModal';
 import { fetchTrails } from '../api/trails';
 
-const App = () => {
+const AppContent = () => {
+  const { token } = useAuth();
   const [trailData, setTrailData] = useState([]);
 
   useEffect(() => {
@@ -22,17 +26,27 @@ const App = () => {
   }, []);
 
   return (
+    <UserLocationProvider>
+      <TrailDataContext.Provider value={{ trailData }}>
+        <Router>
+          {token && <Header />}
+          <Routes>
+            <Route path='/trail/:id' element={<TrailPage />} />
+            <Route path='/' element={<Map />} />
+            <Route path='/auth' element={<AuthModal />} />
+          </Routes>
+        </Router>
+      </TrailDataContext.Provider>
+    </UserLocationProvider>
+  );
+};
+
+const App = () => {
+  return (
     <SpectrumProvider theme={defaultTheme}>
-      <UserLocationProvider>
-        <TrailDataContext.Provider value={{ trailData }}>
-          <Router>
-            <Routes>
-              <Route path='/trail/:id' element={<TrailPage />} />
-              <Route path='/' element={<Map />} />
-            </Routes>
-          </Router>
-        </TrailDataContext.Provider>
-      </UserLocationProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </SpectrumProvider>
   );
 };
