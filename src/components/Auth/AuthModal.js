@@ -14,7 +14,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { loginUser, signupUser } from '../../api/authApi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
 import Close from '@spectrum-icons/workflow/Close';
 
 const AuthModal = ({ onSuccess }) => {
@@ -25,7 +24,6 @@ const AuthModal = ({ onSuccess }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -33,14 +31,17 @@ const AuthModal = ({ onSuccess }) => {
 
     try {
       if (mode === 'login') {
-        const { token, email: userEmail } = await loginUser({
+        const {
+          token,
+          email: userEmail,
+          username: userUsername,
+        } = await loginUser({
           email,
           password,
         });
-        login(token, userEmail);
+        login(token, userEmail, userUsername);
         toast.success('You have successfully logged in!');
         onSuccess();
-        // navigate(0);
       } else {
         await signupUser({ username, email, password });
         toast.success(

@@ -56,7 +56,7 @@ const TrailPage = () => {
             padding='size-200'
             overflow='hidden'
           >
-            <ReviewSection />
+            <ReviewSection trail={trail} />
           </View>
           <View
             flex='1 1 60%'
@@ -66,7 +66,7 @@ const TrailPage = () => {
             padding='size-200'
             overflow='hidden'
           >
-            <CommentSection />
+            <CommentSection trail={trail} />
           </View>
         </Flex>
       </Flex>

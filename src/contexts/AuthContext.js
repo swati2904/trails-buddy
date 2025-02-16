@@ -7,25 +7,34 @@ export const AuthProvider = ({ children }) => {
   const [userEmail, setUserEmail] = useState(
     localStorage.getItem('userEmail') || ''
   );
+  const [username, setUsername] = useState(
+    localStorage.getItem('username') || ''
+  );
 
-  const login = (newToken, email) => {
+  const login = (newToken, email, user) => {
     localStorage.setItem('token', newToken);
     localStorage.setItem('userEmail', email);
+    localStorage.setItem('username', user);
     setToken(newToken);
     setUserEmail(email);
+    setUsername(user);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('username');
     setToken(null);
     setUserEmail('');
+    setUsername('');
   };
 
   const signup = async (userData) => {};
 
   return (
-    <AuthContext.Provider value={{ token, userEmail, login, logout, signup }}>
+    <AuthContext.Provider
+      value={{ token, userEmail, username, login, logout, signup }}
+    >
       {children}
     </AuthContext.Provider>
   );
