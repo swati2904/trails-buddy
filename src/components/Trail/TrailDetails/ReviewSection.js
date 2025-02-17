@@ -8,37 +8,14 @@ import {
 } from '@adobe/react-spectrum';
 import AuthModal from '../../Auth/AuthModal';
 import ReviewModal from './ReviewModal';
-import { fetchComments } from '../../../api/ReviewApi';
+import { useComments } from '../../../contexts/CommentContext';
 
 const ReviewSection = ({ trail }) => {
   const { token, userEmail } = useAuth();
-  const [reviews, setReviews] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [overallRating, setOverallRating] = useState(0);
   const [ratingDistribution, setRatingDistribution] = useState([0, 0, 0, 0, 0]);
-
-  useEffect(() => {
-    const getReviews = async () => {
-      try {
-        const data = await fetchComments(trail.id);
-
-        // If the API response is invalid or empty, handle gracefully
-        if (!Array.isArray(data) || data.length === 0) {
-          setReviews([]);
-          setOverallRating(0);
-          setRatingDistribution([0, 0, 0, 0, 0]);
-          return;
-        }
-
-        setReviews(data);
-        calculateRatings(data);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-      }
-    };
-
-    getReviews();
-  }, [trail.id]);
+  const { comments: reviews, setComments } = useComments();
 
   const calculateRatings = (reviews) => {
     if (!reviews || reviews.length === 0) {
@@ -53,7 +30,6 @@ const ReviewSection = ({ trail }) => {
 
     // Process each review
     reviews.forEach((review) => {
-      console.log('Processing review:', review); // Debugging each review
       if (review.ratings >= 1 && review.ratings <= 5) {
         totalRating += review.ratings;
         distribution[review.ratings - 1]++;
@@ -62,27 +38,21 @@ const ReviewSection = ({ trail }) => {
 
     // Calculate overall rating (weighted average)
     const overall = totalRating / reviews.length;
-
-    console.log('Total Rating:', totalRating); // Debugging totalRating
-    console.log('Distribution:', distribution); // Debugging distribution
-
     setOverallRating(overall.toFixed(1)); // Round to 1 decimal place
     setRatingDistribution(distribution);
   };
 
   const handleReviewSubmit = (reviewData) => {
     const updatedReviews = [reviewData, ...reviews];
-    setReviews(updatedReviews);
+    setComments(updatedReviews);
     setIsModalOpen(false);
-    calculateRatings(updatedReviews);
   };
 
-  if (!token) return <AuthModal onSuccess={() => {}} />;
+  useEffect(() => {
+    calculateRatings(reviews);
+  }, [reviews]);
 
-  // Debugging overallRating and ratingDistribution
-  console.log('Overall Rating:', overallRating);
-  console.log('Rating Distribution:', ratingDistribution);
-  console.log('Reviews Length:', reviews.length);
+  if (!token) return <AuthModal onSuccess={() => {}} />;
 
   return (
     <div>
@@ -100,16 +70,6 @@ const ReviewSection = ({ trail }) => {
         <Text style={{ marginLeft: '16px' }}>{reviews.length} reviews</Text>
       </div>
 
-      {/* Overall Rating ProgressBar */}
-      {/* <ProgressBar
-        value={(overallRating / 5) * 100} // Convert rating (1-5) to percentage (0-100%)
-        maxValue={100}
-        label='Overall Rating'
-        showValueLabel={false}
-        UNSAFE_style={{ marginBottom: '16px', width: '100%' }}
-      /> */}
-
-      {/* Rating Distribution */}
       <div>
         {ratingDistribution.map((count, index) => (
           <div

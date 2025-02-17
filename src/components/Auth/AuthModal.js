@@ -50,7 +50,11 @@ const AuthModal = ({ onSuccess }) => {
         setMode('login');
       }
     } catch (error) {
-      setError(error.message || 'Something went wrong');
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          'Something went wrong. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }

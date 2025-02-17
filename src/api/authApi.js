@@ -1,10 +1,8 @@
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL;
+import client from './client';
 
 export const loginUser = async (credentials) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
+    const response = await client.post('/auth/login', credentials);
     return response.data;
   } catch (error) {
     throw error.response.data;
@@ -13,7 +11,7 @@ export const loginUser = async (credentials) => {
 
 export const signupUser = async (userData) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, userData);
+    const response = await client.post('/auth/register', userData);
     return response.data;
   } catch (error) {
     throw error.response.data;

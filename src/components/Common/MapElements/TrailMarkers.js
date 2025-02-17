@@ -1,7 +1,8 @@
 import { Marker, Polyline, Popup } from 'react-leaflet';
 import { Link } from 'react-router-dom';
+import React, { memo } from 'react';
 
-const TrailMarkers = ({ trails, difficultyIcons, navigate }) => {
+const TrailMarkers = memo(({ trails, difficultyIcons, navigate }) => {
   return trails.map((trail) => {
     const icon = difficultyIcons[trail.difficulty] || null;
 
@@ -25,7 +26,7 @@ const TrailMarkers = ({ trails, difficultyIcons, navigate }) => {
       </Polyline>
     );
   });
-};
+});
 
 const TrailPopupContent = ({ trail }) => (
   <>
@@ -39,4 +40,4 @@ const TrailPopupContent = ({ trail }) => (
   </>
 );
 
-export default TrailMarkers;
+export default memo(TrailMarkers);

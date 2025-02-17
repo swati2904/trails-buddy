@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { TextField, Text } from '@adobe/react-spectrum';
-import { fetchComments } from '../../../api/ReviewApi';
+import React, { useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { REVIEW_CONFIG } from '../../../constants/reviewConfig';
+import { useComments } from '../../../contexts/CommentContext';
 
 const getLabelById = (config, id) => {
   const item = config.find((item) => item.id === id);
@@ -30,174 +29,66 @@ const generateStars = (rating) => {
   );
 };
 
-const CommentSection = ({ trailId }) => {
-  const [comments, setComments] = useState([]);
+const CommentSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { username } = useAuth();
 
-  useEffect(() => {
-    console.log('fetching comments for trail:', trailId);
-    const getComments = async () => {
-      try {
-        const data = await fetchComments(trailId);
-        setComments(data);
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    };
-
-    getComments();
-  }, [trailId]);
+  const { comments, loading, error } = useComments();
 
   const filteredComments = comments.filter((comment) =>
     comment.comment?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <TextField
-        label='Search Comments'
-        value={searchTerm}
-        onChange={setSearchTerm}
-        style={{
-          width: '100%',
-          marginBottom: '20px',
-          padding: '8px',
-          fontSize: '16px',
-        }}
-      />
-      {filteredComments.map((comment) => (
-        <div
-          key={comment.id}
-          style={{
-            margin: '15px 0',
-            padding: '15px',
-            borderRadius: '8px',
-            border: '1px solid #ddd',
-            backgroundColor: '#f9f9f9',
-          }}
-        >
-          {/* User Info Section */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '10px',
-            }}
-          >
-            {/* Avatar */}
-            <div
-              style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                backgroundColor: '#007bff',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '22px',
-                fontWeight: 'bold',
-                marginRight: '15px',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              }}
-            >
-              S
-            </div>
+    <div className='container mt-4'>
+      <div className='mb-4'>
+        <input
+          type='text'
+          className='form-control'
+          placeholder='Search comments...'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-            {/* User Metadata */}
-            <div>
-              <Text
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  marginBottom: '5px',
-                }}
-              >
-                {username}
-              </Text>
+      {filteredComments.map((comment) => (
+        <div key={comment.id} className='card mb-3'>
+          <div className='card-body'>
+            <div className='d-flex align-items-center mb-3'>
               <div
-                style={{ fontSize: '14px', color: '#555', marginBottom: '5px' }}
+                className='bg-primary text-white rounded-circle d-flex align-items-center justify-content-center'
+                style={{ width: '50px', height: '50px' }}
               >
-                {comment.activityDate}
+                {username?.[0]?.toUpperCase() || 'U'}
               </div>
-              <div style={{ fontSize: '14px', color: '#555' }}>
+              <div className='ms-3'>
+                <h5 className='mb-1'>{username}</h5>
+                <small className='text-muted'>{comment.activityDate}</small>
                 {generateStars(comment.ratings)}
               </div>
             </div>
-          </div>
 
-          {/* Comment Details */}
-          <div
-            style={{ marginBottom: '10px', fontSize: '14px', color: '#333' }}
-          >
-            {comment.comment}
-          </div>
+            <p className='card-text mb-3'>{comment.comment}</p>
 
-          {/* Additional Metadata */}
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '10px',
-              marginBottom: '10px',
-            }}
-          >
-            <span
-              style={{
-                backgroundColor: '#e0e0e0',
-                padding: '5px 10px',
-                borderRadius: '20px',
-              }}
-            >
-              {comment.liked ? 'Liked' : 'Not Liked'}
-            </span>
-            <span
-              style={{
-                backgroundColor: '#e0e0e0',
-                padding: '5px 10px',
-                borderRadius: '20px',
-              }}
-            >
-              {getLabelById(REVIEW_CONFIG.difficulty, comment.level)}
-            </span>
-            <span
-              style={{
-                backgroundColor: '#e0e0e0',
-                padding: '5px 10px',
-                borderRadius: '20px',
-              }}
-            >
-              {getLabelById(REVIEW_CONFIG.activities, comment.activityType)}
-            </span>
-          </div>
-
-          {/* Conditions Tags */}
-          {comment.conditions && (
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '8px',
-                marginBottom: '10px',
-              }}
-            >
-              {comment.conditions.map((condition) => (
-                <span
-                  key={condition}
-                  style={{
-                    backgroundColor: '#f0f0f0',
-                    padding: '6px 12px',
-                    borderRadius: '15px',
-                    fontSize: '12px',
-                    color: '#333',
-                  }}
-                >
-                  {getLabelById(REVIEW_CONFIG.conditions, condition)}
-                </span>
-              ))}
+            <div className='d-flex flex-wrap gap-2 mb-3'>
+              <span className='badge bg-secondary'>
+                {getLabelById(REVIEW_CONFIG.difficulty, comment.level)}
+              </span>
+              <span className='badge bg-secondary'>
+                {getLabelById(REVIEW_CONFIG.activities, comment.activityType)}
+              </span>
             </div>
-          )}
+
+            {comment.conditions && (
+              <div className='d-flex flex-wrap gap-2'>
+                {comment.conditions.map((condition) => (
+                  <span key={condition} className='badge bg-info'>
+                    {getLabelById(REVIEW_CONFIG.conditions, condition)}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </div>
