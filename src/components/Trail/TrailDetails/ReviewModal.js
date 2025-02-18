@@ -3,23 +3,21 @@ import {
   Dialog,
   Content,
   Button,
-  Text,
   Heading,
   ActionButton,
   Flex,
-  TextArea,
-  Picker,
-  DatePicker,
-  Item,
-  View,
 } from '@adobe/react-spectrum';
-import { REVIEW_CONFIG } from '../../../constants/reviewConfig';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Star from '@spectrum-icons/workflow/Star';
 import Close from '@spectrum-icons/workflow/Close';
 import { reviewUser } from '../../../api/ReviewApi';
+import RatingStep from './RatingStep';
+import CommentStep from './CommentStep';
+import DifficultyStep from './DifficultyStep';
+import ParkingStep from './ParkingStep';
+import ConditionsStep from './ConditionsStep';
+import ActivityStep from './ActivityStep';
 
 const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
   const [step, setStep] = useState(1);
@@ -64,258 +62,49 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
     switch (step) {
       case 1:
         return (
-          <>
-            <Heading level={3}>How was the trail?</Heading>
-
-            <Flex alignItems='center' gap='size-100'>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <ActionButton
-                  key={star}
-                  isQuiet
-                  onPress={() => setRating(star)}
-                >
-                  <Star
-                    size='L'
-                    UNSAFE_style={{ fill: star <= rating ? 'gold' : 'gray' }}
-                  />
-                </ActionButton>
-              ))}
-            </Flex>
-
-            {rating > 0 && (
-              <>
-                <Text marginTop='size-200'>
-                  {
-                    [
-                      'Bummer. What went wrong?',
-                      'Not great? Let’s get into the details',
-                      'Tell us more about it',
-                      'Nice! Let’s get into the details',
-                      'Amazing! What did you love?',
-                    ][rating - 1]
-                  }
-                </Text>
-
-                <Flex gap='size-100' wrap marginTop='size-200'>
-                  {REVIEW_CONFIG.ratingOptions[rating].map((option) => (
-                    <ActionButton
-                      key={option.id}
-                      isSelected={selectedLiked.includes(option.id)}
-                      onPress={() =>
-                        setSelectedLiked((prev) =>
-                          prev.includes(option.id)
-                            ? prev.filter((id) => id !== option.id)
-                            : [...prev, option.id]
-                        )
-                      }
-                      UNSAFE_style={{
-                        backgroundColor: selectedLiked.includes(option.id)
-                          ? 'lightblue'
-                          : 'transparent',
-                      }}
-                    >
-                      {option.label}
-                    </ActionButton>
-                  ))}
-                </Flex>
-              </>
-            )}
-          </>
+          <RatingStep
+            rating={rating}
+            setRating={setRating}
+            selectedLiked={selectedLiked}
+            setSelectedLiked={setSelectedLiked}
+          />
         );
-
       case 2:
-        return (
-          <>
-            <Heading level={3}>Tell others about the trail</Heading>
-            <Text marginBottom='size-200'>Share helpful details</Text>
-            <TextArea
-              value={comment}
-              onChange={setComment}
-              width='100%'
-              minHeight='size-1200'
-            />
-          </>
-        );
-
+        return <CommentStep comment={comment} setComment={setComment} />;
       case 3:
         return (
-          <>
-            <Heading level={3}>How difficult is this trail?</Heading>
-            <Text>Help others pick the right trail</Text>
-            <Picker
-              selectedKey={difficulty}
-              onSelectionChange={setDifficulty}
-              items={REVIEW_CONFIG.difficulty}
-            >
-              {(item) => <Item key={item.id}>{item.label}</Item>}
-            </Picker>
-          </>
+          <DifficultyStep
+            difficulty={difficulty}
+            setDifficulty={setDifficulty}
+          />
         );
-
       case 4:
         return (
-          <>
-            <Heading level={3}>How was parking?</Heading>
-            <Text>Help the community come prepared</Text>
-
-            <Heading level={4} marginTop='size-200'>
-              Access
-            </Heading>
-            <Flex gap='size-100' wrap>
-              {REVIEW_CONFIG.access.map((access) => (
-                <ActionButton
-                  key={access.id}
-                  isSelected={selectedAccess.some((a) => a.id === access.id)}
-                  onPress={() =>
-                    setSelectedAccess((prev) =>
-                      prev.some((a) => a.id === access.id)
-                        ? prev.filter((a) => a.id !== access.id)
-                        : [...prev, access]
-                    )
-                  }
-                  UNSAFE_style={{
-                    backgroundColor: selectedAccess.some(
-                      (a) => a.id === access.id
-                    )
-                      ? 'lightblue'
-                      : 'transparent',
-                  }}
-                >
-                  {access.label}
-                </ActionButton>
-              ))}
-            </Flex>
-
-            <Heading level={4} marginTop='size-200'>
-              Parking Cost
-            </Heading>
-            <Flex gap='size-100' wrap>
-              {REVIEW_CONFIG.parkingCost.map((cost) => (
-                <ActionButton
-                  key={cost.id}
-                  isSelected={selectedParkingCost.some((p) => p.id === cost.id)}
-                  onPress={() =>
-                    setSelectedParkingCost((prev) =>
-                      prev.some((p) => p.id === cost.id)
-                        ? prev.filter((p) => p.id !== cost.id)
-                        : [...prev, cost]
-                    )
-                  }
-                  UNSAFE_style={{
-                    backgroundColor: selectedParkingCost.some(
-                      (p) => p.id === cost.id
-                    )
-                      ? 'lightblue'
-                      : 'transparent',
-                  }}
-                >
-                  {cost.label}
-                </ActionButton>
-              ))}
-            </Flex>
-
-            <Heading level={4} marginTop='size-200'>
-              Parking Lot Size
-            </Heading>
-            <Flex gap='size-200' marginTop='size-100'>
-              {REVIEW_CONFIG.parkingSize.map((size) => (
-                <Button
-                  key={size.id}
-                  variant={parkingSize?.id === size.id ? 'cta' : 'primary'}
-                  onPress={() => setParkingSize(size)}
-                  width='size-2400'
-                >
-                  <Flex direction='column' alignItems='center'>
-                    <Text>{size.icon}</Text>
-                    <Text>{size.label}</Text>
-                  </Flex>
-                </Button>
-              ))}
-            </Flex>
-          </>
+          <ParkingStep
+            selectedAccess={selectedAccess}
+            setSelectedAccess={setSelectedAccess}
+            selectedParkingCost={selectedParkingCost}
+            setSelectedParkingCost={setSelectedParkingCost}
+            parkingSize={parkingSize}
+            setParkingSize={setParkingSize}
+          />
         );
-
       case 5:
         return (
-          <>
-            <Heading level={3}>Any conditions to note?</Heading>
-            <Text>Help the community come prepared</Text>
-            <Flex gap='size-100' wrap marginTop='size-200'>
-              {REVIEW_CONFIG.conditions.map((condition) => (
-                <ActionButton
-                  key={condition.id}
-                  isSelected={selectedConditions.some(
-                    (c) => c.id === condition.id
-                  )}
-                  onPress={() =>
-                    setSelectedConditions((prev) =>
-                      prev.some((c) => c.id === condition.id)
-                        ? prev.filter((c) => c.id !== condition.id)
-                        : [...prev, condition]
-                    )
-                  }
-                  UNSAFE_style={{
-                    backgroundColor: selectedConditions.some(
-                      (c) => c.id === condition.id
-                    )
-                      ? 'lightblue'
-                      : 'transparent',
-                  }}
-                >
-                  <Flex alignItems='center' gap='size-20'>
-                    <View>{condition.icon}</View>
-                    <View
-                      UNSAFE_style={{
-                        flex: 1,
-                        minWidth: '0',
-                        whiteSpace: 'normal',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        textAlign: 'center',
-                        padding: '0 0.5rem',
-                      }}
-                    >
-                      {condition.label}
-                    </View>
-                  </Flex>
-                </ActionButton>
-              ))}
-            </Flex>
-          </>
+          <ConditionsStep
+            selectedConditions={selectedConditions}
+            setSelectedConditions={setSelectedConditions}
+          />
         );
-
       case 6:
         return (
-          <>
-            <Heading level={3}>One last thing...</Heading>
-            <Text>Help users put your review in context</Text>
-
-            <Flex direction='column' gap='size-200' marginTop='size-200'>
-              <Picker
-                label='Activity type'
-                selectedKey={activityType?.id}
-                onSelectionChange={(key) =>
-                  setActivityType(
-                    REVIEW_CONFIG.activities.find((a) => a.id === key)
-                  )
-                }
-              >
-                {REVIEW_CONFIG.activities.map((activity) => (
-                  <Item key={activity.id}>{activity.label}</Item>
-                ))}
-              </Picker>
-
-              <DatePicker
-                label='Date visited'
-                value={visitDate}
-                onChange={(value) => {
-                  setVisitDate(value);
-                }}
-              />
-            </Flex>
-          </>
+          <ActivityStep
+            activityType={activityType}
+            setActivityType={setActivityType}
+            visitDate={visitDate}
+            setVisitDate={setVisitDate}
+          />
         );
-
       default:
         return null;
     }
@@ -336,7 +125,6 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
       </Flex>
       <Content>
         {renderStep()}
-
         <Flex
           marginTop='size-400'
           gap='size-100'
@@ -347,7 +135,6 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
               Back
             </Button>
           )}
-
           {step < 6 ? (
             <Button
               variant='cta'
@@ -373,4 +160,5 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
     </Dialog>
   );
 };
+
 export default ReviewModal;

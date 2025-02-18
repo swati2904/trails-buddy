@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
 import { REVIEW_CONFIG } from '../../../constants/reviewConfig';
 import { useComments } from '../../../contexts/CommentContext';
 
@@ -32,7 +31,7 @@ const generateStars = (rating) => {
 const CommentSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { comments, loading, error } = useComments();
+  const { comments } = useComments();
 
   const filteredComments = comments.filter((comment) =>
     comment.comment?.toLowerCase().includes(searchTerm.toLowerCase())

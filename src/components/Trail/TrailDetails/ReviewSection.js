@@ -11,7 +11,7 @@ import ReviewModal from './ReviewModal';
 import { useComments } from '../../../contexts/CommentContext';
 
 const ReviewSection = ({ trail }) => {
-  const { token, userEmail } = useAuth();
+  const { token } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [overallRating, setOverallRating] = useState(0);
   const [ratingDistribution, setRatingDistribution] = useState([0, 0, 0, 0, 0]);

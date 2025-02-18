@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Flex,
-  ActionButton,
-  MenuTrigger,
-  Menu,
-  Item,
-} from '@adobe/react-spectrum';
+import { ActionButton, MenuTrigger, Menu, Item } from '@adobe/react-spectrum';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
