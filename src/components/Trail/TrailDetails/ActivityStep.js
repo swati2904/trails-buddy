@@ -16,7 +16,7 @@ const ActivityStep = ({
   setVisitDate,
 }) => (
   <>
-    <Heading level={3}>One last thing...</Heading>
+    <Heading level={5}>One last thing...</Heading>
     <Text>Help users put your review in context</Text>
     <Flex direction='column' gap='size-200' marginTop='size-200'>
       <Picker

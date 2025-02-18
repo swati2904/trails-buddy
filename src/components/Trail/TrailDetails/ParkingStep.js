@@ -17,9 +17,9 @@ const ParkingStep = ({
   setParkingSize,
 }) => (
   <>
-    <Heading level={3}>How was parking?</Heading>
+    <Heading level={5}>How was parking?</Heading>
     <Text>Help the community come prepared</Text>
-    <Heading level={4} marginTop='size-200'>
+    <Heading level={6} marginTop='size-200'>
       Access
     </Heading>
     <Flex gap='size-100' wrap>
@@ -36,7 +36,7 @@ const ParkingStep = ({
           }
           UNSAFE_style={{
             backgroundColor: selectedAccess.some((a) => a.id === access.id)
-              ? 'lightblue'
+              ? 'lightgreen'
               : 'transparent',
           }}
         >
@@ -44,7 +44,7 @@ const ParkingStep = ({
         </ActionButton>
       ))}
     </Flex>
-    <Heading level={4} marginTop='size-200'>
+    <Heading level={6} marginTop='size-200'>
       Parking Cost
     </Heading>
     <Flex gap='size-100' wrap>
@@ -61,7 +61,7 @@ const ParkingStep = ({
           }
           UNSAFE_style={{
             backgroundColor: selectedParkingCost.some((p) => p.id === cost.id)
-              ? 'lightblue'
+              ? 'lightgreen'
               : 'transparent',
           }}
         >
@@ -69,7 +69,7 @@ const ParkingStep = ({
         </ActionButton>
       ))}
     </Flex>
-    <Heading level={4} marginTop='size-200'>
+    <Heading level={6} marginTop='size-200'>
       Parking Lot Size
     </Heading>
     <Flex gap='size-200' marginTop='size-100'>
@@ -78,11 +78,11 @@ const ParkingStep = ({
           key={size.id}
           variant={parkingSize?.id === size.id ? 'cta' : 'primary'}
           onPress={() => setParkingSize(size)}
-          width='size-2400'
+          UNSAFE_style={{ border: '1px solid grey', borderRadius: '0.5rem' }}
         >
           <Flex direction='column' alignItems='center'>
-            <Text>{size.icon}</Text>
-            <Text>{size.label}</Text>
+            <div>{size.icon}</div>
+            <div style={{ fontWeight: '500' }}>{size.label}</div>
           </Flex>
         </Button>
       ))}

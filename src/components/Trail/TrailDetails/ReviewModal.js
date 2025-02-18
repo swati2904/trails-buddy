@@ -6,6 +6,8 @@ import {
   Heading,
   ActionButton,
   Flex,
+  DialogTrigger,
+  Divider,
 } from '@adobe/react-spectrum';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from 'react-toastify';
@@ -50,9 +52,9 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
 
     try {
       const response = await reviewUser(reviewData, token);
-      toast.success('Review submitted successfully!');
       onReviewSubmit(response);
       onClose();
+      toast.success('Review submitted successfully!');
     } catch (error) {
       console.error('Submission error:', error);
     }
@@ -112,17 +114,17 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
 
   return (
     <Dialog>
-      <Flex
-        justifyContent='space-between'
-        alignItems='center'
-        width='100%'
-        padding='size-200'
+      <ActionButton
+        isQuiet
+        onPress={onClose}
+        UNSAFE_style={{ position: 'absolute', right: '1rem', top: '1rem' }}
       >
-        <Heading level={3}>Leave a Review</Heading>
-        <ActionButton isQuiet onPress={onClose}>
-          <Close />
-        </ActionButton>
-      </Flex>
+        <Close />
+      </ActionButton>
+      <Heading>Leave a Review</Heading>
+
+      <Divider />
+
       <Content>
         {renderStep()}
         <Flex
@@ -141,7 +143,7 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
               onPress={() => setStep(step + 1)}
               isDisabled={
                 (step === 1 && (rating === 0 || selectedLiked.length === 0)) ||
-                (step === 2 && comment.length < 20) ||
+                (step === 2 && comment.length < 10) ||
                 (step === 3 && !difficulty) ||
                 (step === 4 && (!parkingSize || selectedAccess.length === 0)) ||
                 (step === 5 && selectedConditions.length === 0) ||

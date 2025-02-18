@@ -5,20 +5,24 @@ import { REVIEW_CONFIG } from '../../../constants/reviewConfig';
 
 const RatingStep = ({ rating, setRating, selectedLiked, setSelectedLiked }) => (
   <>
-    <Heading level={3}>How was the trail?</Heading>
-    <Flex alignItems='center' gap='size-100'>
+    <Heading level={5}>How was the trail?</Heading>
+    <Flex justifyContent={'flex-start'} gap='size-100' marginTop='size-400'>
       {[1, 2, 3, 4, 5].map((star) => (
         <ActionButton key={star} isQuiet onPress={() => setRating(star)}>
           <Star
-            size='L'
-            UNSAFE_style={{ fill: star <= rating ? 'gold' : 'gray' }}
+            // size='L'
+            UNSAFE_style={{
+              fill: star <= rating ? 'gold' : 'gray',
+              width: '2rem',
+              height: '2rem',
+            }}
           />
         </ActionButton>
       ))}
     </Flex>
     {rating > 0 && (
-      <>
-        <Text marginTop='size-200'>
+      <div style={{ marginTop: '2rem', fontWeight: '500' }}>
+        <Text>
           {
             [
               'Bummer. What went wrong?',
@@ -43,7 +47,7 @@ const RatingStep = ({ rating, setRating, selectedLiked, setSelectedLiked }) => (
               }
               UNSAFE_style={{
                 backgroundColor: selectedLiked.includes(option.id)
-                  ? 'lightblue'
+                  ? 'lightgreen'
                   : 'transparent',
               }}
             >
@@ -51,7 +55,7 @@ const RatingStep = ({ rating, setRating, selectedLiked, setSelectedLiked }) => (
             </ActionButton>
           ))}
         </Flex>
-      </>
+      </div>
     )}
   </>
 );

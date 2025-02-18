@@ -53,7 +53,6 @@ const ReviewSection = ({ trail }) => {
 
   return (
     <div className='container mt-4'>
-      {/* <Text className='d-block mb-2'>Logged in as: {userEmail}</Text> */}
       <h1 className='mb-4'>Review</h1>
 
       <div className='d-flex align-items-center mb-4'>
