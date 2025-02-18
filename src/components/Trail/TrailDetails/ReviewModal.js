@@ -50,8 +50,6 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
       activityDate: visitDate?.toString() || '',
     };
 
-    console.log('Trail ID:', trail?.id);
-
     try {
       const response = await reviewUser(reviewData, token);
       toast.success('Review submitted successfully!');

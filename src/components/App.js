@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from 'react-router-dom';
 import {
   Provider as SpectrumProvider,
   defaultTheme,
@@ -16,6 +21,7 @@ import { fetchTrails } from '../api/trails';
 const AppContent = () => {
   const { token } = useAuth();
   const [trailData, setTrailData] = useState([]);
+  const location = useLocation();
 
   useEffect(() => {
     const loadTrails = async () => {
@@ -28,14 +34,12 @@ const AppContent = () => {
   return (
     <UserLocationProvider>
       <TrailDataContext.Provider value={{ trailData }}>
-        <Router>
-          {token && <Header />}
-          <Routes>
-            <Route path='/trail/:id' element={<TrailPage />} />
-            <Route path='/' element={<Map />} />
-            <Route path='/auth' element={<AuthModal />} />
-          </Routes>
-        </Router>
+        {token && location.pathname !== '/' && <Header />}
+        <Routes>
+          <Route path='/trail/:id' element={<TrailPage />} />
+          <Route path='/' element={<Map />} />
+          <Route path='/auth' element={<AuthModal />} />
+        </Routes>
       </TrailDataContext.Provider>
     </UserLocationProvider>
   );
@@ -45,7 +49,9 @@ const App = () => {
   return (
     <SpectrumProvider theme={defaultTheme}>
       <AuthProvider>
-        <AppContent />
+        <Router>
+          <AppContent />
+        </Router>
       </AuthProvider>
     </SpectrumProvider>
   );

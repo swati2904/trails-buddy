@@ -24,11 +24,9 @@ const ReviewSection = ({ trail }) => {
       return;
     }
 
-    // Initialize variables
     let totalRating = 0;
     const distribution = [0, 0, 0, 0, 0];
 
-    // Process each review
     reviews.forEach((review) => {
       if (review.ratings >= 1 && review.ratings <= 5) {
         totalRating += review.ratings;
@@ -36,9 +34,8 @@ const ReviewSection = ({ trail }) => {
       }
     });
 
-    // Calculate overall rating (weighted average)
     const overall = totalRating / reviews.length;
-    setOverallRating(overall.toFixed(1)); // Round to 1 decimal place
+    setOverallRating(overall.toFixed(1));
     setRatingDistribution(distribution);
   };
 
@@ -55,30 +52,29 @@ const ReviewSection = ({ trail }) => {
   if (!token) return <AuthModal onSuccess={() => {}} />;
 
   return (
-    <div>
-      <Text>Logged in as: {userEmail}</Text>
-      <h1>Review</h1>
-      <div
-        style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}
-      >
-        <Text style={{ fontSize: '24px', fontWeight: 'bold' }}>
+    <div className='container mt-4'>
+      {/* <Text className='d-block mb-2'>Logged in as: {userEmail}</Text> */}
+      <h1 className='mb-4'>Review</h1>
+
+      <div className='d-flex align-items-center mb-4'>
+        <Text
+          UNSAFE_style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+          }}
+        >
           {overallRating}
         </Text>
-        <span style={{ color: 'gold', fontSize: '24px', marginLeft: '8px' }}>
-          ★
-        </span>
-        <Text style={{ marginLeft: '16px' }}>{reviews.length} reviews</Text>
+        <span className='text-warning fs-3 ms-2'>★</span>
+        <Text className='ms-3'>{reviews.length} reviews</Text>
       </div>
 
       <div>
         {ratingDistribution.map((count, index) => (
-          <div
-            key={index}
-            style={{ display: 'flex', alignItems: 'center', margin: '4px 0' }}
-          >
+          <div key={index} className='d-flex align-items-center mb-2'>
             <Text>{5 - index} star</Text>
             <ProgressBar
-              value={(count / reviews.length) * 100 || 0} // Percentage of reviews for this star
+              value={(count / reviews.length) * 100 || 0}
               maxValue={100}
               showValueLabel={false}
               UNSAFE_style={{ margin: '0 8px', flex: 1 }}
@@ -91,7 +87,8 @@ const ReviewSection = ({ trail }) => {
       <DialogTrigger isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
         <Button
           variant='cta'
-          marginTop='size-100'
+          marginTop='size-200'
+          className='btn btn-primary'
           onPress={() => setIsModalOpen(true)}
         >
           Write Review

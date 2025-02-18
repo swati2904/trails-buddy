@@ -1,17 +1,25 @@
+import React, { useState } from 'react';
 import { Picker, Item } from '@adobe/react-spectrum';
 
-const DifficultyFilter = ({ selected, onChange }) => (
-  <Picker
-    label='Filter by Difficulty'
-    selectedKey={selected}
-    onSelectionChange={onChange}
-    width='size-2000'
-  >
-    <Item key=''>Show All</Item>
-    <Item key='hiking'>Easy</Item>
-    <Item key='mountain_hiking'>Moderate</Item>
-    <Item key='demanding_mountain_hiking'>Hard</Item>
-  </Picker>
-);
+const DifficultyFilter = ({ selected, onChange }) => {
+  let options = [
+    { key: 'all', label: 'All' },
+    { key: 'easy', label: 'Easy' },
+    { key: 'moderate', label: 'Moderate' },
+    { key: 'hard', label: 'Hard' },
+  ];
+
+  let [difficulty, setDifficulty] = useState('all');
+
+  return (
+    <Picker
+      items={options}
+      selectedKey={difficulty}
+      onSelectionChange={(selected) => setDifficulty(selected)}
+    >
+      {(item) => <Item key={item.key}>{item.label}</Item>}
+    </Picker>
+  );
+};
 
 export default DifficultyFilter;

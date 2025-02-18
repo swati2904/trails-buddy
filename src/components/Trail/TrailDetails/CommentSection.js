@@ -31,7 +31,6 @@ const generateStars = (rating) => {
 
 const CommentSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { username } = useAuth();
 
   const { comments, loading, error } = useComments();
 
@@ -59,10 +58,10 @@ const CommentSection = () => {
                 className='bg-primary text-white rounded-circle d-flex align-items-center justify-content-center'
                 style={{ width: '50px', height: '50px' }}
               >
-                {username?.[0]?.toUpperCase() || 'U'}
+                {comment.username?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className='ms-3'>
-                <h5 className='mb-1'>{username}</h5>
+                <h5 className='mb-1'>{comment.username}</h5>
                 <small className='text-muted'>{comment.activityDate}</small>
                 {generateStars(comment.ratings)}
               </div>

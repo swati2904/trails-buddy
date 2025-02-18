@@ -19,25 +19,18 @@ const Header = () => {
   };
 
   return (
-    <Flex
-      justifyContent='end'
-      alignItems='center'
-      gap='size-100'
-      padding='size-100'
-    >
+    <div className='d-flex justify-content-between align-items-center p-3'>
+      <div className='d-flex align-items-center'>
+        <div>Trail Buddy</div>
+      </div>
       {userEmail && (
         <MenuTrigger>
           <ActionButton isQuiet>
             <div
+              className='btn btn-primary rounded-circle d-flex align-items-center justify-content-center'
               style={{
                 width: '40px',
                 height: '40px',
-                borderRadius: '50%',
-                backgroundColor: '#0070f3',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
             >
               {userEmail[0].toUpperCase()}
@@ -55,7 +48,7 @@ const Header = () => {
           </Menu>
         </MenuTrigger>
       )}
-    </Flex>
+    </div>
   );
 };
 
