@@ -21,19 +21,30 @@ import { fetchTrails } from '../api/trails';
 const AppContent = () => {
   const { token } = useAuth();
   const [trailData, setTrailData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const location = useLocation();
 
   useEffect(() => {
     const loadTrails = async () => {
-      const data = await fetchTrails();
-      setTrailData(data);
+      try {
+        setLoading(true);
+        const data = await fetchTrails();
+        setTrailData(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load trails. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadTrails();
   }, []);
 
   return (
     <UserLocationProvider>
-      <TrailDataContext.Provider value={{ trailData }}>
+      <TrailDataContext.Provider value={{ trailData, loading, error }}>
         {token && location.pathname !== '/' && <Header />}
         <Routes>
           <Route path='/trail/:id' element={<TrailPage />} />
