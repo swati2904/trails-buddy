@@ -8,7 +8,9 @@ import {
   TextField,
   Text,
   ActionButton,
+  Divider,
   Flex,
+  View,
 } from '@adobe/react-spectrum';
 import { useAuth } from '../../contexts/AuthContext';
 import { loginUser, signupUser } from '../../api/authApi';
@@ -61,27 +63,30 @@ const AuthModal = ({ onSuccess }) => {
   };
 
   return (
-    <>
-      <ToastContainer />
-      <DialogTrigger>
-        <Button variant='cta'>Review Trail</Button>
-        {(close) => (
-          <Dialog>
-            <Flex justifyContent='space-between' alignItems='center'>
-              <Heading>{mode === 'login' ? 'Login' : 'Sign Up'}</Heading>
-              <ActionButton isQuiet onPress={close}>
-                <Close />
-              </ActionButton>
-            </Flex>
-            <Content>
-              {error && <Text color='negative'>{error}</Text>}
+    <DialogTrigger>
+      <Button variant='cta'>Review Trail</Button>
+      {(close) => (
+        <Dialog>
+          <ActionButton
+            isQuiet
+            onPress={close}
+            UNSAFE_style={{ position: 'absolute', right: '1rem', top: '1rem' }}
+          >
+            <Close />
+          </ActionButton>
+          <Heading>{mode === 'login' ? 'Login' : 'Sign Up'}</Heading>
 
+          <Divider />
+
+          <Content>
+            {error && <Text color='negative'>{error}</Text>}
+
+            <Flex direction='column' gap='size-100'>
               {mode === 'signup' && (
                 <TextField
                   label='Username'
                   value={username}
                   onChange={setUsername}
-                  marginTop='size-100'
                   isRequired
                 />
               )}
@@ -91,7 +96,6 @@ const AuthModal = ({ onSuccess }) => {
                 value={email}
                 onChange={setEmail}
                 type='email'
-                marginTop='size-100'
                 isRequired
               />
 
@@ -100,47 +104,48 @@ const AuthModal = ({ onSuccess }) => {
                 value={password}
                 onChange={setPassword}
                 type='password'
-                marginTop='size-100'
                 isRequired
               />
 
               <Button
                 variant='cta'
                 onPress={handleSubmit}
-                marginTop='size-200'
                 isDisabled={isLoading}
+                UNSAFE_style={{ width: '100px', borderRadius: '5px' }}
               >
                 {mode === 'login' ? 'Login' : 'Sign Up'}
               </Button>
 
-              <Text marginTop='size-100'>
-                {mode === 'login' ? (
-                  <>
-                    Don't have an account?{' '}
-                    <Button
-                      variant='secondary'
-                      onPress={() => setMode('signup')}
-                    >
-                      Sign Up
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    Already have an account?{' '}
-                    <Button
-                      variant='secondary'
-                      onPress={() => setMode('login')}
-                    >
-                      Login
-                    </Button>
-                  </>
-                )}
-              </Text>
-            </Content>
-          </Dialog>
-        )}
-      </DialogTrigger>
-    </>
+              <View>
+                <Text>
+                  {mode === 'login' ? (
+                    <>
+                      Don't have an account?{' '}
+                      <Button
+                        variant='secondary'
+                        onPress={() => setMode('signup')}
+                      >
+                        Sign Up
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      Already have an account?{' '}
+                      <Button
+                        variant='secondary'
+                        onPress={() => setMode('login')}
+                      >
+                        Login
+                      </Button>
+                    </>
+                  )}
+                </Text>
+              </View>
+            </Flex>
+          </Content>
+        </Dialog>
+      )}
+    </DialogTrigger>
   );
 };
 
