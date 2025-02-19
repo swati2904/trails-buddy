@@ -14,11 +14,14 @@ import {
 } from '@adobe/react-spectrum';
 import { useAuth } from '../../contexts/AuthContext';
 import { loginUser, signupUser } from '../../api/authApi';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Close from '@spectrum-icons/workflow/Close';
+import { useTranslation } from 'react-i18next';
 
 const AuthModal = ({ onSuccess }) => {
+  const { t } = useTranslation();
+
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +30,41 @@ const AuthModal = ({ onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  };
+
+  const validateUsername = (username) => {
+    return username.length >= 3;
+  };
+
+  const isFormValid = () => {
+    if (mode === 'signup' && !validateUsername(username)) {
+      setError('Please enter a valid username (at least 3 characters).');
+      return false;
+    }
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email.');
+      return false;
+    }
+    if (!validatePassword(password)) {
+      setError('Please enter a valid password (at least 6 characters).');
+      return false;
+    }
+    setError('');
+    return true;
+  };
+
   const handleSubmit = async () => {
+    if (!isFormValid()) {
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -64,7 +101,7 @@ const AuthModal = ({ onSuccess }) => {
 
   return (
     <DialogTrigger>
-      <Button variant='cta'>Review Trail</Button>
+      <Button variant='cta'>{t('common.review_trail')}</Button>
       {(close) => (
         <Dialog>
           <ActionButton
@@ -74,8 +111,9 @@ const AuthModal = ({ onSuccess }) => {
           >
             <Close />
           </ActionButton>
-          <Heading>{mode === 'login' ? 'Login' : 'Sign Up'}</Heading>
-
+          <Heading>
+            {mode === 'login' ? t('auth.login') : t('auth.signup')}
+          </Heading>
           <Divider />
 
           <Content>
@@ -84,7 +122,7 @@ const AuthModal = ({ onSuccess }) => {
             <Flex direction='column' gap='size-100'>
               {mode === 'signup' && (
                 <TextField
-                  label='Username'
+                  label={t('auth.username')}
                   value={username}
                   onChange={setUsername}
                   isRequired
@@ -92,7 +130,7 @@ const AuthModal = ({ onSuccess }) => {
               )}
 
               <TextField
-                label='Email'
+                label={t('auth.email')}
                 value={email}
                 onChange={setEmail}
                 type='email'
@@ -100,7 +138,7 @@ const AuthModal = ({ onSuccess }) => {
               />
 
               <TextField
-                label='Password'
+                label={t('auth.password')}
                 value={password}
                 onChange={setPassword}
                 type='password'
@@ -110,32 +148,32 @@ const AuthModal = ({ onSuccess }) => {
               <Button
                 variant='cta'
                 onPress={handleSubmit}
-                isDisabled={isLoading}
+                isDisabled={isLoading || !isFormValid()}
                 UNSAFE_style={{ width: '100px', borderRadius: '5px' }}
               >
-                {mode === 'login' ? 'Login' : 'Sign Up'}
+                {mode === 'login' ? t('auth.login') : t('auth.signup')}
               </Button>
 
               <View>
                 <Text>
                   {mode === 'login' ? (
                     <>
-                      Don't have an account?{' '}
+                      {t('auth.no_account')}{' '}
                       <Button
                         variant='secondary'
                         onPress={() => setMode('signup')}
                       >
-                        Sign Up
+                        {t('auth.signup')}
                       </Button>
                     </>
                   ) : (
                     <>
-                      Already have an account?{' '}
+                      {t('auth.already_have_account')}{' '}
                       <Button
                         variant='secondary'
                         onPress={() => setMode('login')}
                       >
-                        Login
+                        {t('auth.login')}
                       </Button>
                     </>
                   )}

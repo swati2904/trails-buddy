@@ -8,9 +8,13 @@ import {
   Text,
   Divider,
 } from '@adobe/react-spectrum';
+import { ICONS } from '../../../constants/icons';
+import { useTranslation } from 'react-i18next';
 
 const TrailDetailsModal = ({ isOpen, onClose, trail }) => {
-  if (!trail) return null; // Return nothing if trail data is missing
+  const { t } = useTranslation();
+
+  if (!trail) return null;
 
   const detailStyle = {
     display: 'flex',
@@ -41,48 +45,72 @@ const TrailDetailsModal = ({ isOpen, onClose, trail }) => {
     <Dialog isOpen={isOpen} onDismiss={onClose}>
       {/* Modal Heading */}
       <Heading style={{ textAlign: 'center', color: '#0078D4' }}>
-        {trail.name || 'Trail Details'}
+        {trail.name || t('trail.details')}
       </Heading>
       <Divider size='S' />
 
       {/* Modal Content */}
       <Content style={{ padding: '1rem' }}>
         <div style={detailStyle}>
-          <span style={iconStyle}>💪</span>
-          <Text>Difficulty: {trail.difficulty || 'N/A'}</Text>
-        </div>
-        <div style={detailStyle}>
-          <span style={iconStyle}>📏</span>
-          <Text>Length: {trail.length ? `${trail.length} km` : 'N/A'}</Text>
-        </div>
-        <div style={detailStyle}>
-          <span style={iconStyle}>🚴</span>
-          <Text>Bicycle Allowed: {trail.bicycle ? 'Yes' : 'No'}</Text>
-        </div>
-        <div style={detailStyle}>
-          <span style={iconStyle}>🐕</span>
-          <Text>Dog/Pet Allowed: {trail.dog ? 'Yes' : 'No'}</Text>
-        </div>
-        <div style={detailStyle}>
-          <span style={iconStyle}>🛣️</span>
-          <Text>Highway: {trail.highway || 'Not specified'}</Text>
-        </div>
-        <div style={detailStyle}>
-          <span style={iconStyle}>👀</span>
-          <Text>Trail Visibility: {trail.trail_visibility || 'N/A'}</Text>
-        </div>
-        <div style={detailStyle}>
-          <span style={iconStyle}>⛰️</span>
+          <span style={iconStyle}>{ICONS.DIFFICULTY.EASY}</span>
           <Text>
-            Elevation Grade:{' '}
-            {trail.elevation_grade ? `${trail.elevation_grade}%` : 'N/A'}
+            {`${t('trail.difficulty')} ${trail.difficulty || t('common.na')}`}
+          </Text>
+        </div>
+
+        <div style={detailStyle}>
+          <span style={iconStyle}>{ICONS.AMENITIES.LENGTH}</span>
+          <Text>
+            {`${t('trail.length')} ${
+              !trail.length ? `${trail.length} km` : t('common.na')
+            }`}
           </Text>
         </div>
         <div style={detailStyle}>
-          <span style={iconStyle}>📍</span>
+          <span style={iconStyle}>{ICONS.AMENITIES.BICYCLE}</span>
           <Text>
-            Total Distance:{' '}
-            {trail.total_distance ? `${trail.total_distance} km` : 'N/A'}
+            {`${t('trail.bicycle')} ${
+              trail.bicycle ? t('common.yes') : t('common.no')
+            }`}
+          </Text>
+        </div>
+        <div style={detailStyle}>
+          <span style={iconStyle}>{ICONS.AMENITIES.DOG}</span>
+          <Text>
+            {`${t('trail.dog')} ${
+              trail.dog_friendly ? t('common.yes') : t('common.no')
+            }`}
+          </Text>
+        </div>
+        <div style={detailStyle}>
+          <span style={iconStyle}>{ICONS.AMENITIES.HIGHWAY}</span>
+          <Text>
+            {`${t('trail.highway')} ${
+              trail.highway ? t('common.yes') : t('common.no')
+            }`}
+          </Text>
+        </div>
+        <div style={detailStyle}>
+          <span style={iconStyle}>{ICONS.AMENITIES.VISIBILITY}</span>
+          <Text>
+            {`${t('trail.visibility')} ${
+              trail.visibility ? t('common.yes') : t('common.no')
+            }`}
+          </Text>
+        </div>
+        <div style={detailStyle}>
+          <span style={iconStyle}>{ICONS.AMENITIES.ELEVATION}</span>
+          <Text>
+            {t('trail.elevation')}
+            {trail.elevation ? `${trail.elevation} %` : t('common.na')}
+          </Text>
+        </div>
+        <div style={detailStyle}>
+          <span style={iconStyle}>{ICONS.AMENITIES.DISTANCE}</span>
+          <Text>
+            {`${t('trail.distance')} ${
+              trail.distance ? `${trail.distance} km` : t('common.na')
+            }`}
           </Text>
         </div>
       </Content>
@@ -100,7 +128,7 @@ const TrailDetailsModal = ({ isOpen, onClose, trail }) => {
             fontWeight: 'bold',
           }}
         >
-          Close
+          {t('common.close')}
         </Button>
       </ButtonGroup>
     </Dialog>

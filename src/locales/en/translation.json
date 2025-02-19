@@ -1,0 +1,108 @@
+{
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "success_login": "You have successfully logged in!",
+    "success_signup": "Your account has been successfully created. Please log in.",
+    "error_message": "Something went wrong. Please try again."
+  },
+  "trail": {
+    "difficulty": "Difficulty: ",
+    "length": "Length: ",
+    "bicycle": "Bicycle Allowed: ",
+    "dog": "Dog Allowed: ",
+    "highway": "Highway: ",
+    "visibility": "Visibility: ",
+    "elevation": "Elevation Grade: ",
+    "distance": "Total Distance: "
+  },
+  "common": {
+    "submit": "Submit",
+    "next": "Next",
+    "back": "Back",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "na": "N/A",
+    "yes": "Yes",
+    "no": "No",
+    "review_trail": "Review Trail",
+    "trail_buddy": "Trail Buddy"
+  },
+
+  "review": {
+    "ratingOptions": {
+      "trailClosed": "Trail closed",
+      "privateProperty": "Private property",
+      "poorConditions": "Poor conditions",
+      "wrongDirections": "Wrong directions",
+      "noBathrooms": "No bathrooms",
+      "crowded": "Crowded",
+      "hardToPark": "Hard to park",
+      "fairConditions": "Fair conditions",
+      "goodConditions": "Good conditions",
+      "easyToPark": "Easy to park",
+      "notCrowded": "Not crowded",
+      "bathroomsAvailable": "Bathrooms available",
+      "dogFriendly": "Dog-friendly"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "moderate": "Moderate",
+      "hard": "Hard",
+      "strenuous": "Strenuous"
+    },
+    "access": {
+      "permitRequired": "Permit required",
+      "entryFee": "Entry fee"
+    },
+    "parkingCost": {
+      "free": "Free parking",
+      "paid": "Paid parking"
+    },
+    "parkingSize": {
+      "small": "Small (<10 spots)",
+      "medium": "Medium (10-20 spots)",
+      "large": "Large (>30 spots)"
+    },
+    "conditions": {
+      "muddy": "Muddy",
+      "buggy": "Buggy",
+      "dusty": "Dusty",
+      "snowy": "Snowy",
+      "icy": "Icy",
+      "pollen": "Pollen",
+      "obstructions": "Obstructions",
+      "overgrown": "Overgrown",
+      "poorAirQuality": "Poor air quality",
+      "trashOnTrail": "Trash on trail",
+      "poisonousPlants": "Poisonous plants"
+    },
+    "activities": {
+      "backpacking": "Backpacking",
+      "birding": "Birding",
+      "bikeTouring": "Bike touring",
+      "scenicDriving": "Scenic driving",
+      "crossCountrySkiing": "Cross-country skiing",
+      "fishing": "Fishing",
+      "hiking": "Hiking",
+      "horsebackRiding": "Horseback riding",
+      "mountainBiking": "Mountain biking",
+      "offRoadDriving": "Off-road driving",
+      "paddleSports": "Paddle sports",
+      "roadBiking": "Road biking",
+      "rockClimbing": "Rock climbing",
+      "running": "Running",
+      "walking": "Walking",
+      "skiing": "Skiing",
+      "snowshoeing": "Snowshoeing",
+      "viaFerrata": "Via ferrata"
+    }
+  }
+}

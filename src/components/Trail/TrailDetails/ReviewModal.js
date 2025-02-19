@@ -6,7 +6,6 @@ import {
   Heading,
   ActionButton,
   Flex,
-  DialogTrigger,
   Divider,
 } from '@adobe/react-spectrum';
 import { useAuth } from '../../../contexts/AuthContext';

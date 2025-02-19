@@ -1,3 +1,5 @@
+import { ICONS } from './icons';
+
 export const REVIEW_CONFIG = {
   ratingOptions: {
     1: [
@@ -37,9 +39,9 @@ export const REVIEW_CONFIG = {
   },
 
   difficulty: [
-    { id: 0, label: 'Easy' },
-    { id: 1, label: 'Moderate' },
-    { id: 2, label: 'Hard' },
+    { id: 0, label: 'Easy', icon: ICONS.DIFFICULTY.EASY },
+    { id: 1, label: 'Moderate', icon: ICONS.DIFFICULTY.MODERATE },
+    { id: 2, label: 'Hard', icon: ICONS.DIFFICULTY.HARD },
     { id: 3, label: 'Strenuous' },
   ],
 
@@ -54,43 +56,55 @@ export const REVIEW_CONFIG = {
   ],
 
   parkingSize: [
-    { id: 0, label: 'Small (<10 spots)', icon: '🚗' },
-    { id: 1, label: 'Medium (10-20 spots)', icon: '🚗🚗' },
-    { id: 2, label: 'Large (>30 spots)', icon: '🚗🚗🚗' },
+    { id: 0, label: 'Small (<10 spots)', icon: ICONS.AMENITIES.CAR },
+    { id: 1, label: 'Medium (10-20 spots)', icon: ICONS.AMENITIES.CAR },
+    { id: 2, label: 'Large (>30 spots)', icon: ICONS.AMENITIES.CAR },
   ],
 
   conditions: [
-    { id: 0, label: 'Muddy', icon: '💧' },
-    { id: 1, label: 'Buggy', icon: '🦟' },
-    { id: 2, label: 'Dusty', icon: '💨' },
-    { id: 3, label: 'Snowy', icon: '❄️' },
-    { id: 4, label: 'Icy', icon: '⛸️' },
-    { id: 5, label: 'Pollen', icon: '🌼' },
-    { id: 6, label: 'Obstructions', icon: '⚠️' },
-    { id: 7, label: 'Overgrown', icon: '🌿' },
-    { id: 8, label: 'Poor air quality', icon: '🌫️' },
-    { id: 9, label: 'Trash on trail', icon: '🗑️' },
-    { id: 10, label: 'Poisonous plants', icon: '☠️' },
+    { id: 0, label: 'Muddy', icon: ICONS.CONDITIONS.MUD },
+    { id: 1, label: 'Buggy', icon: ICONS.CONDITIONS.BUGS },
+    { id: 2, label: 'Dusty', icon: ICONS.CONDITIONS.DUST },
+    { id: 3, label: 'Snowy', icon: ICONS.CONDITIONS.SNOW },
+    { id: 4, label: 'Icy', icon: ICONS.CONDITIONS.ICE },
+    { id: 5, label: 'Pollen', icon: ICONS.CONDITIONS.POLLEN },
+    { id: 6, label: 'Obstructions', icon: ICONS.CONDITIONS.OBSTACLES },
+    { id: 7, label: 'Overgrown', icon: ICONS.CONDITIONS.OVERGROWN },
+    { id: 8, label: 'Poor air quality', icon: ICONS.CONDITIONS.AIR_QUALITY },
+    { id: 9, label: 'Trash on trail', icon: ICONS.CONDITIONS.TRASH },
+    { id: 10, label: 'Poisonous plants', icon: ICONS.CONDITIONS.POISON },
   ],
 
   activities: [
-    { id: 0, label: 'Backpacking' },
-    { id: 1, label: 'Birding' },
-    { id: 2, label: 'Bike touring' },
-    { id: 3, label: 'Scenic driving' },
-    { id: 4, label: 'Cross-country skiing' },
-    { id: 5, label: 'fishing' },
-    { id: 6, label: 'hiking' },
-    { id: 7, label: 'Horseback riding' },
-    { id: 8, label: 'Mountain biking' },
-    { id: 9, label: 'Off-road driving' },
-    { id: 10, label: 'Paddle sports' },
-    { id: 11, label: 'Road biking' },
-    { id: 12, label: 'Rock climbing' },
-    { id: 13, label: 'Running' },
-    { id: 14, label: 'walking' },
-    { id: 15, label: 'skiing' },
-    { id: 16, label: 'Snowshoeing' },
-    { id: 17, label: 'via ferrata' },
+    { id: 0, label: 'Backpacking', icon: ICONS.ACTIVITIES.BACKPACKING },
+    { id: 1, label: 'Birding', icon: ICONS.ACTIVITIES.BIRDING },
+    { id: 2, label: 'Bike touring', icon: ICONS.ACTIVITIES.BIKE_TOURING },
+    { id: 3, label: 'Scenic driving', icon: ICONS.ACTIVITIES.SCENIC_DRIVING },
+    {
+      id: 4,
+      label: 'Cross-country skiing',
+      icon: ICONS.ACTIVITIES.CROSS_COUNTRY_SKIING,
+    },
+    { id: 5, label: 'Fishing', icon: ICONS.ACTIVITIES.FISHING },
+    { id: 6, label: 'Hiking', icon: ICONS.ACTIVITIES.HIKING },
+    {
+      id: 7,
+      label: 'Horseback riding',
+      icon: ICONS.ACTIVITIES.HORSEBACK_RIDING,
+    },
+    { id: 8, label: 'Mountain biking', icon: ICONS.ACTIVITIES.MOUNTAIN_BIKING },
+    {
+      id: 9,
+      label: 'Off-road driving',
+      icon: ICONS.ACTIVITIES.OFF_ROAD_DRIVING,
+    },
+    { id: 10, label: 'Paddle sports', icon: ICONS.ACTIVITIES.PADDLE_SPORTS },
+    { id: 11, label: 'Road biking', icon: ICONS.ACTIVITIES.ROAD_BIKING },
+    { id: 12, label: 'Rock climbing', icon: ICONS.ACTIVITIES.ROCK_CLIMBING },
+    { id: 13, label: 'Running', icon: ICONS.ACTIVITIES.RUNNING },
+    { id: 14, label: 'Walking', icon: ICONS.ACTIVITIES.WALKING },
+    { id: 15, label: 'Skiing', icon: ICONS.ACTIVITIES.SKIING },
+    { id: 16, label: 'Snowshoeing', icon: ICONS.ACTIVITIES.SNOWSHOEING },
+    { id: 17, label: 'Via ferrata', icon: ICONS.ACTIVITIES.VIA_FERRATA },
   ],
 };

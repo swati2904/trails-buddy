@@ -1,0 +1,107 @@
+{
+  "auth": {
+    "login": "Ingresar",
+    "signup": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "username": "Nombre de usuario",
+    "no_account": "¿No tienes cuenta?",
+    "have_account": "¿Ya tienes cuenta?",
+    "success_login": "¡Has iniciado sesión con éxito!",
+    "success_signup": "Tu cuenta ha sido creada con éxito. Por favor, inicia sesión.",
+    "error_message": "Algo salió mal. Por favor, intenta de nuevo."
+  },
+  "trail": {
+    "difficulty": "Dificultad: ",
+    "length": "Longitud: ",
+    "bicycle": "Bicicleta permitida: ",
+    "dog": "Perros permitidos: ",
+    "highway": "Carretera: ",
+    "visibility": "Visibilidad: ",
+    "elevation": "Elevación: ",
+    "distance": "Distancia total: "
+  },
+  "common": {
+    "submit": "Enviar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "na": "No disponible",
+    "yes": "Sí",
+    "no": "No",
+    "review_trail": "Reseñar el sendero",
+    "trail_buddy": "Compañero de sendero"
+  },
+  "review": {
+    "ratingOptions": {
+      "trailClosed": "Sendero cerrado",
+      "privateProperty": "Propiedad privada",
+      "poorConditions": "Condiciones pobres",
+      "wrongDirections": "Direcciones incorrectas",
+      "noBathrooms": "Sin baños",
+      "crowded": "Aglomerado",
+      "hardToPark": "Difícil de estacionar",
+      "fairConditions": "Condiciones justas",
+      "goodConditions": "Buenas condiciones",
+      "easyToPark": "Fácil de estacionar",
+      "notCrowded": "No está aglomerado",
+      "bathroomsAvailable": "Baños disponibles",
+      "dogFriendly": "Amigable con los perros"
+    },
+    "difficulty": {
+      "easy": "Fácil",
+      "moderate": "Moderado",
+      "hard": "Difícil",
+      "strenuous": "Exigente"
+    },
+    "access": {
+      "permitRequired": "Se requiere permiso",
+      "entryFee": "Tarifa de entrada"
+    },
+    "parkingCost": {
+      "free": "Estacionamiento gratuito",
+      "paid": "Estacionamiento de pago"
+    },
+    "parkingSize": {
+      "small": "Pequeño (<10 lugares)",
+      "medium": "Mediano (10-20 lugares)",
+      "large": "Grande (>30 lugares)"
+    },
+    "conditions": {
+      "muddy": "Barroso",
+      "buggy": "Con insectos",
+      "dusty": "Polvoriento",
+      "snowy": "Nevado",
+      "icy": "Hielo",
+      "pollen": "Polen",
+      "obstructions": "Obstrucciones",
+      "overgrown": "Crecimiento excesivo",
+      "poorAirQuality": "Mala calidad del aire",
+      "trashOnTrail": "Basura en el sendero",
+      "poisonousPlants": "Plantas venenosas"
+    },
+    "activities": {
+      "backpacking": "Senderismo",
+      "birding": "Observación de aves",
+      "bikeTouring": "Recorridos en bicicleta",
+      "scenicDriving": "Conducción escénica",
+      "crossCountrySkiing": "Esquí de fondo",
+      "fishing": "Pesca",
+      "hiking": "Caminata",
+      "horsebackRiding": "Paseo a caballo",
+      "mountainBiking": "Ciclismo de montaña",
+      "offRoadDriving": "Conducción fuera de carretera",
+      "paddleSports": "Deportes acuáticos",
+      "roadBiking": "Ciclismo en carretera",
+      "rockClimbing": "Escalada en roca",
+      "running": "Correr",
+      "walking": "Caminar",
+      "skiing": "Esquí",
+      "snowshoeing": "Caminata con raquetas de nieve",
+      "viaFerrata": "Vía ferrata"
+    }
+  }
+}

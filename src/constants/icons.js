@@ -30,3 +30,50 @@ export const START_ICON = new L.DivIcon({
 export const END_ICON = new L.DivIcon({
   html: '<div style="background-color: red; width: 20px; height: 20px; border-radius: 50%;"></div>',
 });
+
+export const ICONS = {
+  DIFFICULTY: {
+    EASY: '🥾',
+    MODERATE: '⛰️',
+    HARD: '🧗',
+  },
+  AMENITIES: {
+    BICYCLE: '🚴',
+    DOG: '🐕',
+    PARKING: '🅿️',
+    LENGTH: '📏',
+    HIGHWAY: '🛣️',
+    VISIBILITY: '👀',
+    ELEVATION: '⛰️',
+    DISTANCE: '📍',
+    CAR: '🚗',
+  },
+  CONDITIONS: {
+    MUD: '💧',
+    BUGS: '🦟',
+    DUST: '💨',
+    SNOW: '❄️',
+    ICE: '⛸️',
+    POLLEN: '🌼',
+    OBSTACLES: '⚠️',
+    OVERGROWN: '🌿',
+    AIR_QUALITY: '🌫️',
+    TRASH: '🗑️',
+    POISON: '☠️',
+  },
+  ACTIVITIES: {
+    BACKPACKING: '🎒',
+    BIRDING: '🦜',
+    BIKE_TOURING: '🚴',
+    SCENIC_DRIVING: '🚗',
+    CROSS_COUNTRY_SKIING: '🎿',
+    FISHING: '🎣',
+    HIKING: '🥾',
+    HORSEBACK_RIDING: '🐎',
+    MOUNTAIN_BIKING: '🚵',
+    OFF_ROAD_DRIVING: '🚙',
+    PADDLE_SPORTS: '🛶',
+    ROAD_BIKING: '🚴',
+    ROCK_CLIMBING: '🧗',
+  },
+};

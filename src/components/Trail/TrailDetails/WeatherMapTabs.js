@@ -1,4 +1,3 @@
-import { Divider } from '@adobe/react-spectrum';
 import React, { useState } from 'react';
 
 const WeatherMapTabs = ({ lat, lon }) => {

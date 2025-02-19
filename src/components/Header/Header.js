@@ -2,8 +2,11 @@ import React from 'react';
 import { ActionButton, MenuTrigger, Menu, Item } from '@adobe/react-spectrum';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import LanguageSelector from '../Common/LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
+  const { t } = useTranslation();
   const { userEmail, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -15,8 +18,21 @@ const Header = () => {
   return (
     <div className='d-flex justify-content-between align-items-center p-3'>
       <div className='d-flex align-items-center'>
-        <div>Trail Buddy</div>
+        <div
+          style={{
+            fontWeight: '500',
+            fontSize: '1.5rem',
+            marginRight: '1rem',
+            color: '#0078D4',
+            textTransform: 'uppercase',
+            fontStyle: 'italic',
+          }}
+        >
+          {' '}
+          {t('common.trail_buddy')}{' '}
+        </div>
       </div>
+      {<LanguageSelector />}
       {userEmail && (
         <MenuTrigger>
           <ActionButton isQuiet>
