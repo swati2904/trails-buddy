@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import { REVIEW_CONFIG } from '../../../constants/reviewConfig';
 import { useComments } from '../../../contexts/CommentContext';
+import CustomButton from '../../Common/CustomButton';
 
 const getLabelById = (config, id) => {
   const item = config.find((item) => item.id === id);
   return item ? item.label : 'Unknown';
+};
+
+const customBadge = {
+  padding: '0.5em 1em',
+  margin: '0.2em',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '0.9em',
+  borderRadius: '0.25em',
 };
 
 const generateStars = (rating) => {
@@ -13,14 +24,14 @@ const generateStars = (rating) => {
   const greyStars = totalStars - goldStars;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div className='d-flex align-items-center'>
       {[...Array(goldStars)].map((_, index) => (
-        <span key={`gold-${index}`} style={{ color: 'gold', fontSize: '20px' }}>
+        <span key={`gold-${index}`} className='text-warning fs-4'>
           ★
         </span>
       ))}
       {[...Array(greyStars)].map((_, index) => (
-        <span key={`grey-${index}`} style={{ color: 'grey', fontSize: '20px' }}>
+        <span key={`grey-${index}`} className='text-secondary fs-4'>
           ★
         </span>
       ))}
@@ -30,24 +41,43 @@ const generateStars = (rating) => {
 
 const CommentSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortCriteria, setSortCriteria] = useState('date');
+  const [sortOrder, setSortOrder] = useState('asc');
   const { comments, page, setPage, totalPages } = useComments();
 
-  const filteredComments = comments.filter((comment) =>
-    comment.comment?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredComments = comments
+    .filter((comment) =>
+      comment.comment?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortCriteria === 'date') {
+        const dateA = new Date(a.activityDate);
+        const dateB = new Date(b.activityDate);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      } else if (sortCriteria === 'difficulty') {
+        return sortOrder === 'asc' ? a.level - b.level : b.level - a.level;
+      }
+      return 0;
+    });
 
   return (
     <div className='container mt-4'>
       <div className='mb-4'>
-        <input
-          type='text'
-          className='form-control'
-          placeholder='Search comments...'
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className='d-flex justify-content-between align-items-center mb-3'>
+          <h2 className='mb-4'>Comments</h2>{' '}
+          <div className='d-flex gap-2 align-items-center ms-auto'>
+            <label className='form-label mb-0'>Sort by Date</label>
+            <select
+              className='form-select mt-2'
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value='asc'>Ascending</option>
+              <option value='desc'>Descending</option>
+            </select>
+          </div>
+        </div>
       </div>
-
       {filteredComments.map((comment) => (
         <div key={comment.id} className='card mb-3'>
           <div className='card-body'>
@@ -74,10 +104,10 @@ const CommentSection = () => {
             <p className='card-text mb-3'>{comment.comment}</p>
 
             <div className='d-flex flex-wrap gap-2 mb-3'>
-              <span className='badge bg-secondary'>
+              <span className='badge bg-success' style={customBadge}>
                 {getLabelById(REVIEW_CONFIG.difficulty, comment.level)}
               </span>
-              <span className='badge bg-secondary'>
+              <span className='badge bg-success' style={customBadge}>
                 {getLabelById(REVIEW_CONFIG.activities, comment.activityType)}
               </span>
             </div>
@@ -85,7 +115,11 @@ const CommentSection = () => {
             {comment.conditions && (
               <div className='d-flex flex-wrap gap-2'>
                 {comment.conditions.map((condition) => (
-                  <span key={condition} className='badge bg-info'>
+                  <span
+                    key={condition}
+                    className='badge bg-light text-dark'
+                    style={customBadge}
+                  >
                     {getLabelById(REVIEW_CONFIG.conditions, condition)}
                   </span>
                 ))}
@@ -94,22 +128,22 @@ const CommentSection = () => {
           </div>
         </div>
       ))}
-
       <div className='d-flex justify-content-between mt-4'>
-        <button
-          className='btn btn-secondary trail-btn-prev'
+        <CustomButton
+          variant='secondary'
+          className='trail-btn-prev'
           disabled={page === 0}
           onClick={() => setPage(page - 1)}
         >
           Previous
-        </button>
-        <button
-          className='btn btn-secondary trail-btn-next'
+        </CustomButton>
+        <CustomButton
+          className='trail-btn-next'
           disabled={page === totalPages - 1}
           onClick={() => setPage(page + 1)}
         >
           Next
-        </button>
+        </CustomButton>
       </div>
     </div>
   );

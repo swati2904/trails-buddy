@@ -4,12 +4,12 @@ import {
   Heading,
   Content,
   ButtonGroup,
-  Button,
-  Text,
   Divider,
+  Text,
 } from '@adobe/react-spectrum';
 import { ICONS } from '../../../constants/icons';
 import { useTranslation } from 'react-i18next';
+import CustomButton from '../../Common/CustomButton';
 
 const TrailDetailsModal = ({ isOpen, onClose, trail }) => {
   const { t } = useTranslation();
@@ -118,19 +118,13 @@ const TrailDetailsModal = ({ isOpen, onClose, trail }) => {
 
       {/* Modal Footer */}
       <ButtonGroup>
-        <Button
-          variant='cta'
+        <CustomButton
+          variant='primary'
           onPress={onClose}
-          style={{
-            margin: '1rem auto',
-            backgroundColor: '#0078D4',
-            color: 'white',
-            fontWeight: 'bold',
-          }}
           UNSAFE_className='trail-btn-back'
         >
           {t('common.close')}
-        </Button>
+        </CustomButton>
       </ButtonGroup>
     </Dialog>
   );

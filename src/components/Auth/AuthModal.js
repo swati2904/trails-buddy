@@ -4,7 +4,6 @@ import {
   DialogTrigger,
   Heading,
   Content,
-  Button,
   TextField,
   Text,
   ActionButton,
@@ -18,6 +17,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Close from '@spectrum-icons/workflow/Close';
 import { useTranslation } from 'react-i18next';
+import CustomButton from '../Common/CustomButton';
 
 const AuthModal = ({ onSuccess }) => {
   const { t } = useTranslation();
@@ -101,7 +101,7 @@ const AuthModal = ({ onSuccess }) => {
 
   return (
     <DialogTrigger>
-      <Button variant='cta'>{t('common.review_trail')}</Button>
+      <CustomButton>{t('common.review_trail')}</CustomButton>
       {(close) => (
         <Dialog>
           <ActionButton
@@ -145,36 +145,35 @@ const AuthModal = ({ onSuccess }) => {
                 isRequired
               />
 
-              <Button
-                variant='cta'
+              <CustomButton
                 onPress={handleSubmit}
                 isDisabled={isLoading || !isFormValid()}
                 UNSAFE_style={{ width: '100px', borderRadius: '5px' }}
               >
                 {mode === 'login' ? t('auth.login') : t('auth.signup')}
-              </Button>
+              </CustomButton>
 
               <View>
                 <Text>
                   {mode === 'login' ? (
                     <>
                       {t('auth.no_account')}{' '}
-                      <Button
+                      <CustomButton
                         variant='secondary'
                         onPress={() => setMode('signup')}
                       >
                         {t('auth.signup')}
-                      </Button>
+                      </CustomButton>
                     </>
                   ) : (
                     <>
                       {t('auth.already_have_account')}{' '}
-                      <Button
+                      <CustomButton
                         variant='secondary'
                         onPress={() => setMode('login')}
                       >
                         {t('auth.login')}
-                      </Button>
+                      </CustomButton>
                     </>
                   )}
                 </Text>

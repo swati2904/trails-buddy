@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
-import {
-  DialogTrigger,
-  Button,
-  Text,
-  ProgressBar,
-} from '@adobe/react-spectrum';
+import { DialogTrigger, Text, ProgressBar } from '@adobe/react-spectrum';
 import AuthModal from '../../Auth/AuthModal';
 import ReviewModal from './ReviewModal';
 import { useComments } from '../../../contexts/CommentContext';
 import { fetchComments } from '../../../api/ReviewApi';
+import CustomButton from '../../Common/CustomButton';
 
 const ReviewSection = ({ trail }) => {
   const { token } = useAuth();
@@ -86,7 +82,7 @@ const ReviewSection = ({ trail }) => {
           {overallRating}
         </Text>
         <span className='text-warning fs-3 ms-2'>★</span>
-        <Text className='ms-3'>{reviews.length} reviews</Text>
+        {/* <Text className='ms-3'>{reviews.length} reviews</Text> */}
       </div>
 
       <div>
@@ -106,14 +102,14 @@ const ReviewSection = ({ trail }) => {
 
       {token ? (
         <DialogTrigger isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
-          <Button
-            variant='cta'
+          <CustomButton
+            variant='negative'
             marginTop='size-200'
             className='btn btn-primary'
             onPress={() => setIsModalOpen(true)}
           >
             Write Review
-          </Button>
+          </CustomButton>
           {isModalOpen && (
             <ReviewModal
               trail={trail}
