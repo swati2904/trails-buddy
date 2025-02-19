@@ -47,7 +47,7 @@ const RatingStep = ({ rating, setRating, selectedLiked, setSelectedLiked }) => (
               }
               UNSAFE_style={{
                 backgroundColor: selectedLiked.includes(option.id)
-                  ? 'lightgreen'
+                  ? '#c1e2f3'
                   : 'transparent',
               }}
             >

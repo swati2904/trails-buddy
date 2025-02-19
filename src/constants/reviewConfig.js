@@ -42,7 +42,7 @@ export const REVIEW_CONFIG = {
     { id: 0, label: 'Easy', icon: ICONS.DIFFICULTY.EASY },
     { id: 1, label: 'Moderate', icon: ICONS.DIFFICULTY.MODERATE },
     { id: 2, label: 'Hard', icon: ICONS.DIFFICULTY.HARD },
-    { id: 3, label: 'Strenuous' },
+    { id: 3, label: 'Strenuous', icon: ICONS.DIFFICULTY.STRENUOUS },
   ],
 
   access: [

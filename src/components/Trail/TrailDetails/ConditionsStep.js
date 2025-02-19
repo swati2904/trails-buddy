@@ -23,7 +23,7 @@ const ConditionsStep = ({ selectedConditions, setSelectedConditions }) => (
               backgroundColor: selectedConditions.some(
                 (c) => c.id === condition.id
               )
-                ? 'lightgreen'
+                ? '#c1e2f3'
                 : 'transparent',
             }}
           >

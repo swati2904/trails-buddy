@@ -20,6 +20,7 @@ import ParkingStep from './ParkingStep';
 import ConditionsStep from './ConditionsStep';
 import ActivityStep from './ActivityStep';
 import { useTranslation } from 'react-i18next';
+import CustomButton from '../../Common/CustomButton';
 
 const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
   const { t } = useTranslation();
@@ -134,12 +135,12 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
           justifyContent='space-between'
         >
           {step > 1 && (
-            <Button variant='secondary' onPress={() => setStep(step - 1)}>
+            <CustomButton variant='secondary' onPress={() => setStep(step - 1)}>
               {t('common.back')}
-            </Button>
+            </CustomButton>
           )}
           {step < 6 ? (
-            <Button
+            <CustomButton
               variant='cta'
               onPress={() => setStep(step + 1)}
               isDisabled={
@@ -152,11 +153,11 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
               }
             >
               {t('common.next')}
-            </Button>
+            </CustomButton>
           ) : (
-            <Button variant='cta' onPress={handleSubmit}>
+            <CustomButton variant='cta' onPress={handleSubmit}>
               {t('common.submit')}
-            </Button>
+            </CustomButton>
           )}
         </Flex>
       </Content>

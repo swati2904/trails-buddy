@@ -36,7 +36,7 @@ const ParkingStep = ({
           }
           UNSAFE_style={{
             backgroundColor: selectedAccess.some((a) => a.id === access.id)
-              ? 'lightgreen'
+              ? '#c1e2f3'
               : 'transparent',
           }}
         >
@@ -61,7 +61,7 @@ const ParkingStep = ({
           }
           UNSAFE_style={{
             backgroundColor: selectedParkingCost.some((p) => p.id === cost.id)
-              ? 'lightgreen'
+              ? '#c1e2f3'
               : 'transparent',
           }}
         >

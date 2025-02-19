@@ -36,6 +36,7 @@ export const ICONS = {
     EASY: '🥾',
     MODERATE: '⛰️',
     HARD: '🧗',
+    STRENUOUS: '🏋️',
   },
   AMENITIES: {
     BICYCLE: '🚴',

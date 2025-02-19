@@ -11,14 +11,13 @@ const DifficultyStep = ({ difficulty, setDifficulty }) => (
         selectedKey={difficulty}
         onSelectionChange={setDifficulty}
         items={REVIEW_CONFIG.difficulty}
-        UNSAFE_style={{ marginLeft: '30px' }}
+        UNSAFE_style={{
+          marginLeft: '30px',
+          marginTop: '1rem',
+          cursor: 'pointer',
+        }}
       >
-        {(item) => (
-          <Item key={item.id}>
-            <div>{item.icon}</div>
-            {item.label}
-          </Item>
-        )}
+        {(item) => <Item key={item.id}>{item.label}</Item>}
       </Picker>
     </div>
   </>
