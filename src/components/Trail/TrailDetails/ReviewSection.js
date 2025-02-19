@@ -9,6 +9,7 @@ import {
 import AuthModal from '../../Auth/AuthModal';
 import ReviewModal from './ReviewModal';
 import { useComments } from '../../../contexts/CommentContext';
+import { fetchComments } from '../../../api/ReviewApi';
 
 const ReviewSection = ({ trail }) => {
   const { token } = useAuth();
@@ -46,10 +47,30 @@ const ReviewSection = ({ trail }) => {
   };
 
   useEffect(() => {
-    calculateRatings(reviews);
-  }, [reviews]);
+    const loadAllComments = async () => {
+      try {
+        const allComments = [];
+        let page = 0;
+        let totalPages = 1;
 
-  if (!token) return <AuthModal onSuccess={() => {}} />;
+        while (page < totalPages) {
+          const data = await fetchComments(trail.id, page, 100); // Fetch 100 comments at a time
+          allComments.push(...data.content);
+          totalPages = data.totalPages;
+          page++;
+        }
+
+        calculateRatings(allComments);
+      } catch (error) {
+        console.error(
+          'Error loading all comments for rating calculation:',
+          error
+        );
+      }
+    };
+
+    loadAllComments();
+  }, [trail.id]);
 
   return (
     <div className='container mt-4'>
@@ -83,23 +104,27 @@ const ReviewSection = ({ trail }) => {
         ))}
       </div>
 
-      <DialogTrigger isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
-        <Button
-          variant='cta'
-          marginTop='size-200'
-          className='btn btn-primary'
-          onPress={() => setIsModalOpen(true)}
-        >
-          Write Review
-        </Button>
-        {isModalOpen && (
-          <ReviewModal
-            trail={trail}
-            onClose={() => setIsModalOpen(false)}
-            onReviewSubmit={handleReviewSubmit}
-          />
-        )}
-      </DialogTrigger>
+      {token ? (
+        <DialogTrigger isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Button
+            variant='cta'
+            marginTop='size-200'
+            className='btn btn-primary'
+            onPress={() => setIsModalOpen(true)}
+          >
+            Write Review
+          </Button>
+          {isModalOpen && (
+            <ReviewModal
+              trail={trail}
+              onClose={() => setIsModalOpen(false)}
+              onReviewSubmit={handleReviewSubmit}
+            />
+          )}
+        </DialogTrigger>
+      ) : (
+        <AuthModal onSuccess={() => {}} />
+      )}
     </div>
   );
 };

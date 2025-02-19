@@ -30,8 +30,7 @@ const generateStars = (rating) => {
 
 const CommentSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const { comments } = useComments();
+  const { comments, page, setPage, totalPages } = useComments();
 
   const filteredComments = comments.filter((comment) =>
     comment.comment?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -61,7 +60,13 @@ const CommentSection = () => {
               </div>
               <div className='ms-3'>
                 <h5 className='mb-1'>{comment.username}</h5>
-                <small className='text-muted'>{comment.activityDate}</small>
+                <small className='text-muted'>
+                  {new Date(comment.activityDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </small>
                 {generateStars(comment.ratings)}
               </div>
             </div>
@@ -89,6 +94,23 @@ const CommentSection = () => {
           </div>
         </div>
       ))}
+
+      <div className='d-flex justify-content-between mt-4'>
+        <button
+          className='btn btn-secondary'
+          disabled={page === 0}
+          onClick={() => setPage(page - 1)}
+        >
+          Previous
+        </button>
+        <button
+          className='btn btn-secondary'
+          disabled={page === totalPages - 1}
+          onClick={() => setPage(page + 1)}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

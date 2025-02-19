@@ -12,9 +12,11 @@ export const reviewUser = async (reviewData, token) => {
   }
 };
 
-export const fetchComments = async (trailId) => {
+export const fetchComments = async (trailId, page = 0, size = 3) => {
   try {
-    const response = await client.get(`/comments/${trailId}`);
+    const response = await client.get(`/comments/${trailId}`, {
+      params: { page, size },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching comments:', error);
