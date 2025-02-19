@@ -5,11 +5,19 @@
     "email": "Correo electrónico",
     "password": "Contraseña",
     "username": "Nombre de usuario",
+    "logout": "Cerrar sesión",
     "no_account": "¿No tienes cuenta?",
     "have_account": "¿Ya tienes cuenta?",
     "success_login": "¡Has iniciado sesión con éxito!",
     "success_signup": "Tu cuenta ha sido creada con éxito. Por favor, inicia sesión.",
     "error_message": "Algo salió mal. Por favor, intenta de nuevo."
+  },
+  "heading": {
+    "trail": "Sendero",
+    "review": "Reseña",
+    "trail_buddy": "Compañero de Sendero",
+    "comment": "Comentario",
+    "weather": "Clima"
   },
   "trail": {
     "difficulty": "Dificultad: ",
@@ -33,7 +41,10 @@
     "yes": "Sí",
     "no": "No",
     "review_trail": "Reseñar el sendero",
-    "trail_buddy": "Compañero de sendero"
+    "write_review": "Escribir reseña",
+    "previous": "Anterior",
+    "get_my_location": "Obtener mi ubicación",
+    "walkthrough": "Guía"
   },
   "review": {
     "ratingOptions": {

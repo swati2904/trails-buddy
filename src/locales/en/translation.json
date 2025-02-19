@@ -5,11 +5,19 @@
     "email": "Email",
     "password": "Password",
     "username": "Username",
+    "logout": "Logout",
     "no_account": "Don't have an account?",
     "have_account": "Already have an account?",
     "success_login": "You have successfully logged in!",
     "success_signup": "Your account has been successfully created. Please log in.",
     "error_message": "Something went wrong. Please try again."
+  },
+  "heading": {
+    "trail": "Trail",
+    "review": "Review",
+    "trail_buddy": "Trail Buddy",
+    "comment": "Comment",
+    "weather": "Weather"
   },
   "trail": {
     "difficulty": "Difficulty: ",
@@ -33,7 +41,10 @@
     "yes": "Yes",
     "no": "No",
     "review_trail": "Review Trail",
-    "trail_buddy": "Trail Buddy"
+    "write_review": "Write Review",
+    "previous": "Previous",
+    "get_my_location": "Get My Location",
+    "walkthrough": "Walkthrough"
   },
 
   "review": {

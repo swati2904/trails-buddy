@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const WeatherMapTabs = ({ lat, lon }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('temperature');
   const zoomLevel = 11;
 
@@ -20,8 +22,7 @@ const WeatherMapTabs = ({ lat, lon }) => {
   return (
     <div className='trail-weather'>
       <h2 style={{ textTransform: 'capitalize', marginBottom: '2rem' }}>
-        {' '}
-        Weather updates{' '}
+        {t('heading.weather')}
       </h2>
       <style>
         {`

@@ -6,8 +6,10 @@ import ReviewModal from './ReviewModal';
 import { useComments } from '../../../contexts/CommentContext';
 import { fetchComments } from '../../../api/ReviewApi';
 import CustomButton from '../../Common/CustomButton';
+import { useTranslation } from 'react-i18next';
 
 const ReviewSection = ({ trail }) => {
+  const { t } = useTranslation();
   const { token } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [overallRating, setOverallRating] = useState(0);
@@ -70,7 +72,7 @@ const ReviewSection = ({ trail }) => {
 
   return (
     <div className='container mt-4  trail-review'>
-      <h1 className='mb-4'>Review</h1>
+      <h1 className='mb-4'>{t('heading.review')}</h1>
 
       <div className='d-flex align-items-center mb-4'>
         <Text
@@ -108,7 +110,7 @@ const ReviewSection = ({ trail }) => {
             className='btn btn-primary'
             onPress={() => setIsModalOpen(true)}
           >
-            Write Review
+            {t('common.write_review')}
           </CustomButton>
           {isModalOpen && (
             <ReviewModal

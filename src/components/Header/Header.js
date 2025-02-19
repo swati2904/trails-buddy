@@ -8,6 +8,7 @@ import { Button } from '@adobe/react-spectrum';
 import introJs from 'intro.js';
 
 export const Walkthrough = () => {
+  const { t } = useTranslation();
   const startIntro = () => {
     introJs()
       .setOptions({
@@ -64,7 +65,7 @@ export const Walkthrough = () => {
       }}
       onClick={() => startIntro()}
     >
-      Walkthrough
+      {t('common.walkthrough')}
     </Button>
   );
 };
@@ -100,7 +101,7 @@ const Header = () => {
           fontStyle: 'italic',
         }}
       >
-        {t('common.trail_buddy')}
+        {t('heading.trail_buddy')}
       </div>
 
       <div
@@ -136,7 +137,7 @@ const Header = () => {
               }}
             >
               <Item key='email'>{userEmail}</Item>
-              <Item key='logout'>Logout</Item>
+              <Item key='logout'>{t('auth.logout')}</Item>
             </Menu>
           </MenuTrigger>
         )}

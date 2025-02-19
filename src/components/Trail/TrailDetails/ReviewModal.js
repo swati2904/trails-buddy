@@ -19,8 +19,10 @@ import DifficultyStep from './DifficultyStep';
 import ParkingStep from './ParkingStep';
 import ConditionsStep from './ConditionsStep';
 import ActivityStep from './ActivityStep';
+import { useTranslation } from 'react-i18next';
 
 const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -133,7 +135,7 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
         >
           {step > 1 && (
             <Button variant='secondary' onPress={() => setStep(step - 1)}>
-              Back
+              {t('common.back')}
             </Button>
           )}
           {step < 6 ? (
@@ -149,11 +151,11 @@ const ReviewModal = ({ trail, onClose, onReviewSubmit }) => {
                 (step === 6 && (!activityType || !visitDate))
               }
             >
-              Next
+              {t('common.next')}
             </Button>
           ) : (
             <Button variant='cta' onPress={handleSubmit}>
-              Submit Review
+              {t('common.submit')}
             </Button>
           )}
         </Flex>

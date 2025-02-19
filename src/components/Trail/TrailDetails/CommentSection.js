@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { REVIEW_CONFIG } from '../../../constants/reviewConfig';
 import { useComments } from '../../../contexts/CommentContext';
 import CustomButton from '../../Common/CustomButton';
+import { useTranslation } from 'react-i18next';
 
 const getLabelById = (config, id) => {
   const item = config.find((item) => item.id === id);
@@ -40,6 +41,7 @@ const generateStars = (rating) => {
 };
 
 const CommentSection = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCriteria, setSortCriteria] = useState('date');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -64,7 +66,7 @@ const CommentSection = () => {
     <div className='container mt-4'>
       <div className='mb-4'>
         <div className='d-flex justify-content-between align-items-center mb-3'>
-          <h2 className='mb-4'>Comments</h2>{' '}
+          <h2 className='mb-4'>{t('heading.comment')}</h2>{' '}
           <div className='d-flex gap-2 align-items-center ms-auto'>
             <label className='form-label mb-0'>Sort by Date</label>
             <select
@@ -135,14 +137,14 @@ const CommentSection = () => {
           disabled={page === 0}
           onClick={() => setPage(page - 1)}
         >
-          Previous
+          {t('common.previous')}
         </CustomButton>
         <CustomButton
           className='trail-btn-next'
           disabled={page === totalPages - 1}
           onClick={() => setPage(page + 1)}
         >
-          Next
+          {t('common.next')}
         </CustomButton>
       </div>
     </div>
