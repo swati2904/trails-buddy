@@ -8,6 +8,7 @@ import ReviewSection from './TrailDetails/ReviewSection';
 import CommentSection from './TrailDetails/CommentSection';
 import { CommentProvider } from '../../contexts/CommentContext';
 import Loader from '../Common/Loader';
+import WeatherMapTabs from './TrailDetails/WeatherMapTabs';
 
 const TrailPage = () => {
   const { id } = useParams();
@@ -55,6 +56,21 @@ const TrailPage = () => {
               />
             </View>
           </Flex>
+
+          <View
+            borderWidth='thin'
+            borderColor='dark'
+            borderRadius='medium'
+            padding='size-200'
+            overflow='hidden'
+            height='80vh'
+          >
+            <WeatherMapTabs
+              lat={trail.latlngs[0][0]}
+              lon={trail.latlngs[0][1]}
+            />
+          </View>
+
           <Flex gap='size-200' flex='1'>
             <View
               flex='1 1 40%'
