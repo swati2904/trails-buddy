@@ -8,6 +8,7 @@ const LanguageSelector = () => {
     <Picker
       selectedKey={i18n.language}
       onSelectionChange={(lang) => i18n.changeLanguage(lang)}
+      UNSAFE_className='trail-language-selector'
     >
       <Item key='en'>English</Item>
       <Item key='es'>Español</Item>

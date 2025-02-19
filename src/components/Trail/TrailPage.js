@@ -63,7 +63,7 @@ const TrailPage = () => {
             borderRadius='medium'
             padding='size-200'
             overflow='hidden'
-            height='80vh'
+            height='90vh'
           >
             <WeatherMapTabs
               lat={trail.latlngs[0][0]}

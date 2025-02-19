@@ -16,6 +16,7 @@ const DifficultyFilter = ({ selected, onChange }) => {
       items={options}
       selectedKey={difficulty}
       onSelectionChange={(selected) => setDifficulty(selected)}
+      UNSAFE_className='trail-difficulty-filter'
     >
       {(item) => <Item key={item.key}>{item.label}</Item>}
     </Picker>

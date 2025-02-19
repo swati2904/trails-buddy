@@ -8,6 +8,8 @@ import App from './components/App';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './i18n';
+import 'intro.js/introjs.css';
+import 'intro.js/intro.js';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

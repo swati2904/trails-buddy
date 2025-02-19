@@ -127,6 +127,7 @@ const TrailDetailsModal = ({ isOpen, onClose, trail }) => {
             color: 'white',
             fontWeight: 'bold',
           }}
+          UNSAFE_className='trail-btn-back'
         >
           {t('common.close')}
         </Button>

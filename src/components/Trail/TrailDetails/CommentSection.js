@@ -97,14 +97,14 @@ const CommentSection = () => {
 
       <div className='d-flex justify-content-between mt-4'>
         <button
-          className='btn btn-secondary'
+          className='btn btn-secondary trail-btn-prev'
           disabled={page === 0}
           onClick={() => setPage(page - 1)}
         >
           Previous
         </button>
         <button
-          className='btn btn-secondary'
+          className='btn btn-secondary trail-btn-next'
           disabled={page === totalPages - 1}
           onClick={() => setPage(page + 1)}
         >

@@ -18,7 +18,11 @@ const WeatherMapTabs = ({ lat, lon }) => {
   ];
 
   return (
-    <div>
+    <div className='trail-weather'>
+      <h2 style={{ textTransform: 'capitalize', marginBottom: '2rem' }}>
+        {' '}
+        Weather updates{' '}
+      </h2>
       <style>
         {`
           .tabs {

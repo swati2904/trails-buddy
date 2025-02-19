@@ -73,7 +73,7 @@ const ReviewSection = ({ trail }) => {
   }, [trail.id]);
 
   return (
-    <div className='container mt-4'>
+    <div className='container mt-4  trail-review'>
       <h1 className='mb-4'>Review</h1>
 
       <div className='d-flex align-items-center mb-4'>

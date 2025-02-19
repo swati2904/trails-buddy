@@ -5,7 +5,11 @@ const LocationButton = () => {
   const { handleGetLocation } = useGeolocation();
 
   return (
-    <Button variant='cta' onPress={handleGetLocation}>
+    <Button
+      variant='cta'
+      onPress={handleGetLocation}
+      UNSAFE_className='trail-location'
+    >
       Get My Location
     </Button>
   );
