@@ -167,7 +167,7 @@ const AuthModal = ({ onSuccess }) => {
                     </>
                   ) : (
                     <>
-                      {t('auth.already_have_account')}{' '}
+                      {t('auth.have_account')}{' '}
                       <CustomButton
                         variant='secondary'
                         onPress={() => setMode('login')}
