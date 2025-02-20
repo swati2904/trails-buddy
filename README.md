@@ -123,11 +123,24 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 ## 💾 Caching Strategy
 The application uses local storage to cache trail data and user location. This reduces the number of API calls and improves performance. The cached data is set to expire after one hour.
 
-![image](https://github.com/user-attachments/assets/db7ceaee-197a-4d1e-bd3f-d15b1926da90)
+![image](https://github.com/user-attachments/assets/590e5902-ae36-4ca7-9817-b1c236925906)
+![image](https://github.com/user-attachments/assets/dc7f4a4c-248c-4c93-81f3-37a03ee03271)
+![image](https://github.com/user-attachments/assets/40df6832-c663-4703-8ac7-2c60267faadc)
+![image](https://github.com/user-attachments/assets/bc8666e1-00ec-4f1c-80bc-cb06d639c2b1)
+![image](https://github.com/user-attachments/assets/6771d0ff-1df6-4746-b874-6bf2b293f42f)
+![image](https://github.com/user-attachments/assets/a3f37292-74f6-4780-8dc5-aacc6b7ed3d6)
+![image](https://github.com/user-attachments/assets/fdd41286-d5c2-472a-a3e5-3e4c788199f7)
+![image](https://github.com/user-attachments/assets/7aed6afe-32c9-45cb-b459-fbf4bb5c0986)
+![image](https://github.com/user-attachments/assets/8c3646bd-5efd-43f8-84fa-f3daf69bfc3a)
+![image](https://github.com/user-attachments/assets/c05c2f2c-dcce-4f32-a155-c1a74fc81693)
+![image](https://github.com/user-attachments/assets/ee39a130-4a9b-4ab2-aa1a-33b247971c0f)
+![image](https://github.com/user-attachments/assets/7389e4d3-6fed-463e-bf57-4bc3172db6d2)
+![image](https://github.com/user-attachments/assets/c676afd4-caaa-4082-bea4-cb03280589a1)
+![image](https://github.com/user-attachments/assets/79c0ee54-ef01-44be-be44-325740a0c305)
+![image](https://github.com/user-attachments/assets/8ef7abf1-7d19-491d-89c4-92bb3fd544c1)
+![image](https://github.com/user-attachments/assets/b9bd276a-9c95-4ec6-b7e5-d656fc3da00b)
+![image](https://github.com/user-attachments/assets/472caa7c-c605-44b4-8c1b-8eb9403b1500)
+![image](https://github.com/user-attachments/assets/e85f5df8-6f83-4119-8af6-27500479f515)
+![image](https://github.com/user-attachments/assets/9c55f608-e97c-44e8-b5be-cc3017ab2d6d)
 
-![image](https://github.com/user-attachments/assets/2f2a7ddf-b3c4-4104-b48f-53dc3bc26881)
-
-![image](https://github.com/user-attachments/assets/144a73b5-ef23-4c09-84ee-14db46fd9e75)
-
-![image](https://github.com/user-attachments/assets/755302d4-3cef-483c-ad03-58c4604cafb2)
 
