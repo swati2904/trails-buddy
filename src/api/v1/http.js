@@ -29,7 +29,7 @@ const buildBaseUrl = () => {
 const API_BASE_URL = buildBaseUrl();
 
 export const USE_MOCK_API =
-  String(process.env.REACT_APP_USE_MOCK_API || 'true').toLowerCase() !==
+  String(process.env.REACT_APP_USE_MOCK_API || 'false').toLowerCase() !==
   'false';
 
 let refreshInFlightPromise = null;
@@ -121,10 +121,6 @@ const shouldRefreshAndRetry = (error) => {
 };
 
 const refreshAccessToken = async () => {
-  if (USE_MOCK_API) {
-    return null;
-  }
-
   if (refreshInFlightPromise) {
     return refreshInFlightPromise;
   }
