@@ -13,10 +13,35 @@
 
 # misc
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+
+# environment and secrets
+.env
+.env.*
+!.env.example
+
+# certificates and private keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+
+# local IDE and system artifacts
+.vscode/
+.idea/
+Thumbs.db
+
+# local logs and runtime artifacts
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# local db/cache artifacts
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
 
 npm-debug.log*
 yarn-debug.log*
