@@ -53,6 +53,10 @@ const writeStoredSession = (session) => {
   localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
 };
 
+const clearStoredSession = () => {
+  localStorage.removeItem(AUTH_SESSION_KEY);
+};
+
 const readPayload = async (response) => {
   try {
     return await response.json();
@@ -136,6 +140,14 @@ const refreshAccessToken = async () => {
     const refreshToken = session?.tokens?.refreshToken;
 
     if (!refreshToken) {
+      clearStoredSession();
+      window.dispatchEvent(
+        new CustomEvent('tb-auth-session-invalid', {
+          detail: {
+            reason: 'missing-refresh-token',
+          },
+        }),
+      );
       return null;
     }
 
@@ -174,7 +186,17 @@ const refreshAccessToken = async () => {
     );
 
     return nextSession?.tokens?.accessToken || null;
-  })().finally(() => {
+  })().catch((error) => {
+    clearStoredSession();
+    window.dispatchEvent(
+      new CustomEvent('tb-auth-session-invalid', {
+        detail: {
+          reason: error?.code || 'refresh-failed',
+        },
+      }),
+    );
+    throw error;
+  }).finally(() => {
     refreshInFlightPromise = null;
   });
 

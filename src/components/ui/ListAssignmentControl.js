@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addTrailToList, getLists } from '../../api/v1/user';
+import { getApiErrorMessage, shouldForceSignOut } from '../../api/v1/errorMessages';
 import { useAuth } from '../../state/AuthContext';
 import Button from './Button';
 
 const ListAssignmentControl = ({ trailId }) => {
-  const { isAuthenticated, tokens } = useAuth();
+  const { isAuthenticated, tokens, signOutSession } = useAuth();
   const [lists, setLists] = useState([]);
   const [selectedListId, setSelectedListId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,9 +27,12 @@ const ListAssignmentControl = ({ trailId }) => {
         setSelectedListId(nextLists[0].id);
       }
     } catch (error) {
-      setMessage(error.message || 'Unable to load lists.');
+      if (shouldForceSignOut(error)) {
+        signOutSession();
+      }
+      setMessage(getApiErrorMessage(error, 'Unable to load lists.'));
     }
-  }, [isAuthenticated, tokens?.accessToken]);
+  }, [isAuthenticated, signOutSession, tokens?.accessToken]);
 
   useEffect(() => {
     loadLists();
@@ -45,7 +49,10 @@ const ListAssignmentControl = ({ trailId }) => {
       await addTrailToList(selectedListId, trailId, tokens?.accessToken);
       setMessage('Trail added to list.');
     } catch (error) {
-      setMessage(error.message || 'Unable to add trail to list.');
+      if (shouldForceSignOut(error)) {
+        signOutSession();
+      }
+      setMessage(getApiErrorMessage(error, 'Unable to add trail to list.'));
     } finally {
       setLoading(false);
     }

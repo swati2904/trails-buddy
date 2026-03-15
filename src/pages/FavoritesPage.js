@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { getFavorites, removeFavorite } from '../api/v1/user';
+import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const FavoritesPage = () => {
-  const { tokens, isAuthenticated } = useAuth();
+  const { tokens, isAuthenticated, signOutSession } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,11 +19,14 @@ const FavoritesPage = () => {
       const result = await getFavorites(tokens?.accessToken);
       setItems(result.items || []);
     } catch (loadError) {
-      setError(loadError.message || 'Unable to load favorites.');
+      if (shouldForceSignOut(loadError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(loadError, 'Unable to load favorites.'));
     } finally {
       setLoading(false);
     }
-  }, [tokens?.accessToken]);
+  }, [signOutSession, tokens?.accessToken]);
 
   useEffect(() => {
     load();
@@ -33,7 +37,10 @@ const FavoritesPage = () => {
       await removeFavorite(trailId, tokens?.accessToken);
       setItems((current) => current.filter((item) => item.trailId !== trailId));
     } catch (removeError) {
-      setError(removeError.message || 'Unable to remove favorite.');
+      if (shouldForceSignOut(removeError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(removeError, 'Unable to remove favorite.'));
     }
   };
 

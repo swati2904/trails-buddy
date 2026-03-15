@@ -3,11 +3,12 @@ import { Link, useParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { getListById, removeTrailFromList } from '../api/v1/user';
+import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const ListDetailPage = () => {
   const { id } = useParams();
-  const { isAuthenticated, tokens } = useAuth();
+  const { isAuthenticated, tokens, signOutSession } = useAuth();
   const [list, setList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,11 +20,14 @@ const ListDetailPage = () => {
       const selected = await getListById(id, tokens?.accessToken);
       setList(selected || null);
     } catch (loadError) {
-      setError(loadError.message || 'Unable to load list details.');
+      if (shouldForceSignOut(loadError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(loadError, 'Unable to load list details.'));
     } finally {
       setLoading(false);
     }
-  }, [id, tokens?.accessToken]);
+  }, [id, signOutSession, tokens?.accessToken]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -54,7 +58,12 @@ const ListDetailPage = () => {
         };
       });
     } catch (removeError) {
-      setError(removeError.message || 'Unable to remove trail from this list.');
+      if (shouldForceSignOut(removeError)) {
+        signOutSession();
+      }
+      setError(
+        getApiErrorMessage(removeError, 'Unable to remove trail from this list.'),
+      );
     }
   };
 

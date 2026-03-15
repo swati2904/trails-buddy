@@ -45,9 +45,17 @@ export const AuthProvider = ({ children }) => {
       setTokens(nextSession?.tokens || null);
     };
 
+    const onSessionInvalid = () => {
+      setUser(null);
+      setTokens(null);
+      clearStoredSession();
+    };
+
     window.addEventListener('tb-auth-session-updated', onSessionUpdate);
+    window.addEventListener('tb-auth-session-invalid', onSessionInvalid);
     return () => {
       window.removeEventListener('tb-auth-session-updated', onSessionUpdate);
+      window.removeEventListener('tb-auth-session-invalid', onSessionInvalid);
     };
   }, []);
 

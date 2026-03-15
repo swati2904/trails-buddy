@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { signIn } from '../api/v1/auth';
+import { getApiErrorMessage } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const SignInPage = () => {
@@ -23,7 +24,7 @@ const SignInPage = () => {
       signInSession(result.user, result.tokens);
       navigate('/explore');
     } catch (submitError) {
-      setError(submitError.message || 'Unable to sign in.');
+      setError(getApiErrorMessage(submitError, 'Unable to sign in.'));
     } finally {
       setLoading(false);
     }

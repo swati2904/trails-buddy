@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { signUp } from '../api/v1/auth';
+import { getApiErrorMessage } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const SignUpPage = () => {
@@ -24,7 +25,7 @@ const SignUpPage = () => {
       signInSession(result.user, result.tokens);
       navigate('/explore');
     } catch (submitError) {
-      setError(submitError.message || 'Unable to create account.');
+      setError(getApiErrorMessage(submitError, 'Unable to create account.'));
     } finally {
       setLoading(false);
     }

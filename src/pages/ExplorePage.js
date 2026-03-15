@@ -7,11 +7,12 @@ import Button from '../components/ui/Button';
 import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import { searchTrails } from '../api/v1/trails';
 import { addFavorite, getFavorites } from '../api/v1/user';
+import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const ExplorePage = () => {
   const location = useLocation();
-  const { isAuthenticated, tokens } = useAuth();
+  const { isAuthenticated, tokens, signOutSession } = useAuth();
   const [params, setParams] = useSearchParams();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +47,7 @@ const ExplorePage = () => {
         });
         setItems(result.items);
       } catch (loadError) {
-        setError(loadError.message || 'Unable to load trails.');
+        setError(getApiErrorMessage(loadError, 'Unable to load trails.'));
       } finally {
         setLoading(false);
       }
@@ -66,12 +67,15 @@ const ExplorePage = () => {
         const result = await getFavorites(tokens?.accessToken);
         setFavoriteIds((result.items || []).map((item) => item.trailId));
       } catch (loadError) {
-        setError(loadError.message || 'Unable to load favorites.');
+        if (shouldForceSignOut(loadError)) {
+          signOutSession();
+        }
+        setError(getApiErrorMessage(loadError, 'Unable to load favorites.'));
       }
     };
 
     loadFavorites();
-  }, [isAuthenticated, tokens?.accessToken]);
+  }, [isAuthenticated, signOutSession, tokens?.accessToken]);
 
   const summary = useMemo(() => {
     if (loading) {
@@ -99,7 +103,10 @@ const ExplorePage = () => {
         current.includes(trailId) ? current : [...current, trailId],
       );
     } catch (saveError) {
-      setError(saveError.message || 'Unable to save favorite.');
+      if (shouldForceSignOut(saveError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(saveError, 'Unable to save favorite.'));
     }
   };
 

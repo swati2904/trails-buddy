@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { createList, getLists, removeTrailFromList } from '../api/v1/user';
+import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 import { mockTrails } from '../data/mockTrails';
 
@@ -12,7 +13,7 @@ const trailNameIndex = mockTrails.reduce((acc, trail) => {
 }, {});
 
 const ListsPage = () => {
-  const { tokens, isAuthenticated } = useAuth();
+  const { tokens, isAuthenticated, signOutSession } = useAuth();
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
   const [isPublic, setIsPublic] = useState(false);
@@ -26,11 +27,14 @@ const ListsPage = () => {
       const result = await getLists(tokens?.accessToken);
       setItems(result.items || []);
     } catch (loadError) {
-      setError(loadError.message || 'Unable to load lists.');
+      if (shouldForceSignOut(loadError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(loadError, 'Unable to load lists.'));
     } finally {
       setLoading(false);
     }
-  }, [tokens?.accessToken]);
+  }, [signOutSession, tokens?.accessToken]);
 
   useEffect(() => {
     load();
@@ -51,7 +55,10 @@ const ListsPage = () => {
       setName('');
       setIsPublic(false);
     } catch (createError) {
-      setError(createError.message || 'Unable to create list.');
+      if (shouldForceSignOut(createError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(createError, 'Unable to create list.'));
     }
   };
 
@@ -73,7 +80,12 @@ const ListsPage = () => {
         }),
       );
     } catch (removeError) {
-      setError(removeError.message || 'Unable to remove trail from list.');
+      if (shouldForceSignOut(removeError)) {
+        signOutSession();
+      }
+      setError(
+        getApiErrorMessage(removeError, 'Unable to remove trail from list.'),
+      );
     }
   };
 

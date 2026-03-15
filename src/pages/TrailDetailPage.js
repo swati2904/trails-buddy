@@ -11,33 +11,43 @@ import {
 import Button from '../components/ui/Button';
 import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import { addFavorite } from '../api/v1/user';
+import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const TrailDetailPage = () => {
-  const { isAuthenticated, tokens } = useAuth();
+  const { isAuthenticated, tokens, signOutSession } = useAuth();
   const { slug } = useParams();
   const [trail, setTrail] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [savedFavorite, setSavedFavorite] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const run = async () => {
       setLoading(true);
-      const trailData = await getTrailBySlug(slug);
-      setTrail(trailData);
+      setError('');
+      try {
+        const trailData = await getTrailBySlug(slug);
+        setTrail(trailData);
 
-      if (trailData) {
-        const reviewData = await getTrailReviews(trailData.id, 1, 20);
-        setReviews(reviewData.items);
+        if (trailData) {
+          const reviewData = await getTrailReviews(trailData.id, 1, 20);
+          setReviews(reviewData.items);
+        }
+      } catch (loadError) {
+        if (shouldForceSignOut(loadError)) {
+          signOutSession();
+        }
+        setError(getApiErrorMessage(loadError, 'Unable to load trail details.'));
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     run();
-  }, [slug]);
+  }, [signOutSession, slug]);
 
   const submitReview = async () => {
     if (!trail || !comment.trim()) {
@@ -48,38 +58,52 @@ const TrailDetailPage = () => {
       return;
     }
 
-    await createTrailReview(
-      trail.id,
-      {
-        rating: 5,
-        comment: comment.trim(),
-        condition: 'good',
-        activity: 'hiking',
-      },
-      tokens?.accessToken,
-    );
+    try {
+      await createTrailReview(
+        trail.id,
+        {
+          rating: 5,
+          comment: comment.trim(),
+          condition: 'good',
+          activity: 'hiking',
+        },
+        tokens?.accessToken,
+      );
 
-    setReviews((current) => [
-      {
-        id: `rvw_local_${Date.now()}`,
-        user: { id: 'usr_local', displayName: 'You' },
-        rating: 5,
-        comment: comment.trim(),
-        condition: 'good',
-        activity: 'hiking',
-        createdAt: new Date().toISOString(),
-      },
-      ...current,
-    ]);
-    setComment('');
+      setReviews((current) => [
+        {
+          id: `rvw_local_${Date.now()}`,
+          user: { id: 'usr_local', displayName: 'You' },
+          rating: 5,
+          comment: comment.trim(),
+          condition: 'good',
+          activity: 'hiking',
+          createdAt: new Date().toISOString(),
+        },
+        ...current,
+      ]);
+      setComment('');
+    } catch (submitError) {
+      if (shouldForceSignOut(submitError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(submitError, 'Unable to submit review.'));
+    }
   };
 
   const onSaveFavorite = async () => {
     if (!trail || !isAuthenticated) {
       return;
     }
-    await addFavorite(trail.id, tokens?.accessToken);
-    setSavedFavorite(true);
+    try {
+      await addFavorite(trail.id, tokens?.accessToken);
+      setSavedFavorite(true);
+    } catch (saveError) {
+      if (shouldForceSignOut(saveError)) {
+        signOutSession();
+      }
+      setError(getApiErrorMessage(saveError, 'Unable to save favorite.'));
+    }
   };
 
   if (loading) {
@@ -137,6 +161,8 @@ const TrailDetailPage = () => {
         </div>
         <ListAssignmentControl trailId={trail.id} />
       </Card>
+
+      {error ? <p className='error-copy'>{error}</p> : null}
 
       <Card>
         <h2>Current Conditions</h2>
