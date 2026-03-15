@@ -1,3 +1,3 @@
-test('test runner is configured', () => {
+test('runner is configured', () => {
   expect(true).toBe(true);
 });
