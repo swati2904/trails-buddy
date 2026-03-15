@@ -1,19 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
 import Button from '../components/ui/Button';
+import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import { searchTrails } from '../api/v1/trails';
-import { addFavorite } from '../api/v1/user';
+import { addFavorite, getFavorites } from '../api/v1/user';
 import { useAuth } from '../state/AuthContext';
 
 const ExplorePage = () => {
+  const location = useLocation();
   const { isAuthenticated, tokens } = useAuth();
   const [params, setParams] = useSearchParams();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [favoriteIds, setFavoriteIds] = useState([]);
 
   const query = params.get('q') || '';
   const difficulty = params.get('difficulty') || '';
@@ -46,12 +50,37 @@ const ExplorePage = () => {
     run();
   }, [query, difficulty, sort]);
 
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (!isAuthenticated) {
+        setFavoriteIds([]);
+        return;
+      }
+
+      try {
+        const result = await getFavorites(tokens?.accessToken);
+        setFavoriteIds((result.items || []).map((item) => item.trailId));
+      } catch (loadError) {
+        setError(loadError.message || 'Unable to load favorites.');
+      }
+    };
+
+    loadFavorites();
+  }, [isAuthenticated, tokens?.accessToken]);
+
   const summary = useMemo(() => {
     if (loading) {
       return 'Loading trails...';
     }
     return `${items.length} trails found`;
   }, [items.length, loading]);
+
+  const pageHeading =
+    location.pathname === '/search'
+      ? 'Search Trails'
+      : location.pathname === '/nearby'
+        ? 'Nearby Trails'
+        : 'Explore Trails';
 
   const onSave = async (trailId) => {
     if (!isAuthenticated) {
@@ -61,6 +90,7 @@ const ExplorePage = () => {
 
     try {
       await addFavorite(trailId, tokens?.accessToken);
+      setFavoriteIds((current) => (current.includes(trailId) ? current : [...current, trailId]));
     } catch (saveError) {
       setError(saveError.message || 'Unable to save favorite.');
     }
@@ -69,7 +99,7 @@ const ExplorePage = () => {
   return (
     <section className='page-block'>
       <Card className='explore-filters'>
-        <h1 className='page-title'>Explore Trails</h1>
+        <h1 className='page-title'>{pageHeading}</h1>
         <p className='page-subtitle'>{summary}</p>
         <div className='filter-row'>
           <input
@@ -113,9 +143,10 @@ const ExplorePage = () => {
               <div className='feature-actions'>
                 <Link to={`/trail/${trail.slug}`}>Open details</Link>
                 <Button variant='ghost' onClick={() => onSave(trail.id)}>
-                  Save
+                  {favoriteIds.includes(trail.id) ? 'Saved' : 'Save'}
                 </Button>
               </div>
+              <ListAssignmentControl trailId={trail.id} />
             </Card>
           ))}
         </div>

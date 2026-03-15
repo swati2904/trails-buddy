@@ -5,13 +5,18 @@ import HomePage from '../pages/HomePage';
 import ExplorePage from '../pages/ExplorePage';
 import TrailDetailPage from '../pages/TrailDetailPage';
 import ParkPage from '../pages/ParkPage';
-import SimplePage from '../pages/SimplePage';
 import SignInPage from '../pages/SignInPage';
 import SignUpPage from '../pages/SignUpPage';
 import FavoritesPage from '../pages/FavoritesPage';
 import ListsPage from '../pages/ListsPage';
+import ListDetailPage from '../pages/ListDetailPage';
 import ProfilePage from '../pages/ProfilePage';
 import SettingsPage from '../pages/SettingsPage';
+import PricingPage from '../pages/PricingPage';
+import AboutPage from '../pages/AboutPage';
+import HelpPage from '../pages/HelpPage';
+import PressPage from '../pages/PressPage';
+import NotFoundPage from '../pages/NotFoundPage';
 import { AuthProvider } from '../state/AuthContext';
 
 const App = () => {
@@ -28,30 +33,16 @@ const App = () => {
             <Route path='/parks/:slug' element={<ParkPage />} />
             <Route path='/signin' element={<SignInPage />} />
             <Route path='/signup' element={<SignUpPage />} />
-            <Route
-              path='/pricing'
-              element={<SimplePage title='Pricing' subtitle='Plan comparison and checkout are pending backend entitlement endpoints.' />}
-            />
-            <Route
-              path='/about'
-              element={<SimplePage title='About' subtitle='Company profile and brand story page placeholder.' />}
-            />
-            <Route
-              path='/help'
-              element={<SimplePage title='Help Center' subtitle='Knowledge base and support contacts page placeholder.' />}
-            />
-            <Route
-              path='/press'
-              element={<SimplePage title='Press' subtitle='Media resources and press updates page placeholder.' />}
-            />
+            <Route path='/pricing' element={<PricingPage />} />
+            <Route path='/about' element={<AboutPage />} />
+            <Route path='/help' element={<HelpPage />} />
+            <Route path='/press' element={<PressPage />} />
             <Route path='/my-favorites' element={<FavoritesPage />} />
             <Route path='/my-lists' element={<ListsPage />} />
+            <Route path='/my-lists/:id' element={<ListDetailPage />} />
             <Route path='/profile' element={<ProfilePage />} />
             <Route path='/settings' element={<SettingsPage />} />
-            <Route
-              path='/404'
-              element={<SimplePage title='Page Not Found' subtitle='The route you requested was not found.' />}
-            />
+            <Route path='/404' element={<NotFoundPage />} />
             <Route path='*' element={<Navigate to='/404' replace />} />
           </Route>
         </Routes>

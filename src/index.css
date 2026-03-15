@@ -454,9 +454,88 @@ body {
   margin-top: var(--space-3);
 }
 
+.list-assign-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.list-assign-control select {
+  width: 100%;
+  border: 1px solid var(--stroke-1);
+  border-radius: var(--radius-s);
+  padding: 0.45rem 0.55rem;
+  background: #fff;
+}
+
+.list-assign-message {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+}
+
+.list-trails {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.list-trail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--stroke-0);
+  border-radius: var(--radius-s);
+  background: #fbfdf8;
+}
+
 .error-copy {
   margin: 0;
   color: #ab2121;
+}
+
+.success-copy {
+  margin: 0;
+  color: #2e6b3f;
+}
+
+.pricing-card {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.pricing-card--featured {
+  border-color: #ffb48f;
+  box-shadow: 0 16px 32px rgba(255, 95, 46, 0.18);
+}
+
+.pricing-price {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.8rem;
+  color: var(--ink-1);
+}
+
+.pricing-price span {
+  margin-left: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.pricing-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--ink-1);
+}
+
+.press-date {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-2);
 }
 
 .ui-skeleton {

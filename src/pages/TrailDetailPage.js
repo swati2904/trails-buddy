@@ -5,6 +5,7 @@ import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
 import { createTrailReview, getTrailBySlug, getTrailReviews } from '../api/v1/trails';
 import Button from '../components/ui/Button';
+import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import { addFavorite } from '../api/v1/user';
 import { useAuth } from '../state/AuthContext';
 
@@ -15,6 +16,7 @@ const TrailDetailPage = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
+  const [savedFavorite, setSavedFavorite] = useState(false);
 
   useEffect(() => {
     const run = async () => {
@@ -69,6 +71,7 @@ const TrailDetailPage = () => {
       return;
     }
     await addFavorite(trail.id, tokens?.accessToken);
+    setSavedFavorite(true);
   };
 
   if (loading) {
@@ -107,9 +110,10 @@ const TrailDetailPage = () => {
         </div>
         <div className='feature-actions'>
           <Button variant='ghost' onClick={onSaveFavorite} disabled={!isAuthenticated}>
-            {isAuthenticated ? 'Save To Favorites' : 'Sign In To Save'}
+            {isAuthenticated ? (savedFavorite ? 'Saved To Favorites' : 'Save To Favorites') : 'Sign In To Save'}
           </Button>
         </div>
+        <ListAssignmentControl trailId={trail.id} />
       </Card>
 
       <Card>

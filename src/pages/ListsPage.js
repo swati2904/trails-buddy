@@ -2,8 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { createList, getLists } from '../api/v1/user';
+import { createList, getLists, removeTrailFromList } from '../api/v1/user';
 import { useAuth } from '../state/AuthContext';
+import { mockTrails } from '../data/mockTrails';
+
+const trailNameIndex = mockTrails.reduce((acc, trail) => {
+  acc[trail.id] = trail.name;
+  return acc;
+}, {});
 
 const ListsPage = () => {
   const { tokens, isAuthenticated } = useAuth();
@@ -43,6 +49,28 @@ const ListsPage = () => {
       setIsPublic(false);
     } catch (createError) {
       setError(createError.message || 'Unable to create list.');
+    }
+  };
+
+  const onRemoveTrail = async (listId, trailId) => {
+    try {
+      await removeTrailFromList(listId, trailId, tokens?.accessToken);
+      setItems((current) =>
+        current.map((item) => {
+          if (item.id !== listId) {
+            return item;
+          }
+
+          const nextTrails = (item.trails || []).filter((id) => id !== trailId);
+          return {
+            ...item,
+            trails: nextTrails,
+            trailCount: nextTrails.length,
+          };
+        }),
+      );
+    } catch (removeError) {
+      setError(removeError.message || 'Unable to remove trail from list.');
     }
   };
 
@@ -93,6 +121,24 @@ const ListsPage = () => {
             <p>
               {item.trailCount || 0} trails • {item.isPublic ? 'Public' : 'Private'}
             </p>
+            <Link to={`/my-lists/${item.id}`}>Open list details</Link>
+            {Array.isArray(item.trails) && item.trails.length > 0 ? (
+              <div className='list-trails'>
+                {item.trails.map((trailId) => (
+                  <div key={`${item.id}-${trailId}`} className='list-trail-row'>
+                    <span>{trailNameIndex[trailId] || trailId}</span>
+                    <Button
+                      variant='ghost'
+                      onClick={() => onRemoveTrail(item.id, trailId)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className='page-subtitle'>No trails in this list yet.</p>
+            )}
           </Card>
         ))}
       </div>
