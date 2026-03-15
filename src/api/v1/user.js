@@ -1,4 +1,5 @@
 import { requestJson, USE_MOCK_API } from './http';
+import { mockTrails } from '../../data/mockTrails';
 
 const FAVORITES_KEY = 'tb.v1.favorites';
 const LISTS_KEY = 'tb.v1.lists';
@@ -16,6 +17,34 @@ const writeJson = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
+const trailById = mockTrails.reduce((acc, trail) => {
+  acc[trail.id] = trail;
+  return acc;
+}, {});
+
+const toMockFavoriteItem = (favorite) => {
+  const trail = trailById[favorite.trailId];
+  return {
+    trailId: favorite.trailId,
+    savedAt: favorite.savedAt,
+    name: trail?.name || '',
+    slug: trail?.slug || '',
+    location: trail?.location || '',
+    thumbnailUrl: trail?.thumbnailUrl || '',
+  };
+};
+
+const toMockListTrailItem = (trailId) => {
+  const trail = trailById[trailId];
+  return {
+    trailId,
+    slug: trail?.slug || '',
+    name: trail?.name || trailId,
+    location: trail?.location || '',
+    thumbnailUrl: trail?.thumbnailUrl || '',
+  };
+};
+
 export const getFavorites = async (token) => {
   if (!USE_MOCK_API) {
     return requestJson({
@@ -26,7 +55,7 @@ export const getFavorites = async (token) => {
   }
 
   const items = readJson(FAVORITES_KEY, []);
-  return { items };
+  return { items: items.map(toMockFavoriteItem) };
 };
 
 export const addFavorite = async (trailId, token) => {
@@ -75,6 +104,32 @@ export const getLists = async (token) => {
 
   const items = readJson(LISTS_KEY, []);
   return { items };
+};
+
+export const getListById = async (id, token) => {
+  if (!USE_MOCK_API) {
+    return requestJson({
+      path: `/users/me/lists/${id}`,
+      token,
+      fallbackMessage: 'Unable to load list details',
+    });
+  }
+
+  const items = readJson(LISTS_KEY, []);
+  const list = items.find((item) => item.id === id);
+  if (!list) {
+    return null;
+  }
+
+  return {
+    id: list.id,
+    name: list.name,
+    isPublic: Boolean(list.isPublic),
+    updatedAt: list.updatedAt,
+    trails: Array.isArray(list.trails)
+      ? list.trails.map(toMockListTrailItem)
+      : [],
+  };
 };
 
 export const createList = async ({ name, isPublic = false }, token) => {

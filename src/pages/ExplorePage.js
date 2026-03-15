@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';

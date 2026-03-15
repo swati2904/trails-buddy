@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { getFavorites, removeFavorite } from '../api/v1/user';
-import { mockTrails } from '../data/mockTrails';
 import { useAuth } from '../state/AuthContext';
 
 const FavoritesPage = () => {
@@ -28,14 +27,6 @@ const FavoritesPage = () => {
   useEffect(() => {
     load();
   }, [load]);
-
-  const byTrailId = useMemo(() => {
-    const index = new Map();
-    mockTrails.forEach((trail) => {
-      index.set(trail.id, trail);
-    });
-    return index;
-  }, []);
 
   const onRemove = async (trailId) => {
     try {
@@ -85,13 +76,19 @@ const FavoritesPage = () => {
 
       <div className='cards-grid'>
         {items.map((item) => {
-          const trail = byTrailId.get(item.trailId);
           return (
             <Card key={item.trailId}>
-              <h2>{trail?.name || item.trailId}</h2>
-              <p>{trail?.location || 'Trail info from backend catalog'}</p>
-              {trail?.slug ? (
-                <Link to={`/trail/${trail.slug}`}>Open Trail</Link>
+              {item.thumbnailUrl ? (
+                <img
+                  className='trail-thumb'
+                  src={item.thumbnailUrl}
+                  alt={item.name || item.trailId}
+                />
+              ) : null}
+              <h2>{item.name || item.trailId}</h2>
+              <p>{item.location || 'Trail info from backend catalog'}</p>
+              {item.slug ? (
+                <Link to={`/trail/${item.slug}`}>Open Trail</Link>
               ) : null}
               <div className='feature-actions'>
                 <Button variant='ghost' onClick={() => onRemove(item.trailId)}>

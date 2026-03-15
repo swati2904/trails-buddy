@@ -1,6 +1,12 @@
 const trimTrailingSlash = (value) => String(value || '').replace(/\/+$/, '');
 const trimLeadingSlash = (value) => String(value || '').replace(/^\/+/, '');
 
+const AUTH_SESSION_KEY = 'tb.auth.session';
+const REFRESHABLE_AUTH_CODES = new Set([
+  'AUTH_TOKEN_EXPIRED',
+  'AUTH_TOKEN_INVALID',
+]);
+
 const buildBaseUrl = () => {
   const exactUrl = process.env.REACT_APP_API_URL;
   if (exactUrl && exactUrl.trim()) {
@@ -11,11 +17,19 @@ const buildBaseUrl = () => {
     process.env.REACT_APP_API_ORIGIN || 'http://localhost:8080',
   );
   const basePath = trimLeadingSlash(
-    process.env.REACT_APP_API_BASE_PATH || 'api',
+    process.env.REACT_APP_API_BASE_PATH || '',
   );
   const version = trimLeadingSlash(process.env.REACT_APP_API_VERSION || 'v1');
 
-  return `${origin}/${basePath}/${version}`;
+  const parts = [origin];
+  if (basePath) {
+    parts.push(basePath);
+  }
+  if (version) {
+    parts.push(version);
+  }
+
+  return trimTrailingSlash(parts.join('/'));
 };
 
 const API_BASE_URL = buildBaseUrl();
@@ -23,6 +37,41 @@ const API_BASE_URL = buildBaseUrl();
 export const USE_MOCK_API =
   String(process.env.REACT_APP_USE_MOCK_API || 'true').toLowerCase() !==
   'false';
+
+let refreshInFlightPromise = null;
+
+const readStoredSession = () => {
+  try {
+    const raw = localStorage.getItem(AUTH_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const writeStoredSession = (session) => {
+  localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+};
+
+const readPayload = async (response) => {
+  try {
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+};
+
+const unwrapEnvelope = (payload) => {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    Object.prototype.hasOwnProperty.call(payload, 'data')
+  ) {
+    return payload.data;
+  }
+
+  return payload;
+};
 
 const getErrorMessage = (payload, fallbackMessage) => {
   if (payload && typeof payload === 'object') {
@@ -41,6 +90,95 @@ const getErrorMessage = (payload, fallbackMessage) => {
   }
 
   return fallbackMessage;
+};
+
+const createRequestError = (response, payload, fallbackMessage) => {
+  const requestId = payload?.meta?.requestId || null;
+  const correlationId = response.headers.get('X-Correlation-Id') || null;
+  const message = getErrorMessage(payload, fallbackMessage);
+
+  const error = new Error(message);
+  error.status = response.status;
+  error.code = payload?.error?.code || payload?.code || null;
+  error.details = payload;
+  error.requestId = requestId || correlationId;
+  error.correlationId = correlationId;
+  return error;
+};
+
+const shouldRefreshAndRetry = (error) => {
+  if (!error) {
+    return false;
+  }
+
+  if (error.status === 401) {
+    return true;
+  }
+
+  if (REFRESHABLE_AUTH_CODES.has(String(error.code || ''))) {
+    return true;
+  }
+
+  return false;
+};
+
+const refreshAccessToken = async () => {
+  if (USE_MOCK_API) {
+    return null;
+  }
+
+  if (refreshInFlightPromise) {
+    return refreshInFlightPromise;
+  }
+
+  refreshInFlightPromise = (async () => {
+    const session = readStoredSession();
+    const refreshToken = session?.tokens?.refreshToken;
+
+    if (!refreshToken) {
+      return null;
+    }
+
+    const response = await fetch(buildUrl('/auth/refresh'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    const payload = await readPayload(response);
+    if (!response.ok) {
+      throw createRequestError(
+        response,
+        payload,
+        'Unable to refresh authentication session',
+      );
+    }
+
+    const nextTokens = unwrapEnvelope(payload) || {};
+    const nextSession = {
+      user: session?.user || null,
+      tokens: {
+        ...session?.tokens,
+        ...nextTokens,
+      },
+    };
+
+    writeStoredSession(nextSession);
+    window.dispatchEvent(
+      new CustomEvent('tb-auth-session-updated', {
+        detail: nextSession,
+      }),
+    );
+
+    return nextSession?.tokens?.accessToken || null;
+  })().finally(() => {
+    refreshInFlightPromise = null;
+  });
+
+  return refreshInFlightPromise;
 };
 
 const buildUrl = (path, query) => {
@@ -75,36 +213,41 @@ export const requestJson = async ({
   token,
   fallbackMessage = 'Request failed',
 }) => {
-  const response = await fetch(buildUrl(path, query), {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
+  const runRequest = async (authToken) => {
+    const response = await fetch(buildUrl(path, query), {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
 
-  let payload = null;
+    const payload = await readPayload(response);
+
+    if (!response.ok) {
+      throw createRequestError(response, payload, fallbackMessage);
+    }
+
+    return unwrapEnvelope(payload);
+  };
+
+  const storedToken = readStoredSession()?.tokens?.accessToken;
+  const initialToken = storedToken || token || null;
+
   try {
-    payload = await response.json();
+    return await runRequest(initialToken);
   } catch (error) {
-    payload = null;
-  }
+    if (!token || !shouldRefreshAndRetry(error)) {
+      throw error;
+    }
 
-  if (!response.ok) {
-    const error = new Error(getErrorMessage(payload, fallbackMessage));
-    error.status = response.status;
-    error.details = payload;
-    throw error;
-  }
+    const refreshedToken = await refreshAccessToken();
+    if (!refreshedToken) {
+      throw error;
+    }
 
-  if (
-    payload &&
-    typeof payload === 'object' &&
-    Object.prototype.hasOwnProperty.call(payload, 'data')
-  ) {
-    return payload.data;
+    return runRequest(refreshedToken);
   }
-
-  return payload;
 };

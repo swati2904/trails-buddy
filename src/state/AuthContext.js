@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 const AuthContext = createContext(null);
 
@@ -31,6 +37,19 @@ export const AuthProvider = ({ children }) => {
   const initial = readStoredSession();
   const [user, setUser] = useState(initial.user);
   const [tokens, setTokens] = useState(initial.tokens);
+
+  useEffect(() => {
+    const onSessionUpdate = (event) => {
+      const nextSession = event?.detail || readStoredSession();
+      setUser(nextSession?.user || null);
+      setTokens(nextSession?.tokens || null);
+    };
+
+    window.addEventListener('tb-auth-session-updated', onSessionUpdate);
+    return () => {
+      window.removeEventListener('tb-auth-session-updated', onSessionUpdate);
+    };
+  }, []);
 
   const signInSession = (nextUser, nextTokens) => {
     setUser(nextUser);

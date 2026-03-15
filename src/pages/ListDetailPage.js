@@ -2,14 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { getLists, removeTrailFromList } from '../api/v1/user';
+import { getListById, removeTrailFromList } from '../api/v1/user';
 import { useAuth } from '../state/AuthContext';
-import { mockTrails } from '../data/mockTrails';
-
-const trailsById = mockTrails.reduce((acc, trail) => {
-  acc[trail.id] = trail;
-  return acc;
-}, {});
 
 const ListDetailPage = () => {
   const { id } = useParams();
@@ -22,10 +16,8 @@ const ListDetailPage = () => {
     setLoading(true);
     setError('');
     try {
-      const result = await getLists(tokens?.accessToken);
-      const selected =
-        (result.items || []).find((item) => item.id === id) || null;
-      setList(selected);
+      const selected = await getListById(id, tokens?.accessToken);
+      setList(selected || null);
     } catch (loadError) {
       setError(loadError.message || 'Unable to load list details.');
     } finally {
@@ -53,7 +45,7 @@ const ListDetailPage = () => {
         }
 
         const nextTrails = (current.trails || []).filter(
-          (item) => item !== trailId,
+          (item) => item.trailId !== trailId,
         );
         return {
           ...current,
@@ -105,7 +97,7 @@ const ListDetailPage = () => {
       <Card>
         <h1 className='page-title'>{list.name}</h1>
         <p className='page-subtitle'>
-          {list.trailCount || trails.length} trails •{' '}
+          {trails.length} trails •{' '}
           {list.isPublic ? 'Public' : 'Private'}
         </p>
       </Card>
@@ -113,17 +105,26 @@ const ListDetailPage = () => {
       {error ? <p className='error-copy'>{error}</p> : null}
 
       <div className='cards-grid'>
-        {trails.map((trailId) => {
-          const trail = trailsById[trailId];
+        {trails.map((trail) => {
           return (
-            <Card key={`${list.id}-${trailId}`}>
-              <h2>{trail?.name || trailId}</h2>
-              <p>{trail?.location || 'Trail record from backend catalog'}</p>
+            <Card key={`${list.id}-${trail.trailId}`}>
+              {trail.thumbnailUrl ? (
+                <img
+                  className='trail-thumb'
+                  src={trail.thumbnailUrl}
+                  alt={trail.name || trail.trailId}
+                />
+              ) : null}
+              <h2>{trail.name || trail.trailId}</h2>
+              <p>{trail.location || 'Trail record from backend catalog'}</p>
               <div className='feature-actions'>
-                {trail?.slug ? (
+                {trail.slug ? (
                   <Link to={`/trail/${trail.slug}`}>Open Trail</Link>
                 ) : null}
-                <Button variant='ghost' onClick={() => onRemove(trailId)}>
+                <Button
+                  variant='ghost'
+                  onClick={() => onRemove(trail.trailId)}
+                >
                   Remove
                 </Button>
               </div>

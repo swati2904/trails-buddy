@@ -57,3 +57,20 @@ export const signUp = async ({ email, password, displayName }) => {
     },
   };
 };
+
+export const refreshSession = async ({ refreshToken }) => {
+  if (!USE_MOCK_API) {
+    return requestJson({
+      path: '/auth/refresh',
+      method: 'POST',
+      body: { refreshToken },
+      fallbackMessage: 'Unable to refresh authentication session',
+    });
+  }
+
+  await sleep(90);
+  return {
+    accessToken: `mock-access-token-${Date.now()}`,
+    refreshToken: refreshToken || `mock-refresh-token-${Date.now()}`,
+  };
+};
