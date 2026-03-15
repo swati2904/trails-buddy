@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addTrailToList, getLists } from '../../api/v1/user';
-import { getApiErrorMessage, shouldForceSignOut } from '../../api/v1/errorMessages';
+import {
+  getApiErrorMessage,
+  shouldForceSignOut,
+} from '../../api/v1/errorMessages';
 import { useAuth } from '../../state/AuthContext';
 import Button from './Button';
 

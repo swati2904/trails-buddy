@@ -3,7 +3,10 @@ import { Link, useParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { getListById, removeTrailFromList } from '../api/v1/user';
-import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
+import {
+  getApiErrorMessage,
+  shouldForceSignOut,
+} from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const ListDetailPage = () => {
@@ -62,7 +65,10 @@ const ListDetailPage = () => {
         signOutSession();
       }
       setError(
-        getApiErrorMessage(removeError, 'Unable to remove trail from this list.'),
+        getApiErrorMessage(
+          removeError,
+          'Unable to remove trail from this list.',
+        ),
       );
     }
   };
@@ -106,8 +112,7 @@ const ListDetailPage = () => {
       <Card>
         <h1 className='page-title'>{list.name}</h1>
         <p className='page-subtitle'>
-          {trails.length} trails •{' '}
-          {list.isPublic ? 'Public' : 'Private'}
+          {trails.length} trails • {list.isPublic ? 'Public' : 'Private'}
         </p>
       </Card>
 
@@ -130,10 +135,7 @@ const ListDetailPage = () => {
                 {trail.slug ? (
                   <Link to={`/trail/${trail.slug}`}>Open Trail</Link>
                 ) : null}
-                <Button
-                  variant='ghost'
-                  onClick={() => onRemove(trail.trailId)}
-                >
+                <Button variant='ghost' onClick={() => onRemove(trail.trailId)}>
                   Remove
                 </Button>
               </div>

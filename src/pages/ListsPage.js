@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { createList, getLists, removeTrailFromList } from '../api/v1/user';
-import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
+import {
+  getApiErrorMessage,
+  shouldForceSignOut,
+} from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 import { mockTrails } from '../data/mockTrails';
 

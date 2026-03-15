@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import { useAuth } from '../state/AuthContext';
 import { getFavorites, getLists } from '../api/v1/user';
-import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
+import {
+  getApiErrorMessage,
+  shouldForceSignOut,
+} from '../api/v1/errorMessages';
 import Button from '../components/ui/Button';
 
 const ProfilePage = () => {

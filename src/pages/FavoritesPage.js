@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { getFavorites, removeFavorite } from '../api/v1/user';
-import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
+import {
+  getApiErrorMessage,
+  shouldForceSignOut,
+} from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const FavoritesPage = () => {

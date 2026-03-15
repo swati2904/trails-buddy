@@ -7,7 +7,10 @@ import Button from '../components/ui/Button';
 import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import { searchTrails } from '../api/v1/trails';
 import { addFavorite, getFavorites } from '../api/v1/user';
-import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
+import {
+  getApiErrorMessage,
+  shouldForceSignOut,
+} from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const ExplorePage = () => {

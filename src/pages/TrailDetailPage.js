@@ -11,7 +11,10 @@ import {
 import Button from '../components/ui/Button';
 import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import { addFavorite } from '../api/v1/user';
-import { getApiErrorMessage, shouldForceSignOut } from '../api/v1/errorMessages';
+import {
+  getApiErrorMessage,
+  shouldForceSignOut,
+} from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
 const TrailDetailPage = () => {
@@ -40,7 +43,9 @@ const TrailDetailPage = () => {
         if (shouldForceSignOut(loadError)) {
           signOutSession();
         }
-        setError(getApiErrorMessage(loadError, 'Unable to load trail details.'));
+        setError(
+          getApiErrorMessage(loadError, 'Unable to load trail details.'),
+        );
       } finally {
         setLoading(false);
       }

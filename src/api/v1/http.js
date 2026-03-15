@@ -13,22 +13,16 @@ const buildBaseUrl = () => {
     return trimTrailingSlash(exactUrl);
   }
 
-  const origin = trimTrailingSlash(
-    process.env.REACT_APP_API_ORIGIN || 'http://localhost:8080',
-  );
-  const basePath = trimLeadingSlash(
-    process.env.REACT_APP_API_BASE_PATH || '',
-  );
+  const origin = trimTrailingSlash(process.env.REACT_APP_API_ORIGIN || '');
+  const basePath = trimLeadingSlash(process.env.REACT_APP_API_BASE_PATH || '');
   const version = trimLeadingSlash(process.env.REACT_APP_API_VERSION || 'v1');
 
-  const parts = [origin];
-  if (basePath) {
-    parts.push(basePath);
-  }
-  if (version) {
-    parts.push(version);
+  const pathParts = [basePath, version].filter(Boolean);
+  if (!origin) {
+    return `/${pathParts.join('/')}`;
   }
 
+  const parts = [origin, ...pathParts];
   return trimTrailingSlash(parts.join('/'));
 };
 
@@ -186,26 +180,33 @@ const refreshAccessToken = async () => {
     );
 
     return nextSession?.tokens?.accessToken || null;
-  })().catch((error) => {
-    clearStoredSession();
-    window.dispatchEvent(
-      new CustomEvent('tb-auth-session-invalid', {
-        detail: {
-          reason: error?.code || 'refresh-failed',
-        },
-      }),
-    );
-    throw error;
-  }).finally(() => {
-    refreshInFlightPromise = null;
-  });
+  })()
+    .catch((error) => {
+      clearStoredSession();
+      window.dispatchEvent(
+        new CustomEvent('tb-auth-session-invalid', {
+          detail: {
+            reason: error?.code || 'refresh-failed',
+          },
+        }),
+      );
+      throw error;
+    })
+    .finally(() => {
+      refreshInFlightPromise = null;
+    });
 
   return refreshInFlightPromise;
 };
 
 const buildUrl = (path, query) => {
   const normalizedPath = trimLeadingSlash(path);
-  const url = new URL(`${API_BASE_URL}/${normalizedPath}`);
+  const normalizedBase = trimTrailingSlash(API_BASE_URL);
+  const isAbsolute = /^https?:\/\//i.test(normalizedBase);
+  const baseUrl = isAbsolute
+    ? `${normalizedBase}/`
+    : `${window.location.origin}${normalizedBase}/`;
+  const url = new URL(normalizedPath, baseUrl);
 
   if (query && typeof query === 'object') {
     Object.entries(query).forEach(([key, value]) => {
@@ -236,14 +237,15 @@ export const requestJson = async ({
   fallbackMessage = 'Request failed',
 }) => {
   const runRequest = async (authToken) => {
+    const hasBody = body !== undefined;
     const response = await fetch(buildUrl(path, query), {
       method,
       headers: {
-        'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
         ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       },
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      ...(hasBody ? { body: JSON.stringify(body) } : {}),
     });
 
     const payload = await readPayload(response);
