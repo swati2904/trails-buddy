@@ -35,39 +35,23 @@ const normalizeRouteCoordinates = (routeCoordinates) => {
   return routeCoordinates.map(normalizeCoordinate).filter(Boolean);
 };
 
-const buildFallbackRoute = (startCoordinate) => {
-  const start = normalizeCoordinate(startCoordinate);
-  if (!start) {
-    return [];
-  }
-
-  const [lat, lon] = start;
-  return [
-    [lat, lon],
-    [lat + 0.01, lon + 0.015],
-    [lat + 0.018, lon + 0.005],
-    [lat + 0.01, lon - 0.015],
-    [lat, lon],
-  ];
-};
-
 const TrailRouteMap = ({ trail }) => {
   const start = normalizeCoordinate(trail?.location?.start);
 
   const route = useMemo(() => {
-    const parsed = normalizeRouteCoordinates(trail?.map?.routeCoordinates);
-    if (parsed.length >= 2) {
-      return parsed;
-    }
-
-    return buildFallbackRoute(start);
-  }, [start, trail?.map?.routeCoordinates]);
+    return normalizeRouteCoordinates(trail?.map?.routeCoordinates);
+  }, [trail?.map?.routeCoordinates]);
 
   const center = route[0] || start || DEFAULT_CENTER;
 
   return (
     <div className='map-panel'>
-      <MapContainer center={center} zoom={12} scrollWheelZoom className='leaflet-map'>
+      <MapContainer
+        center={center}
+        zoom={12}
+        scrollWheelZoom
+        className='leaflet-map'
+      >
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'

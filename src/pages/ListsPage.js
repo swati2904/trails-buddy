@@ -8,12 +8,14 @@ import {
   shouldForceSignOut,
 } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
-import { mockTrails } from '../data/mockTrails';
 
-const trailNameIndex = mockTrails.reduce((acc, trail) => {
-  acc[trail.id] = trail.name;
-  return acc;
-}, {});
+const getTrailItemId = (trail) =>
+  typeof trail === 'string' ? trail : trail?.trailId || trail?.id || '';
+
+const getTrailItemLabel = (trail) =>
+  typeof trail === 'string'
+    ? trail
+    : trail?.name || trail?.trailId || trail?.id || 'Trail';
 
 const ListsPage = () => {
   const { tokens, isAuthenticated, signOutSession } = useAuth();
@@ -74,7 +76,9 @@ const ListsPage = () => {
             return item;
           }
 
-          const nextTrails = (item.trails || []).filter((id) => id !== trailId);
+          const nextTrails = (item.trails || []).filter(
+            (trail) => getTrailItemId(trail) !== trailId,
+          );
           return {
             ...item,
             trails: nextTrails,
@@ -155,17 +159,23 @@ const ListsPage = () => {
             <Link to={`/my-lists/${item.id}`}>Open list details</Link>
             {Array.isArray(item.trails) && item.trails.length > 0 ? (
               <div className='list-trails'>
-                {item.trails.map((trailId) => (
-                  <div key={`${item.id}-${trailId}`} className='list-trail-row'>
-                    <span>{trailNameIndex[trailId] || trailId}</span>
-                    <Button
-                      variant='ghost'
-                      onClick={() => onRemoveTrail(item.id, trailId)}
+                {item.trails.map((trail) => {
+                  const trailId = getTrailItemId(trail);
+                  return (
+                    <div
+                      key={`${item.id}-${trailId}`}
+                      className='list-trail-row'
                     >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
+                      <span>{getTrailItemLabel(trail)}</span>
+                      <Button
+                        variant='ghost'
+                        onClick={() => onRemoveTrail(item.id, trailId)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className='page-subtitle'>No trails in this list yet.</p>

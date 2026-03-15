@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
 import Button from '../components/ui/Button';
-import { mockTrails } from '../data/mockTrails';
+import { searchTrails } from '../api/v1/trails';
+import { getApiErrorMessage } from '../api/v1/errorMessages';
 
 const HomePage = () => {
-  const featured = mockTrails.slice(0, 3);
+  const [featured, setFeatured] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadFeatured = async () => {
+      setError('');
+      try {
+        const result = await searchTrails({
+          sort: 'popular',
+          page: 1,
+          pageSize: 3,
+        });
+        setFeatured(Array.isArray(result?.items) ? result.items : []);
+      } catch (loadError) {
+        setError(
+          getApiErrorMessage(loadError, 'Unable to load featured trails.'),
+        );
+      }
+    };
+
+    loadFeatured();
+  }, []);
 
   return (
     <section className='page-block'>
@@ -25,6 +47,8 @@ const HomePage = () => {
           </Link>
         </div>
       </div>
+
+      {error ? <p className='error-copy'>{error}</p> : null}
 
       <div className='cards-grid'>
         {featured.map((trail) => (

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
@@ -21,8 +21,12 @@ const ExplorePage = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [locationNotice, setLocationNotice] = useState('');
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [activeTrailId, setActiveTrailId] = useState('');
+  const [userLocation, setUserLocation] = useState(null);
+  const [geoState, setGeoState] = useState('idle');
+  const requestedGeoRef = useRef(false);
 
   const query = params.get('q') || '';
   const difficulty = params.get('difficulty') || '';
@@ -39,19 +43,96 @@ const ExplorePage = () => {
   };
 
   useEffect(() => {
+    if (query.trim()) {
+      setLocationNotice('');
+      return;
+    }
+
+    if (userLocation || requestedGeoRef.current) {
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setGeoState('unsupported');
+      setLocationNotice(
+        'Location is unavailable in this browser. Search by ZIP or city.',
+      );
+      return;
+    }
+
+    requestedGeoRef.current = true;
+    setGeoState('locating');
+    setLocationNotice('Finding trails near your current location...');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: Number(position.coords.latitude),
+          lon: Number(position.coords.longitude),
+        });
+        setGeoState('ready');
+        setLocationNotice('Showing nearby trails from your current location.');
+      },
+      () => {
+        setGeoState('denied');
+        setLocationNotice(
+          'Location access was denied. Search by ZIP or city to find trails.',
+        );
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 8000,
+        maximumAge: 300000,
+      },
+    );
+  }, [query, userLocation]);
+
+  useEffect(() => {
     const run = async () => {
+      const trimmedQuery = query.trim();
+
+      if (!trimmedQuery && !userLocation) {
+        if (geoState === 'locating' || geoState === 'idle') {
+          setLoading(true);
+          return;
+        }
+
+        setItems([]);
+        setActiveTrailId('');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError('');
       try {
-        const result = await searchTrails({
-          q: query,
+        const request = {
           difficulty,
           sort,
           page: 1,
           pageSize: 20,
+        };
+
+        if (trimmedQuery) {
+          request.q = trimmedQuery;
+        } else if (userLocation) {
+          request.lat = userLocation.lat;
+          request.lon = userLocation.lon;
+          request.radiusKm = 75;
+        }
+
+        const result = await searchTrails({
+          ...request,
         });
-        setItems(result.items);
-        setActiveTrailId(result.items?.[0]?.id || '');
+        const nextItems = Array.isArray(result?.items) ? result.items : [];
+        setItems(nextItems);
+        setActiveTrailId(nextItems?.[0]?.id || '');
+
+        if (!trimmedQuery && userLocation && nextItems.length === 0) {
+          setLocationNotice(
+            'No nearby trails found for your current location.',
+          );
+        }
       } catch (loadError) {
         setError(getApiErrorMessage(loadError, 'Unable to load trails.'));
       } finally {
@@ -60,7 +141,7 @@ const ExplorePage = () => {
     };
 
     run();
-  }, [query, difficulty, sort]);
+  }, [query, difficulty, sort, userLocation, geoState]);
 
   useEffect(() => {
     const loadFavorites = async () => {
@@ -124,7 +205,7 @@ const ExplorePage = () => {
         <div className='filter-row'>
           <input
             value={query}
-            placeholder='Search by trail or location'
+            placeholder='Search by ZIP, city, or state'
             onChange={(event) => setParam('q', event.target.value)}
           />
           <select
@@ -149,6 +230,9 @@ const ExplorePage = () => {
       </Card>
 
       {error ? <p className='error-copy'>{error}</p> : null}
+      {locationNotice ? (
+        <p className='page-subtitle'>{locationNotice}</p>
+      ) : null}
 
       {!loading ? (
         <TrailExploreMap

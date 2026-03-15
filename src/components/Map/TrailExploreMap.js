@@ -64,7 +64,12 @@ const TrailExploreMap = ({ trails, activeTrailId, onPickTrail }) => {
 
   return (
     <div className='map-panel'>
-      <MapContainer center={center} zoom={10} scrollWheelZoom className='leaflet-map'>
+      <MapContainer
+        center={center}
+        zoom={10}
+        scrollWheelZoom
+        className='leaflet-map'
+      >
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'

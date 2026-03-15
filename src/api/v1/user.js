@@ -1,222 +1,71 @@
-import { requestJson, USE_MOCK_API } from './http';
-import { mockTrails } from '../../data/mockTrails';
-
-const FAVORITES_KEY = 'tb.v1.favorites';
-const LISTS_KEY = 'tb.v1.lists';
-
-const readJson = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch (error) {
-    return fallback;
-  }
-};
-
-const writeJson = (key, value) => {
-  localStorage.setItem(key, JSON.stringify(value));
-};
-
-const trailById = mockTrails.reduce((acc, trail) => {
-  acc[trail.id] = trail;
-  return acc;
-}, {});
-
-const toMockFavoriteItem = (favorite) => {
-  const trail = trailById[favorite.trailId];
-  return {
-    trailId: favorite.trailId,
-    savedAt: favorite.savedAt,
-    name: trail?.name || '',
-    slug: trail?.slug || '',
-    location: trail?.location || '',
-    thumbnailUrl: trail?.thumbnailUrl || '',
-  };
-};
-
-const toMockListTrailItem = (trailId) => {
-  const trail = trailById[trailId];
-  return {
-    trailId,
-    slug: trail?.slug || '',
-    name: trail?.name || trailId,
-    location: trail?.location || '',
-    thumbnailUrl: trail?.thumbnailUrl || '',
-  };
-};
+import { requestJson } from './http';
 
 export const getFavorites = async (token) => {
-  if (!USE_MOCK_API) {
-    return requestJson({
-      path: '/users/me/favorites',
-      token,
-      fallbackMessage: 'Unable to load favorites',
-    });
-  }
-
-  const items = readJson(FAVORITES_KEY, []);
-  return { items: items.map(toMockFavoriteItem) };
+  return requestJson({
+    path: '/users/me/favorites',
+    token,
+    fallbackMessage: 'Unable to load favorites',
+  });
 };
 
 export const addFavorite = async (trailId, token) => {
-  if (!USE_MOCK_API) {
-    await requestJson({
-      path: `/users/me/favorites/${trailId}`,
-      method: 'POST',
-      token,
-      fallbackMessage: 'Unable to add favorite',
-    });
-    return;
-  }
-
-  const items = readJson(FAVORITES_KEY, []);
-  if (!items.some((item) => item.trailId === trailId)) {
-    items.push({ trailId, savedAt: new Date().toISOString() });
-    writeJson(FAVORITES_KEY, items);
-  }
+  await requestJson({
+    path: `/users/me/favorites/${trailId}`,
+    method: 'POST',
+    token,
+    fallbackMessage: 'Unable to add favorite',
+  });
 };
 
 export const removeFavorite = async (trailId, token) => {
-  if (!USE_MOCK_API) {
-    await requestJson({
-      path: `/users/me/favorites/${trailId}`,
-      method: 'DELETE',
-      token,
-      fallbackMessage: 'Unable to remove favorite',
-    });
-    return;
-  }
-
-  const items = readJson(FAVORITES_KEY, []).filter(
-    (item) => item.trailId !== trailId,
-  );
-  writeJson(FAVORITES_KEY, items);
+  await requestJson({
+    path: `/users/me/favorites/${trailId}`,
+    method: 'DELETE',
+    token,
+    fallbackMessage: 'Unable to remove favorite',
+  });
 };
 
 export const getLists = async (token) => {
-  if (!USE_MOCK_API) {
-    return requestJson({
-      path: '/users/me/lists',
-      token,
-      fallbackMessage: 'Unable to load lists',
-    });
-  }
-
-  const items = readJson(LISTS_KEY, []);
-  return { items };
+  return requestJson({
+    path: '/users/me/lists',
+    token,
+    fallbackMessage: 'Unable to load lists',
+  });
 };
 
 export const getListById = async (id, token) => {
-  if (!USE_MOCK_API) {
-    return requestJson({
-      path: `/users/me/lists/${id}`,
-      token,
-      fallbackMessage: 'Unable to load list details',
-    });
-  }
-
-  const items = readJson(LISTS_KEY, []);
-  const list = items.find((item) => item.id === id);
-  if (!list) {
-    return null;
-  }
-
-  return {
-    id: list.id,
-    name: list.name,
-    isPublic: Boolean(list.isPublic),
-    updatedAt: list.updatedAt,
-    trails: Array.isArray(list.trails)
-      ? list.trails.map(toMockListTrailItem)
-      : [],
-  };
+  return requestJson({
+    path: `/users/me/lists/${id}`,
+    token,
+    fallbackMessage: 'Unable to load list details',
+  });
 };
 
 export const createList = async ({ name, isPublic = false }, token) => {
-  if (!USE_MOCK_API) {
-    return requestJson({
-      path: '/users/me/lists',
-      method: 'POST',
-      body: { name, isPublic },
-      token,
-      fallbackMessage: 'Unable to create list',
-    });
-  }
-
-  const items = readJson(LISTS_KEY, []);
-  const created = {
-    id: `lst_${Date.now()}`,
-    name,
-    isPublic,
-    trailCount: 0,
-    trails: [],
-    updatedAt: new Date().toISOString(),
-  };
-  items.push(created);
-  writeJson(LISTS_KEY, items);
-  return created;
+  return requestJson({
+    path: '/users/me/lists',
+    method: 'POST',
+    body: { name, isPublic },
+    token,
+    fallbackMessage: 'Unable to create list',
+  });
 };
 
 export const addTrailToList = async (listId, trailId, token) => {
-  if (!USE_MOCK_API) {
-    await requestJson({
-      path: `/users/me/lists/${listId}/trails/${trailId}`,
-      method: 'POST',
-      token,
-      fallbackMessage: 'Unable to add trail to list',
-    });
-    return;
-  }
-
-  const items = readJson(LISTS_KEY, []);
-  const next = items.map((item) => {
-    if (item.id !== listId) {
-      return item;
-    }
-
-    const trails = Array.isArray(item.trails) ? item.trails : [];
-    if (trails.includes(trailId)) {
-      return item;
-    }
-
-    return {
-      ...item,
-      trails: [...trails, trailId],
-      trailCount: (item.trailCount || trails.length) + 1,
-      updatedAt: new Date().toISOString(),
-    };
+  await requestJson({
+    path: `/users/me/lists/${listId}/trails/${trailId}`,
+    method: 'POST',
+    token,
+    fallbackMessage: 'Unable to add trail to list',
   });
-
-  writeJson(LISTS_KEY, next);
 };
 
 export const removeTrailFromList = async (listId, trailId, token) => {
-  if (!USE_MOCK_API) {
-    await requestJson({
-      path: `/users/me/lists/${listId}/trails/${trailId}`,
-      method: 'DELETE',
-      token,
-      fallbackMessage: 'Unable to remove trail from list',
-    });
-    return;
-  }
-
-  const items = readJson(LISTS_KEY, []);
-  const next = items.map((item) => {
-    if (item.id !== listId) {
-      return item;
-    }
-
-    const trails = Array.isArray(item.trails) ? item.trails : [];
-    const filteredTrails = trails.filter((id) => id !== trailId);
-
-    return {
-      ...item,
-      trails: filteredTrails,
-      trailCount: filteredTrails.length,
-      updatedAt: new Date().toISOString(),
-    };
+  await requestJson({
+    path: `/users/me/lists/${listId}/trails/${trailId}`,
+    method: 'DELETE',
+    token,
+    fallbackMessage: 'Unable to remove trail from list',
   });
-
-  writeJson(LISTS_KEY, next);
 };

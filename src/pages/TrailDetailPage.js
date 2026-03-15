@@ -76,18 +76,8 @@ const TrailDetailPage = () => {
         tokens?.accessToken,
       );
 
-      setReviews((current) => [
-        {
-          id: `rvw_local_${Date.now()}`,
-          user: { id: 'usr_local', displayName: 'You' },
-          rating: 5,
-          comment: comment.trim(),
-          condition: 'good',
-          activity: 'hiking',
-          createdAt: new Date().toISOString(),
-        },
-        ...current,
-      ]);
+      const refreshedReviews = await getTrailReviews(trail.id, 1, 20);
+      setReviews(refreshedReviews.items || []);
       setComment('');
     } catch (submitError) {
       if (shouldForceSignOut(submitError)) {
@@ -170,7 +160,9 @@ const TrailDetailPage = () => {
 
       <Card>
         <h2>Route Map</h2>
-        <p className='page-subtitle'>Trailhead pin and highlighted trail route.</p>
+        <p className='page-subtitle'>
+          Trailhead pin and highlighted trail route.
+        </p>
         <TrailRouteMap trail={trail} />
       </Card>
 
