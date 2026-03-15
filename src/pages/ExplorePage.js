@@ -38,7 +38,13 @@ const ExplorePage = () => {
       setLoading(true);
       setError('');
       try {
-        const result = await searchTrails({ q: query, difficulty, sort, page: 1, pageSize: 20 });
+        const result = await searchTrails({
+          q: query,
+          difficulty,
+          sort,
+          page: 1,
+          pageSize: 20,
+        });
         setItems(result.items);
       } catch (loadError) {
         setError(loadError.message || 'Unable to load trails.');
@@ -90,7 +96,9 @@ const ExplorePage = () => {
 
     try {
       await addFavorite(trailId, tokens?.accessToken);
-      setFavoriteIds((current) => (current.includes(trailId) ? current : [...current, trailId]));
+      setFavoriteIds((current) =>
+        current.includes(trailId) ? current : [...current, trailId],
+      );
     } catch (saveError) {
       setError(saveError.message || 'Unable to save favorite.');
     }
@@ -107,13 +115,19 @@ const ExplorePage = () => {
             placeholder='Search by trail or location'
             onChange={(event) => setParam('q', event.target.value)}
           />
-          <select value={difficulty} onChange={(event) => setParam('difficulty', event.target.value)}>
+          <select
+            value={difficulty}
+            onChange={(event) => setParam('difficulty', event.target.value)}
+          >
             <option value=''>All Difficulties</option>
             <option value='easy'>Easy</option>
             <option value='moderate'>Moderate</option>
             <option value='hard'>Hard</option>
           </select>
-          <select value={sort} onChange={(event) => setParam('sort', event.target.value)}>
+          <select
+            value={sort}
+            onChange={(event) => setParam('sort', event.target.value)}
+          >
             <option value='relevance'>Relevance</option>
             <option value='distance'>Distance</option>
             <option value='rating'>Rating</option>
@@ -132,7 +146,11 @@ const ExplorePage = () => {
         <div className='cards-grid'>
           {items.map((trail) => (
             <Card key={trail.id}>
-              <img className='trail-thumb' src={trail.thumbnailUrl} alt={trail.name} />
+              <img
+                className='trail-thumb'
+                src={trail.thumbnailUrl}
+                alt={trail.name}
+              />
               <h2>{trail.name}</h2>
               <p>{trail.location}</p>
               <div className='chip-row'>

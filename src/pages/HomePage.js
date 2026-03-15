@@ -13,8 +13,8 @@ const HomePage = () => {
       <div className='home-hero'>
         <h1 className='page-title'>Discover Trails For Your Next Adventure</h1>
         <p className='page-subtitle'>
-          Search trails by difficulty, distance, and local conditions, then save routes into
-          custom trip lists.
+          Search trails by difficulty, distance, and local conditions, then save
+          routes into custom trip lists.
         </p>
         <div className='feature-actions'>
           <Link to='/explore'>
@@ -29,7 +29,11 @@ const HomePage = () => {
       <div className='cards-grid'>
         {featured.map((trail) => (
           <Card key={trail.id}>
-            <img className='trail-thumb' src={trail.thumbnailUrl} alt={trail.name} />
+            <img
+              className='trail-thumb'
+              src={trail.thumbnailUrl}
+              alt={trail.name}
+            />
             <h2>{trail.name}</h2>
             <p>{trail.location}</p>
             <div className='chip-row'>

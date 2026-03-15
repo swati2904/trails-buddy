@@ -34,7 +34,9 @@ const SignUpPage = () => {
     <section className='page-block'>
       <Card className='auth-card'>
         <h1 className='page-title'>Create Account</h1>
-        <p className='page-subtitle'>Start saving trails and building personal route lists.</p>
+        <p className='page-subtitle'>
+          Start saving trails and building personal route lists.
+        </p>
 
         <form className='auth-form' onSubmit={onSubmit}>
           <label>
@@ -68,7 +70,9 @@ const SignUpPage = () => {
 
           {error ? <p className='error-copy'>{error}</p> : null}
 
-          <Button disabled={loading}>{loading ? 'Creating...' : 'Create account'}</Button>
+          <Button disabled={loading}>
+            {loading ? 'Creating...' : 'Create account'}
+          </Button>
         </form>
       </Card>
     </section>

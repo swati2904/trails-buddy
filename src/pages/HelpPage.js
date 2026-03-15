@@ -21,7 +21,9 @@ const HelpPage = () => {
     <section className='page-block'>
       <Card>
         <h1 className='page-title'>Help Center</h1>
-        <p className='page-subtitle'>Guides for core workflows and common troubleshooting.</p>
+        <p className='page-subtitle'>
+          Guides for core workflows and common troubleshooting.
+        </p>
       </Card>
 
       {faqs.map((item) => (

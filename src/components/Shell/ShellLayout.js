@@ -41,17 +41,30 @@ const ShellLayout = () => {
           ))}
         </nav>
 
-        <nav className='site-header__nav site-header__nav--account' aria-label='Account'>
+        <nav
+          className='site-header__nav site-header__nav--account'
+          aria-label='Account'
+        >
           {isAuthenticated ? (
-            <span className='site-user-pill'>{user?.displayName || 'Account'}</span>
+            <span className='site-user-pill'>
+              {user?.displayName || 'Account'}
+            </span>
           ) : null}
           {accountNav.map((item) => (
-            <Link key={item.to} className='site-nav-link site-nav-link--subtle' to={item.to}>
+            <Link
+              key={item.to}
+              className='site-nav-link site-nav-link--subtle'
+              to={item.to}
+            >
               {item.label}
             </Link>
           ))}
           {isAuthenticated ? (
-            <Button variant='ghost' className='site-signout-btn' onClick={signOutSession}>
+            <Button
+              variant='ghost'
+              className='site-signout-btn'
+              onClick={signOutSession}
+            >
               Sign Out
             </Button>
           ) : null}
@@ -66,7 +79,8 @@ const ShellLayout = () => {
         <div>
           <p className='site-footer__headline'>Trails Buddy Platform Rebuild</p>
           <p className='site-footer__text'>
-            Frontend scaffold in place. Next phases wire live map, search, and account features.
+            Frontend scaffold in place. Next phases wire live map, search, and
+            account features.
           </p>
         </div>
         <div className='site-footer__links'>

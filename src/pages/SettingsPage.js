@@ -47,7 +47,9 @@ const SettingsPage = () => {
     <section className='page-block'>
       <Card>
         <h1 className='page-title'>Settings</h1>
-        <p className='page-subtitle'>Manage language, measurement units, and notification preferences.</p>
+        <p className='page-subtitle'>
+          Manage language, measurement units, and notification preferences.
+        </p>
       </Card>
 
       <Card className='auth-form'>
@@ -55,7 +57,9 @@ const SettingsPage = () => {
           <span>Language</span>
           <select
             value={settings.language}
-            onChange={(event) => updateSettings({ ...settings, language: event.target.value })}
+            onChange={(event) =>
+              updateSettings({ ...settings, language: event.target.value })
+            }
           >
             <option value='en'>English</option>
             <option value='es'>Spanish</option>
@@ -66,7 +70,9 @@ const SettingsPage = () => {
           <span>Distance Units</span>
           <select
             value={settings.units}
-            onChange={(event) => updateSettings({ ...settings, units: event.target.value })}
+            onChange={(event) =>
+              updateSettings({ ...settings, units: event.target.value })
+            }
           >
             <option value='metric'>Metric (km, m)</option>
             <option value='imperial'>Imperial (mi, ft)</option>
@@ -84,7 +90,9 @@ const SettingsPage = () => {
               })
             }
           />
-          <span>Enable notifications for trail updates and review activity</span>
+          <span>
+            Enable notifications for trail updates and review activity
+          </span>
         </label>
 
         <Button onClick={saveSettings}>Save Settings</Button>

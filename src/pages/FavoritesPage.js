@@ -51,7 +51,9 @@ const FavoritesPage = () => {
       <section className='page-block'>
         <Card>
           <h1 className='page-title'>My Favorites</h1>
-          <p className='page-subtitle'>Please sign in to manage your saved trails.</p>
+          <p className='page-subtitle'>
+            Please sign in to manage your saved trails.
+          </p>
           <Link to='/signin'>Go to sign in</Link>
         </Card>
       </section>
@@ -62,10 +64,16 @@ const FavoritesPage = () => {
     <section className='page-block'>
       <Card>
         <h1 className='page-title'>My Favorites</h1>
-        <p className='page-subtitle'>Saved trails for quick access and planning.</p>
+        <p className='page-subtitle'>
+          Saved trails for quick access and planning.
+        </p>
       </Card>
 
-      {loading ? <Card><p>Loading favorites...</p></Card> : null}
+      {loading ? (
+        <Card>
+          <p>Loading favorites...</p>
+        </Card>
+      ) : null}
       {error ? <p className='error-copy'>{error}</p> : null}
 
       {!loading && !error && items.length === 0 ? (
@@ -82,7 +90,9 @@ const FavoritesPage = () => {
             <Card key={item.trailId}>
               <h2>{trail?.name || item.trailId}</h2>
               <p>{trail?.location || 'Trail info from backend catalog'}</p>
-              {trail?.slug ? <Link to={`/trail/${trail.slug}`}>Open Trail</Link> : null}
+              {trail?.slug ? (
+                <Link to={`/trail/${trail.slug}`}>Open Trail</Link>
+              ) : null}
               <div className='feature-actions'>
                 <Button variant='ghost' onClick={() => onRemove(item.trailId)}>
                   Remove

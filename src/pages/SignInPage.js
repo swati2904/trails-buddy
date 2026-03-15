@@ -33,7 +33,9 @@ const SignInPage = () => {
     <section className='page-block'>
       <Card className='auth-card'>
         <h1 className='page-title'>Sign In</h1>
-        <p className='page-subtitle'>Access your favorites, lists, and trail activity.</p>
+        <p className='page-subtitle'>
+          Access your favorites, lists, and trail activity.
+        </p>
 
         <form className='auth-form' onSubmit={onSubmit}>
           <label>
@@ -58,7 +60,9 @@ const SignInPage = () => {
 
           {error ? <p className='error-copy'>{error}</p> : null}
 
-          <Button disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</Button>
+          <Button disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
         </form>
       </Card>
     </section>

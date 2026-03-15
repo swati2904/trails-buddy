@@ -48,16 +48,26 @@ const ProfilePage = () => {
           </>
         ) : (
           <>
-            <p className='page-subtitle'>Display name: {user?.displayName || 'User'}</p>
+            <p className='page-subtitle'>
+              Display name: {user?.displayName || 'User'}
+            </p>
             <p className='page-subtitle'>Email: {user?.email || '-'}</p>
-            {loading ? <p className='page-subtitle'>Loading account stats...</p> : null}
-            {!loading ? <p className='page-subtitle'>Saved favorites: {favoritesCount}</p> : null}
-            {!loading ? <p className='page-subtitle'>Saved lists: {listsCount}</p> : null}
+            {loading ? (
+              <p className='page-subtitle'>Loading account stats...</p>
+            ) : null}
+            {!loading ? (
+              <p className='page-subtitle'>Saved favorites: {favoritesCount}</p>
+            ) : null}
+            {!loading ? (
+              <p className='page-subtitle'>Saved lists: {listsCount}</p>
+            ) : null}
             {error ? <p className='error-copy'>{error}</p> : null}
             <div className='feature-actions'>
               <Link to='/my-favorites'>Open favorites</Link>
               <Link to='/my-lists'>Open lists</Link>
-              <Button variant='ghost' onClick={signOutSession}>Sign out</Button>
+              <Button variant='ghost' onClick={signOutSession}>
+                Sign out
+              </Button>
             </div>
           </>
         )}

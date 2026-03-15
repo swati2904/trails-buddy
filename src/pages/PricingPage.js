@@ -46,12 +46,21 @@ const PricingPage = () => {
     <section className='page-block'>
       <Card>
         <h1 className='page-title'>Pricing</h1>
-        <p className='page-subtitle'>Choose a plan that matches your trail planning workflow.</p>
+        <p className='page-subtitle'>
+          Choose a plan that matches your trail planning workflow.
+        </p>
       </Card>
 
       <div className='cards-grid'>
         {plans.map((plan) => (
-          <Card key={plan.id} className={plan.featured ? 'pricing-card pricing-card--featured' : 'pricing-card'}>
+          <Card
+            key={plan.id}
+            className={
+              plan.featured
+                ? 'pricing-card pricing-card--featured'
+                : 'pricing-card'
+            }
+          >
             <h2>{plan.name}</h2>
             <p className='pricing-price'>
               {plan.price}

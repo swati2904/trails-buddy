@@ -1,6 +1,11 @@
 import React from 'react';
 
-const Button = ({ children, variant = 'primary', className = '', ...props }) => {
+const Button = ({
+  children,
+  variant = 'primary',
+  className = '',
+  ...props
+}) => {
   return (
     <button
       type='button'

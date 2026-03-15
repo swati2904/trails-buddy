@@ -19,7 +19,9 @@ const PressPage = () => {
     <section className='page-block'>
       <Card>
         <h1 className='page-title'>Press</h1>
-        <p className='page-subtitle'>Product updates, announcements, and media resources.</p>
+        <p className='page-subtitle'>
+          Product updates, announcements, and media resources.
+        </p>
       </Card>
 
       <div className='cards-grid'>

@@ -43,7 +43,10 @@ const ListsPage = () => {
     }
 
     try {
-      const created = await createList({ name: name.trim(), isPublic }, tokens?.accessToken);
+      const created = await createList(
+        { name: name.trim(), isPublic },
+        tokens?.accessToken,
+      );
       setItems((current) => [created, ...current]);
       setName('');
       setIsPublic(false);
@@ -79,7 +82,9 @@ const ListsPage = () => {
       <section className='page-block'>
         <Card>
           <h1 className='page-title'>My Lists</h1>
-          <p className='page-subtitle'>Please sign in to create and manage lists.</p>
+          <p className='page-subtitle'>
+            Please sign in to create and manage lists.
+          </p>
           <Link to='/signin'>Go to sign in</Link>
         </Card>
       </section>
@@ -90,14 +95,20 @@ const ListsPage = () => {
     <section className='page-block'>
       <Card>
         <h1 className='page-title'>My Lists</h1>
-        <p className='page-subtitle'>Build trip lists and organize trails by season or location.</p>
+        <p className='page-subtitle'>
+          Build trip lists and organize trails by season or location.
+        </p>
       </Card>
 
       <Card>
         <form className='auth-form' onSubmit={onCreate}>
           <label>
             <span>List name</span>
-            <input value={name} onChange={(event) => setName(event.target.value)} required />
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
           </label>
           <label className='checkbox-row'>
             <input
@@ -111,7 +122,11 @@ const ListsPage = () => {
         </form>
       </Card>
 
-      {loading ? <Card><p>Loading lists...</p></Card> : null}
+      {loading ? (
+        <Card>
+          <p>Loading lists...</p>
+        </Card>
+      ) : null}
       {error ? <p className='error-copy'>{error}</p> : null}
 
       <div className='cards-grid'>
@@ -119,7 +134,8 @@ const ListsPage = () => {
           <Card key={item.id}>
             <h2>{item.name}</h2>
             <p>
-              {item.trailCount || 0} trails • {item.isPublic ? 'Public' : 'Private'}
+              {item.trailCount || 0} trails •{' '}
+              {item.isPublic ? 'Public' : 'Private'}
             </p>
             <Link to={`/my-lists/${item.id}`}>Open list details</Link>
             {Array.isArray(item.trails) && item.trails.length > 0 ? (

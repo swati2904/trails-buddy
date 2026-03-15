@@ -23,7 +23,8 @@ const ListDetailPage = () => {
     setError('');
     try {
       const result = await getLists(tokens?.accessToken);
-      const selected = (result.items || []).find((item) => item.id === id) || null;
+      const selected =
+        (result.items || []).find((item) => item.id === id) || null;
       setList(selected);
     } catch (loadError) {
       setError(loadError.message || 'Unable to load list details.');
@@ -51,7 +52,9 @@ const ListDetailPage = () => {
           return current;
         }
 
-        const nextTrails = (current.trails || []).filter((item) => item !== trailId);
+        const nextTrails = (current.trails || []).filter(
+          (item) => item !== trailId,
+        );
         return {
           ...current,
           trails: nextTrails,
@@ -102,7 +105,8 @@ const ListDetailPage = () => {
       <Card>
         <h1 className='page-title'>{list.name}</h1>
         <p className='page-subtitle'>
-          {list.trailCount || trails.length} trails • {list.isPublic ? 'Public' : 'Private'}
+          {list.trailCount || trails.length} trails •{' '}
+          {list.isPublic ? 'Public' : 'Private'}
         </p>
       </Card>
 
@@ -116,7 +120,9 @@ const ListDetailPage = () => {
               <h2>{trail?.name || trailId}</h2>
               <p>{trail?.location || 'Trail record from backend catalog'}</p>
               <div className='feature-actions'>
-                {trail?.slug ? <Link to={`/trail/${trail.slug}`}>Open Trail</Link> : null}
+                {trail?.slug ? (
+                  <Link to={`/trail/${trail.slug}`}>Open Trail</Link>
+                ) : null}
                 <Button variant='ghost' onClick={() => onRemove(trailId)}>
                   Remove
                 </Button>

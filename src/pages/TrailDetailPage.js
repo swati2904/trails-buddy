@@ -3,7 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
-import { createTrailReview, getTrailBySlug, getTrailReviews } from '../api/v1/trails';
+import {
+  createTrailReview,
+  getTrailBySlug,
+  getTrailReviews,
+} from '../api/v1/trails';
 import Button from '../components/ui/Button';
 import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import { addFavorite } from '../api/v1/user';
@@ -44,12 +48,16 @@ const TrailDetailPage = () => {
       return;
     }
 
-    await createTrailReview(trail.id, {
-      rating: 5,
-      comment: comment.trim(),
-      condition: 'good',
-      activity: 'hiking',
-    }, tokens?.accessToken);
+    await createTrailReview(
+      trail.id,
+      {
+        rating: 5,
+        comment: comment.trim(),
+        condition: 'good',
+        activity: 'hiking',
+      },
+      tokens?.accessToken,
+    );
 
     setReviews((current) => [
       {
@@ -89,7 +97,9 @@ const TrailDetailPage = () => {
       <section className='page-block'>
         <Card>
           <h1 className='page-title'>Trail Not Found</h1>
-          <p className='page-subtitle'>This trail does not exist in the current catalog.</p>
+          <p className='page-subtitle'>
+            This trail does not exist in the current catalog.
+          </p>
           <Link to='/explore'>Back to explore</Link>
         </Card>
       </section>
@@ -99,7 +109,11 @@ const TrailDetailPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <img className='trail-hero' src={trail.media.heroImageUrl} alt={trail.name} />
+        <img
+          className='trail-hero'
+          src={trail.media.heroImageUrl}
+          alt={trail.name}
+        />
         <h1 className='page-title'>{trail.name}</h1>
         <p className='page-subtitle'>{trail.summary}</p>
         <div className='chip-row'>
@@ -109,8 +123,16 @@ const TrailDetailPage = () => {
           <Chip>{trail.rating.average} stars</Chip>
         </div>
         <div className='feature-actions'>
-          <Button variant='ghost' onClick={onSaveFavorite} disabled={!isAuthenticated}>
-            {isAuthenticated ? (savedFavorite ? 'Saved To Favorites' : 'Save To Favorites') : 'Sign In To Save'}
+          <Button
+            variant='ghost'
+            onClick={onSaveFavorite}
+            disabled={!isAuthenticated}
+          >
+            {isAuthenticated
+              ? savedFavorite
+                ? 'Saved To Favorites'
+                : 'Save To Favorites'
+              : 'Sign In To Save'}
           </Button>
         </div>
         <ListAssignmentControl trailId={trail.id} />

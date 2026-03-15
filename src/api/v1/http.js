@@ -7,8 +7,12 @@ const buildBaseUrl = () => {
     return trimTrailingSlash(exactUrl);
   }
 
-  const origin = trimTrailingSlash(process.env.REACT_APP_API_ORIGIN || 'http://localhost:8080');
-  const basePath = trimLeadingSlash(process.env.REACT_APP_API_BASE_PATH || 'api');
+  const origin = trimTrailingSlash(
+    process.env.REACT_APP_API_ORIGIN || 'http://localhost:8080',
+  );
+  const basePath = trimLeadingSlash(
+    process.env.REACT_APP_API_BASE_PATH || 'api',
+  );
   const version = trimLeadingSlash(process.env.REACT_APP_API_VERSION || 'v1');
 
   return `${origin}/${basePath}/${version}`;
@@ -17,7 +21,8 @@ const buildBaseUrl = () => {
 const API_BASE_URL = buildBaseUrl();
 
 export const USE_MOCK_API =
-  String(process.env.REACT_APP_USE_MOCK_API || 'true').toLowerCase() !== 'false';
+  String(process.env.REACT_APP_USE_MOCK_API || 'true').toLowerCase() !==
+  'false';
 
 const getErrorMessage = (payload, fallbackMessage) => {
   if (payload && typeof payload === 'object') {
@@ -93,7 +98,11 @@ export const requestJson = async ({
     throw error;
   }
 
-  if (payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, 'data')) {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    Object.prototype.hasOwnProperty.call(payload, 'data')
+  ) {
     return payload.data;
   }
 

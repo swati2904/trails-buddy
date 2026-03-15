@@ -58,7 +58,9 @@ export const removeFavorite = async (trailId, token) => {
     return;
   }
 
-  const items = readJson(FAVORITES_KEY, []).filter((item) => item.trailId !== trailId);
+  const items = readJson(FAVORITES_KEY, []).filter(
+    (item) => item.trailId !== trailId,
+  );
   writeJson(FAVORITES_KEY, items);
 };
 
