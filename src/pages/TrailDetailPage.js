@@ -10,6 +10,7 @@ import {
 } from '../api/v1/trails';
 import Button from '../components/ui/Button';
 import ListAssignmentControl from '../components/ui/ListAssignmentControl';
+import TrailRouteMap from '../components/Map/TrailRouteMap';
 import { addFavorite } from '../api/v1/user';
 import {
   getApiErrorMessage,
@@ -165,6 +166,12 @@ const TrailDetailPage = () => {
           </Button>
         </div>
         <ListAssignmentControl trailId={trail.id} />
+      </Card>
+
+      <Card>
+        <h2>Route Map</h2>
+        <p className='page-subtitle'>Trailhead pin and highlighted trail route.</p>
+        <TrailRouteMap trail={trail} />
       </Card>
 
       {error ? <p className='error-copy'>{error}</p> : null}

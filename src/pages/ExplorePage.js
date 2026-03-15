@@ -5,6 +5,7 @@ import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
 import Button from '../components/ui/Button';
 import ListAssignmentControl from '../components/ui/ListAssignmentControl';
+import TrailExploreMap from '../components/Map/TrailExploreMap';
 import { searchTrails } from '../api/v1/trails';
 import { addFavorite, getFavorites } from '../api/v1/user';
 import {
@@ -21,6 +22,7 @@ const ExplorePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [activeTrailId, setActiveTrailId] = useState('');
 
   const query = params.get('q') || '';
   const difficulty = params.get('difficulty') || '';
@@ -49,6 +51,7 @@ const ExplorePage = () => {
           pageSize: 20,
         });
         setItems(result.items);
+        setActiveTrailId(result.items?.[0]?.id || '');
       } catch (loadError) {
         setError(getApiErrorMessage(loadError, 'Unable to load trails.'));
       } finally {
@@ -147,6 +150,14 @@ const ExplorePage = () => {
 
       {error ? <p className='error-copy'>{error}</p> : null}
 
+      {!loading ? (
+        <TrailExploreMap
+          trails={items}
+          activeTrailId={activeTrailId}
+          onPickTrail={setActiveTrailId}
+        />
+      ) : null}
+
       {loading ? (
         <Card>
           <Skeleton lines={6} />
@@ -154,11 +165,15 @@ const ExplorePage = () => {
       ) : (
         <div className='cards-grid'>
           {items.map((trail) => (
-            <Card key={trail.id}>
+            <Card
+              key={trail.id}
+              className={trail.id === activeTrailId ? 'ui-card--active' : ''}
+            >
               <img
                 className='trail-thumb'
                 src={trail.thumbnailUrl}
                 alt={trail.name}
+                onMouseEnter={() => setActiveTrailId(trail.id)}
               />
               <h2>{trail.name}</h2>
               <p>{trail.location}</p>

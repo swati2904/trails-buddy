@@ -18,6 +18,14 @@ export const mockTrails = [
     map: {
       bounds: [-105.0, 39.7, -104.93, 39.77],
       start: { lat: 39.73, lon: -104.97 },
+      routeCoordinates: [
+        [39.73, -104.97],
+        [39.738, -104.962],
+        [39.747, -104.955],
+        [39.756, -104.962],
+        [39.748, -104.973],
+        [39.73, -104.97],
+      ],
     },
     conditions: ['Muddy near mile 2', 'Clear past ridge'],
   },
@@ -40,6 +48,13 @@ export const mockTrails = [
     map: {
       bounds: [-105.34, 40.0, -105.19, 40.08],
       start: { lat: 40.03, lon: -105.28 },
+      routeCoordinates: [
+        [40.03, -105.28],
+        [40.038, -105.268],
+        [40.047, -105.257],
+        [40.055, -105.246],
+        [40.062, -105.236],
+      ],
     },
     conditions: ['Rocky switchbacks', 'Windy afternoons'],
   },
@@ -62,6 +77,14 @@ export const mockTrails = [
     map: {
       bounds: [-105.15, 40.51, -105.03, 40.6],
       start: { lat: 40.56, lon: -105.1 },
+      routeCoordinates: [
+        [40.56, -105.1],
+        [40.566, -105.092],
+        [40.571, -105.084],
+        [40.567, -105.073],
+        [40.558, -105.079],
+        [40.56, -105.1],
+      ],
     },
     conditions: ['Packed dirt', 'Good shade coverage'],
   },
@@ -84,6 +107,13 @@ export const mockTrails = [
     map: {
       bounds: [-105.63, 40.26, -105.48, 40.34],
       start: { lat: 40.29, lon: -105.56 },
+      routeCoordinates: [
+        [40.29, -105.56],
+        [40.296, -105.548],
+        [40.304, -105.537],
+        [40.311, -105.525],
+        [40.319, -105.512],
+      ],
     },
     conditions: ['Snow patches above 3000m'],
   },
