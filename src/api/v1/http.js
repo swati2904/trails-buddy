@@ -28,10 +28,6 @@ const buildBaseUrl = () => {
 
 const API_BASE_URL = buildBaseUrl();
 
-export const USE_MOCK_API =
-  String(process.env.REACT_APP_USE_MOCK_API || 'false').toLowerCase() !==
-  'false';
-
 let refreshInFlightPromise = null;
 
 const readStoredSession = () => {
