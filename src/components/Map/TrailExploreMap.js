@@ -27,7 +27,12 @@ const normalizeCoordinate = (coordinate) => {
   return null;
 };
 
-const TrailExploreMap = ({ trails, activeTrailId, onPickTrail }) => {
+const TrailExploreMap = ({
+  trails,
+  activeTrailId,
+  onPickTrail,
+  markerLimit = 120,
+}) => {
   const points = useMemo(
     () =>
       (trails || [])
@@ -42,17 +47,27 @@ const TrailExploreMap = ({ trails, activeTrailId, onPickTrail }) => {
     [trails],
   );
 
-  const center = useMemo(() => {
+  const visiblePoints = useMemo(() => {
     if (!points.length) {
+      return [];
+    }
+
+    return points.slice(0, markerLimit);
+  }, [points, markerLimit]);
+
+  const center = useMemo(() => {
+    if (!visiblePoints.length) {
       return DEFAULT_CENTER;
     }
 
     const lat =
-      points.reduce((sum, item) => sum + item.position[0], 0) / points.length;
+      visiblePoints.reduce((sum, item) => sum + item.position[0], 0) /
+      visiblePoints.length;
     const lon =
-      points.reduce((sum, item) => sum + item.position[1], 0) / points.length;
+      visiblePoints.reduce((sum, item) => sum + item.position[1], 0) /
+      visiblePoints.length;
     return [lat, lon];
-  }, [points]);
+  }, [visiblePoints]);
 
   if (!points.length) {
     return (
@@ -64,6 +79,13 @@ const TrailExploreMap = ({ trails, activeTrailId, onPickTrail }) => {
 
   return (
     <div className='map-panel'>
+      {points.length > visiblePoints.length ? (
+        <div className='map-limit-note'>
+          Showing {visiblePoints.length} markers on map. Refine filters to view
+          {` `}
+          all {points.length} trails.
+        </div>
+      ) : null}
       <MapContainer
         center={center}
         zoom={10}
@@ -74,7 +96,7 @@ const TrailExploreMap = ({ trails, activeTrailId, onPickTrail }) => {
           attribution='&copy; OpenStreetMap contributors'
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         />
-        {points.map(({ trail, position }) => {
+        {visiblePoints.map(({ trail, position }) => {
           const active = trail.id === activeTrailId;
           return (
             <CircleMarker

@@ -36,7 +36,9 @@ const normalizeRouteCoordinates = (routeCoordinates) => {
 };
 
 const TrailRouteMap = ({ trail }) => {
-  const start = normalizeCoordinate(trail?.location?.start);
+  const start = normalizeCoordinate(
+    trail?.locationData?.start || trail?.location?.start,
+  );
 
   const route = useMemo(() => {
     return normalizeRouteCoordinates(trail?.map?.routeCoordinates);

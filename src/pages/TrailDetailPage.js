@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
@@ -21,6 +21,7 @@ import { useAuth } from '../state/AuthContext';
 const TrailDetailPage = () => {
   const { isAuthenticated, tokens, signOutSession } = useAuth();
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
   const [trail, setTrail] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,20 +130,35 @@ const TrailDetailPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <img
-          className='trail-hero'
-          src={trail.media.heroImageUrl}
-          alt={trail.name}
-        />
+        <img className='trail-hero' src={trail.thumbnailUrl} alt={trail.name} />
         <h1 className='page-title'>{trail.name}</h1>
-        <p className='page-subtitle'>{trail.summary}</p>
+        <p className='page-subtitle'>
+          {trail.parkName} · {trail.state || trail.location}
+        </p>
         <div className='chip-row'>
+          <Chip>{trail.parkCategory}</Chip>
           <Chip>{trail.difficulty}</Chip>
-          <Chip>{trail.stats.distanceKm} km</Chip>
-          <Chip>{trail.stats.elevationGainM} m gain</Chip>
-          <Chip>{trail.rating.average} stars</Chip>
+          <Chip>{trail.stats?.distanceKm || trail.distanceKm} km</Chip>
+          <Chip>
+            {trail.stats?.elevationGainM || trail.elevationGainM} m elevation
+          </Chip>
+          <Chip>{trail.routeType}</Chip>
+          {trail.distanceFromSearchKm ? (
+            <Chip>{trail.distanceFromSearchKm.toFixed(1)} km from search</Chip>
+          ) : null}
         </div>
+        {trail.summary ? <p>{trail.summary}</p> : null}
+        {searchParams.get('q') ? (
+          <p className='page-subtitle'>
+            Result for: <strong>{searchParams.get('q')}</strong>
+          </p>
+        ) : null}
         <div className='feature-actions'>
+          {trail.parkSlug ? (
+            <Link to={`/parks/${trail.parkSlug}`}>
+              <Button variant='secondary'>Open Park Page</Button>
+            </Link>
+          ) : null}
           <Button
             variant='ghost'
             onClick={onSaveFavorite}
@@ -159,23 +175,49 @@ const TrailDetailPage = () => {
       </Card>
 
       <Card>
+        <h2>Trail Snapshot</h2>
+        <ul>
+          <li>Park Category: {trail.parkCategory}</li>
+          <li>Difficulty: {trail.difficulty}</li>
+          <li>Length: {trail.distanceKm} km</li>
+          <li>Elevation Gain: {trail.elevationGainM} m</li>
+          <li>Route Type: {trail.routeType}</li>
+          <li>Activity: {trail.activityType}</li>
+        </ul>
+      </Card>
+
+      <Card>
+        <h2>AI Summary Placeholder</h2>
+        <p className='page-subtitle'>
+          This section is reserved for a concise AI-generated hike summary.
+        </p>
+        <p>
+          {trail.aiSummary ||
+            'Soon: a short trail insight covering terrain, crowd patterns, and suggested start time.'}
+        </p>
+      </Card>
+
+      <Card>
         <h2>Route Map</h2>
         <p className='page-subtitle'>
-          Trailhead pin and highlighted trail route.
+          Preview trailhead and route shape before starting your hike.
         </p>
         <TrailRouteMap trail={trail} />
       </Card>
 
       {error ? <p className='error-copy'>{error}</p> : null}
 
-      <Card>
-        <h2>Current Conditions</h2>
-        <ul>
-          {trail.conditions.highlights.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </Card>
+      {Array.isArray(trail?.conditions?.highlights) &&
+      trail.conditions.highlights.length ? (
+        <Card>
+          <h2>Current Conditions</h2>
+          <ul>
+            {trail.conditions.highlights.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
 
       <Card>
         <h2>Reviews</h2>
