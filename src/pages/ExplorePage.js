@@ -470,7 +470,11 @@ const ExplorePage = () => {
               <p className='suggestion-note'>Finding suggestions...</p>
             ) : null}
             {!loadingSuggestions && suggestions.length > 0 ? (
-              <ul className='suggestions-panel' id='explore-search-suggestions' role='listbox'>
+              <ul
+                className='suggestions-panel'
+                id='explore-search-suggestions'
+                role='listbox'
+              >
                 {suggestions.map((item, index) => (
                   <li
                     key={`${item.type}-${item.id || item.value || index}`}

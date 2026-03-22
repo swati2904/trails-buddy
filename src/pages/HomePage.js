@@ -315,7 +315,11 @@ const HomePage = () => {
                 <p className='suggestion-note'>Finding suggestions...</p>
               ) : null}
               {!loadingSuggestions && suggestions.length > 0 ? (
-                <ul className='suggestions-panel' id='home-search-suggestions' role='listbox'>
+                <ul
+                  className='suggestions-panel'
+                  id='home-search-suggestions'
+                  role='listbox'
+                >
                   {suggestions.map((item, index) => (
                     <li
                       key={`${item.type}-${item.id || item.value || index}`}
@@ -326,7 +330,9 @@ const HomePage = () => {
                       <button
                         type='button'
                         className={`suggestion-item ${index === highlightedSuggestionIndex ? 'suggestion-item--active' : ''}`.trim()}
-                        onMouseEnter={() => setHighlightedSuggestionIndex(index)}
+                        onMouseEnter={() =>
+                          setHighlightedSuggestionIndex(index)
+                        }
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => onPickSuggestion(item.value)}
                       >
