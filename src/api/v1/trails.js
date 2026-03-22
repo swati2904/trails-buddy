@@ -1,4 +1,5 @@
 import { requestJson } from './http';
+import { normalizeListResponse } from './contracts';
 
 const TRAIL_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=60';
@@ -99,7 +100,7 @@ const getTrailLocationLabel = (trail) => {
   return trail?.park?.name || trail?.parkName || 'Location unavailable';
 };
 
-const normalizeTrail = (trail) => {
+export const normalizeTrail = (trail) => {
   const normalizedCoordinate =
     normalizeCoordinate(trail?.coordinate) ||
     normalizeCoordinate(trail?.location?.start) ||
@@ -181,17 +182,12 @@ export const searchTrails = async (query = {}) => {
     fallbackMessage: 'Unable to load trails',
   });
 
-  const items = Array.isArray(response?.items)
-    ? response.items.map((item) => normalizeTrail(item))
-    : [];
-
-  return {
-    ...response,
-    items,
-    page: toNumber(response?.page, query?.page || 1),
-    pageSize: toNumber(response?.pageSize, query?.pageSize || items.length),
-    total: toNumber(response?.total, items.length),
-  };
+  return normalizeListResponse({
+    response,
+    itemNormalizer: normalizeTrail,
+    fallbackPage: query?.page || 1,
+    fallbackSize: query?.pageSize || 20,
+  });
 };
 
 export const getFeaturedTrails = async ({

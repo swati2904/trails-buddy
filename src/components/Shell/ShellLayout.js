@@ -7,6 +7,7 @@ const primaryNav = [
   { to: '/', label: 'Home' },
   { to: '/explore', label: 'Explore' },
   { to: '/search', label: 'Search' },
+  { to: '/parks', label: 'Parks' },
   { to: '/nearby', label: 'Nearby' },
   { to: '/pricing', label: 'Pricing' },
 ];
@@ -77,10 +78,10 @@ const ShellLayout = () => {
 
       <footer className='site-footer'>
         <div>
-          <p className='site-footer__headline'>Trails Buddy Platform Rebuild</p>
+          <p className='site-footer__headline'>U.S. Park Trails Discovery</p>
           <p className='site-footer__text'>
-            Frontend scaffold in place. Next phases wire live map, search, and
-            account features.
+            Search and explore trails across National, State, and Regional
+            Parks.
           </p>
         </div>
         <div className='site-footer__links'>

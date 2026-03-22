@@ -78,7 +78,10 @@ const ParkPage = () => {
       <Card>
         <img className='trail-hero' src={park.heroImageUrl} alt={park.name} />
         <h1 className='page-title'>{park.name}</h1>
-        <p className='page-subtitle'>{park.summary}</p>
+        <p className='page-subtitle'>
+          {park.summary ||
+            'Park description will appear here when available from the backend.'}
+        </p>
         <div className='chip-row'>
           <Chip>{park.category}</Chip>
           {park.state ? <Chip>{park.state}</Chip> : null}
@@ -100,29 +103,51 @@ const ParkPage = () => {
       </Card>
 
       <Card>
-        <h2>Available Trails</h2>
-        <ul className='link-list'>
-          {park.topTrails.map((trail) => (
-            <li key={trail.id}>
-              <Link to={`/trail/${trail.slug}`}>
-                {trail.name} ({trail.difficulty}, {trail.rating} stars)
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <h2>Trails In This Park</h2>
+        {Array.isArray(park.topTrails) && park.topTrails.length > 0 ? (
+          <ul className='link-list'>
+            {park.topTrails.map((trail) => (
+              <li key={trail.id}>
+                <Link to={`/trail/${trail.slug}`}>
+                  {trail.name} ({trail.difficulty || 'moderate'},{' '}
+                  {trail.rating || 0} stars)
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className='page-subtitle'>
+            No park-specific trails are available yet.
+          </p>
+        )}
       </Card>
 
       <Card>
         <h2>Nearby Trails</h2>
-        <ul className='link-list'>
-          {nearbyTrails.map((trail) => (
-            <li key={trail.id}>
-              <Link to={`/trail/${trail.slug}`}>
-                {trail.name} ({trail.parkCategory}, {trail.distanceKm} km)
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {nearbyTrails.length ? (
+          <ul className='link-list'>
+            {nearbyTrails.map((trail) => (
+              <li key={trail.id}>
+                <Link to={`/trail/${trail.slug}`}>
+                  {trail.name} ({trail.parkCategory}, {trail.distanceKm} km)
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className='page-subtitle'>
+            Nearby trail recommendations will appear once location-aware park
+            indexing is available.
+          </p>
+        )}
+      </Card>
+
+      <Card>
+        <h2>Nearby Parks Placeholder</h2>
+        <p className='page-subtitle'>
+          Future backend support can power nearby park suggestions from this
+          park profile.
+        </p>
       </Card>
 
       {error ? <p className='error-copy'>{error}</p> : null}

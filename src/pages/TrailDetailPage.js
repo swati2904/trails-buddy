@@ -176,13 +176,15 @@ const TrailDetailPage = () => {
 
       <Card>
         <h2>Trail Snapshot</h2>
-        <ul>
+        <ul className='detail-list'>
           <li>Park Category: {trail.parkCategory}</li>
+          <li>Park: {trail.parkName}</li>
           <li>Difficulty: {trail.difficulty}</li>
           <li>Length: {trail.distanceKm} km</li>
           <li>Elevation Gain: {trail.elevationGainM} m</li>
           <li>Route Type: {trail.routeType}</li>
           <li>Activity: {trail.activityType}</li>
+          <li>Location: {trail.state || trail.location}</li>
         </ul>
       </Card>
 
@@ -194,6 +196,14 @@ const TrailDetailPage = () => {
         <p>
           {trail.aiSummary ||
             'Soon: a short trail insight covering terrain, crowd patterns, and suggested start time.'}
+        </p>
+      </Card>
+
+      <Card>
+        <h2>Related And Nearby Trails</h2>
+        <p className='page-subtitle'>
+          This section is reserved for future recommendation endpoints (similar
+          trails, nearby alternatives, and personalized picks).
         </p>
       </Card>
 

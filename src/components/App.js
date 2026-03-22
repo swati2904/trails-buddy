@@ -5,6 +5,7 @@ import HomePage from '../pages/HomePage';
 import ExplorePage from '../pages/ExplorePage';
 import TrailDetailPage from '../pages/TrailDetailPage';
 import ParkPage from '../pages/ParkPage';
+import ParksPage from '../pages/ParksPage';
 import SignInPage from '../pages/SignInPage';
 import SignUpPage from '../pages/SignUpPage';
 import FavoritesPage from '../pages/FavoritesPage';
@@ -29,6 +30,7 @@ const App = () => {
             <Route path='/explore' element={<ExplorePage />} />
             <Route path='/search' element={<ExplorePage />} />
             <Route path='/nearby' element={<ExplorePage />} />
+            <Route path='/parks' element={<ParksPage />} />
             <Route path='/trail/:slug' element={<TrailDetailPage />} />
             <Route path='/parks/:slug' element={<ParkPage />} />
             <Route path='/signin' element={<SignInPage />} />

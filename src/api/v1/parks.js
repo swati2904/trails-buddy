@@ -1,4 +1,5 @@
 import { requestJson } from './http';
+import { normalizeListResponse } from './contracts';
 
 const PARK_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1200&q=60';
@@ -19,7 +20,7 @@ const normalizeParkCategory = (value) => {
   return value || 'Park';
 };
 
-const normalizePark = (park) => {
+export const normalizePark = (park) => {
   const topTrails = Array.isArray(park?.topTrails)
     ? park.topTrails
     : Array.isArray(park?.trails)
@@ -54,12 +55,12 @@ export const searchParks = async (query = {}) => {
     fallbackMessage: 'Unable to load parks',
   });
 
-  return {
-    ...response,
-    items: Array.isArray(response?.items)
-      ? response.items.map((item) => normalizePark(item))
-      : [],
-  };
+  return normalizeListResponse({
+    response,
+    itemNormalizer: normalizePark,
+    fallbackPage: query?.page || 1,
+    fallbackSize: query?.pageSize || 20,
+  });
 };
 
 export const getParkBySlug = async (slug) => {

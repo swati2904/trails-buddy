@@ -1,12 +1,12 @@
 # Trails Buddy
 
-Trails Buddy is a React application designed to help users find and explore hiking trails. The app fetches trail data using the Overpass API and displays it on an interactive Leaflet map. To enhance the hiking experience, it also provides comprehensive trail details, user reviews, and weather updates.
+Trails Buddy is a React application for discovering hiking trails across U.S. National, State, and Regional Parks. It integrates with a backend API and displays results in list + map views powered by Leaflet.
 
 ##  🚀 Features
 
-### 🌐 Interactive Map
+### 🌐 Discovery Map
 
-Dive into the dynamic map powered by Leaflet, where you can explore trails with just a few clicks. The map includes markers for trailheads, routes, and other points of interest.
+Explore trails using map markers with list synchronization, route previews, and location-aware nearby discovery.
 
 ### 🔍 Trail Details
 
@@ -18,14 +18,11 @@ Access comprehensive information about each trail, including:
 - rating
 
 ### 📍 Current Location
-Easily check your current location on the map.
+Find nearby trails using your device location with configurable radius.
 
-### 🗺️ Trail Markers
- 
-Visualize trailheads, routes, and markers, making navigation a breeze.
+### 🗺️ Park-Centric Browsing
 
-### 🌦️ Weather Updates
-Get real-time weather updates for the trails, including temperature, wind, rainfall, and more.
+Browse by park categories: National Parks, State Parks, and Regional Parks.
 
 ### 📝 User Reviews
 Read and write reviews for trails. Share your experiences and help others choose the right trail.
@@ -36,8 +33,8 @@ The application supports multiple languages, including English and Spanish, usin
 ### 🧭 Walkthrough
 A guided walkthrough to help new users understand the features and navigation of the application.
 
-### 💾 Caching
-Improve performance with local storage caching for trail data and user location.
+### 🤖 AI-Ready Extension Points
+UI placeholders are in place for future natural-language search, recommendations, and generated trail summaries.
 
 
 ## 📚 Libraries and Technologies
@@ -54,9 +51,7 @@ Improve performance with local storage caching for trail data and user location.
 - **Intro.js**: For creating guided product tours.
 
 ### Backend and APIs
-- **Overpass API**: To fetch trail data from OpenStreetMap.
-- **Nominatim API**: For reverse geocoding to get location names.
-- **Custom API**: For handling user authentication and reviews.
+- **Spring Boot API**: For search, nearby discovery, autocomplete, parks, trails, authentication, lists, and reviews.
   <h6> Check the repository for services: https://github.com/swati2904/trails-buddy-services </h6>
 
 ### Caching
@@ -89,8 +84,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 ## ⚒️ Tech Stack
 - **React**: For building the user interface.
 - **Leaflet**: For interactive maps.
-- **Overpass API**: For fetching trail data.
-- **Nominatim API**: For reverse geocoding.
+- **Backend Search APIs**: For global, nearby, and filtered park/trail discovery.
 - **React Spectrum**: For UI components.
 - **Bootstrap**: For responsive design.
 - **i18next**: For internationalization.
