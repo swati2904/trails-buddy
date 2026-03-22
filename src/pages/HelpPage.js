@@ -3,16 +3,16 @@ import Card from '../components/ui/Card';
 
 const faqs = [
   {
-    q: 'How do I save a trail?',
-    a: 'Open Explore or Trail Detail and use Save or Add To List while signed in.',
+    q: 'How do I save a trail for later?',
+    a: 'Open Explore or a Trail Detail page, then use Save trail or Add To List while signed in.',
   },
   {
     q: 'Can I plan trips with multiple routes?',
-    a: 'Yes. Create custom lists and assign trails into each list from Explore or Trail Detail.',
+    a: 'Yes. Create collections and add trails from Explore or Trail Detail to organize full-day adventures.',
   },
   {
-    q: 'Why do I not see some trail data?',
-    a: 'Some trail metrics depend on backend availability and source completeness.',
+    q: 'Why are some trail fields missing?',
+    a: 'Some fields depend on source availability. When data is unavailable, Trail Buddy gracefully shows fallbacks instead of empty placeholders.',
   },
 ];
 
@@ -20,9 +20,9 @@ const HelpPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>Help Center</h1>
+        <h1 className='page-title'>Help center</h1>
         <p className='page-subtitle'>
-          Guides for core workflows and common troubleshooting.
+          Quick answers for searching, saving, and planning your next trail day.
         </p>
       </Card>
 

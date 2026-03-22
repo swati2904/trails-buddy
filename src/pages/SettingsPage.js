@@ -46,9 +46,9 @@ const SettingsPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>Settings</h1>
+        <h1 className='page-title'>Trail preferences</h1>
         <p className='page-subtitle'>
-          Manage language, measurement units, and notification preferences.
+          Personalize language, units, and alerts for your next adventure.
         </p>
       </Card>
 
@@ -95,7 +95,7 @@ const SettingsPage = () => {
           </span>
         </label>
 
-        <Button onClick={saveSettings}>Save Settings</Button>
+        <Button onClick={saveSettings}>Save preferences</Button>
         {savedNotice ? <p className='success-copy'>{savedNotice}</p> : null}
       </Card>
     </section>

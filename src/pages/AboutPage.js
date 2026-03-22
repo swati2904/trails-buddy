@@ -5,10 +5,10 @@ const AboutPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>About Trailbuddy</h1>
+        <h1 className='page-title'>About Trail Buddy</h1>
         <p className='page-subtitle'>
-          Trailbuddy helps people discover, evaluate, and plan outdoor routes
-          with confidence.
+          Trail Buddy helps people discover, evaluate, and plan outdoor routes
+          with confidence and curiosity.
         </p>
       </Card>
 
@@ -16,22 +16,23 @@ const AboutPage = () => {
         <Card>
           <h2>Mission</h2>
           <p>
-            Make trail planning safer and faster by combining route quality
-            data, community conditions, and personal list management.
+            Make trail planning safer, simpler, and more inspiring by combining
+            route quality data, real community notes, and personal planning
+            tools.
           </p>
         </Card>
         <Card>
           <h2>What We Build</h2>
           <p>
-            A modern discovery platform with map-first search, detailed trail
-            profiles, and personalized planning tools.
+            A map-first discovery experience with rich trail profiles and trip
+            collections that feel ready for real weekends outside.
           </p>
         </Card>
         <Card>
           <h2>Community</h2>
           <p>
-            Every review and condition update improves route confidence for the
-            next person.
+            Every review, condition update, and saved route helps the next hiker
+            head out with better context.
           </p>
         </Card>
       </div>

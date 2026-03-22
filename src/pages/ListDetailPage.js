@@ -112,11 +112,15 @@ const ListDetailPage = () => {
       <Card>
         <h1 className='page-title'>{list.name}</h1>
         <p className='page-subtitle'>
-          {trails.length} trails • {list.isPublic ? 'Public' : 'Private'}
+          {trails.length} saved trails • {list.isPublic ? 'Public' : 'Private'}
         </p>
       </Card>
 
-      {error ? <p className='error-copy'>{error}</p> : null}
+      {error ? (
+        <p className='error-copy' role='alert'>
+          {error}
+        </p>
+      ) : null}
 
       <div className='cards-grid'>
         {trails.map((trail) => {
@@ -130,13 +134,19 @@ const ListDetailPage = () => {
                 />
               ) : null}
               <h2>{trail.name || trail.trailId}</h2>
-              <p>{trail.location || 'Trail record from backend catalog'}</p>
+              <p>
+                {trail.location || 'Location details available in trail view'}
+              </p>
               <div className='feature-actions'>
                 {trail.slug ? (
-                  <Link to={`/trail/${trail.slug}`}>Open Trail</Link>
+                  <Link to={`/trail/${trail.slug}`}>View trail</Link>
                 ) : null}
-                <Button variant='ghost' onClick={() => onRemove(trail.trailId)}>
-                  Remove
+                <Button
+                  variant='ghost'
+                  onClick={() => onRemove(trail.trailId)}
+                  aria-label={`Remove ${trail.name || 'trail'} from ${list.name}`}
+                >
+                  Remove trail
                 </Button>
               </div>
             </Card>

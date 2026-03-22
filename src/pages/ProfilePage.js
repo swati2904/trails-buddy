@@ -47,31 +47,31 @@ const ProfilePage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>Profile</h1>
+        <h1 className='page-title'>Trail profile</h1>
         {!isAuthenticated ? (
           <>
-            <p className='page-subtitle'>Sign in to view your profile.</p>
+            <p className='page-subtitle'>Sign in to see your trail activity.</p>
             <Link to='/signin'>Go to sign in</Link>
           </>
         ) : (
           <>
             <p className='page-subtitle'>
-              Display name: {user?.displayName || 'User'}
+              Explorer: {user?.displayName || 'Trail Buddy Member'}
             </p>
             <p className='page-subtitle'>Email: {user?.email || '-'}</p>
             {loading ? (
               <p className='page-subtitle'>Loading account stats...</p>
             ) : null}
             {!loading ? (
-              <p className='page-subtitle'>Saved favorites: {favoritesCount}</p>
+              <p className='page-subtitle'>Favorite trails: {favoritesCount}</p>
             ) : null}
             {!loading ? (
-              <p className='page-subtitle'>Saved lists: {listsCount}</p>
+              <p className='page-subtitle'>Trail collections: {listsCount}</p>
             ) : null}
             {error ? <p className='error-copy'>{error}</p> : null}
             <div className='feature-actions'>
               <Link to='/my-favorites'>Open favorites</Link>
-              <Link to='/my-lists'>Open lists</Link>
+              <Link to='/my-lists'>Open collections</Link>
               <Button variant='ghost' onClick={signOutSession}>
                 Sign out
               </Button>

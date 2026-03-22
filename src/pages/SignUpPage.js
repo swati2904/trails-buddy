@@ -34,9 +34,9 @@ const SignUpPage = () => {
   return (
     <section className='page-block'>
       <Card className='auth-card'>
-        <h1 className='page-title'>Create Account</h1>
+        <h1 className='page-title'>Create your trail profile</h1>
         <p className='page-subtitle'>
-          Start saving trails and building personal route lists.
+          Save trails, organize trip lists, and keep your next hike a tap away.
         </p>
 
         <form className='auth-form' onSubmit={onSubmit}>
@@ -45,6 +45,8 @@ const SignUpPage = () => {
             <input
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'signup-error' : undefined}
               required
             />
           </label>
@@ -55,6 +57,8 @@ const SignUpPage = () => {
               type='email'
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'signup-error' : undefined}
               required
             />
           </label>
@@ -65,14 +69,20 @@ const SignUpPage = () => {
               type='password'
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'signup-error' : undefined}
               required
             />
           </label>
 
-          {error ? <p className='error-copy'>{error}</p> : null}
+          {error ? (
+            <p id='signup-error' className='error-copy' role='alert'>
+              {error}
+            </p>
+          ) : null}
 
           <Button disabled={loading}>
-            {loading ? 'Creating...' : 'Create account'}
+            {loading ? 'Creating...' : 'Start exploring'}
           </Button>
         </form>
       </Card>

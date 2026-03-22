@@ -33,9 +33,10 @@ const SignInPage = () => {
   return (
     <section className='page-block'>
       <Card className='auth-card'>
-        <h1 className='page-title'>Sign In</h1>
+        <h1 className='page-title'>Welcome back, explorer</h1>
         <p className='page-subtitle'>
-          Access your favorites, lists, and trail activity.
+          Sign in to continue building lists, saving routes, and tracking your
+          next adventure.
         </p>
 
         <form className='auth-form' onSubmit={onSubmit}>
@@ -45,6 +46,8 @@ const SignInPage = () => {
               type='email'
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'signin-error' : undefined}
               required
             />
           </label>
@@ -55,14 +58,20 @@ const SignInPage = () => {
               type='password'
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'signin-error' : undefined}
               required
             />
           </label>
 
-          {error ? <p className='error-copy'>{error}</p> : null}
+          {error ? (
+            <p id='signin-error' className='error-copy' role='alert'>
+              {error}
+            </p>
+          ) : null}
 
           <Button disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Signing in...' : 'Continue to Trail Buddy'}
           </Button>
         </form>
       </Card>

@@ -47,9 +47,9 @@ const ParksPage = () => {
   }, [items.length, loading]);
 
   return (
-    <section className='page-block'>
+    <section className='page-block parks-page'>
       <Card>
-        <h1 className='page-title'>Browse U.S. Parks</h1>
+        <h1 className='page-title'>Find parks worth exploring</h1>
         <p className='page-subtitle'>{pageSummary}</p>
         <div className='filter-row filter-row--search-secondary'>
           <input
@@ -63,9 +63,9 @@ const ParksPage = () => {
             onChange={(event) => setParam('category', event.target.value)}
           >
             <option value=''>All Categories</option>
-            <option value='National Parks'>National Parks</option>
-            <option value='State Parks'>State Parks</option>
-            <option value='Regional Parks'>Regional Parks</option>
+            <option value='NATIONAL_PARK'>National Parks</option>
+            <option value='STATE_PARK'>State Parks</option>
+            <option value='REGIONAL_PARK'>Regional Parks</option>
           </select>
 
           <input
@@ -88,29 +88,30 @@ const ParksPage = () => {
       ) : (
         <div className='cards-grid'>
           {items.map((park) => (
-            <Card key={park.id}>
+            <Card key={park.id} className='park-card'>
               <img
                 className='trail-thumb'
                 src={park.heroImageUrl}
                 alt={park.name}
+                loading='lazy'
               />
               <h2>{park.name}</h2>
               <p className='page-subtitle'>
                 {park.summary || 'Park overview coming soon.'}
               </p>
               <div className='chip-row'>
-                <Chip>{park.category}</Chip>
-                {park.state ? <Chip>{park.state}</Chip> : null}
-                <Chip>{(park.topTrails || []).length} trails</Chip>
+                <Chip tone='nature'>{park.category}</Chip>
+                {park.state ? <Chip tone='sky'>{park.state}</Chip> : null}
+                <Chip tone='warm'>{(park.topTrails || []).length} trails</Chip>
               </div>
               <div className='feature-actions'>
                 <Link to={`/parks/${park.slug}`}>
-                  <Button variant='ghost'>Open Park</Button>
+                  <Button variant='ghost'>Park details</Button>
                 </Link>
                 <Link
                   to={`/search?category=${encodeURIComponent(park.category)}&q=${encodeURIComponent(park.name)}`}
                 >
-                  <Button variant='secondary'>Find Nearby Trails</Button>
+                  <Button variant='secondary'>Find nearby trails</Button>
                 </Link>
               </div>
             </Card>

@@ -160,22 +160,28 @@ const TrailDetailPage = () => {
             )}
           </p>
           <div className='chip-row'>
-            <Chip>{valueOrFallback(trail.parkCategory, 'Park')}</Chip>
-            <Chip>{valueOrFallback(trail.difficulty, 'general')}</Chip>
-            <Chip>
+            <Chip tone='nature'>
+              {valueOrFallback(trail.parkCategory, 'Park')}
+            </Chip>
+            <Chip tone='nature'>
+              {valueOrFallback(trail.difficulty, 'general')}
+            </Chip>
+            <Chip tone='warm'>
               {Number(trail?.rating) > 0
                 ? `${Number(trail.rating).toFixed(1)} rated`
                 : 'Not yet rated'}
             </Chip>
             {trail.distanceFromSearchKm ? (
-              <Chip>{trail.distanceFromSearchKm.toFixed(1)} km away</Chip>
+              <Chip tone='sky'>
+                {trail.distanceFromSearchKm.toFixed(1)} km away
+              </Chip>
             ) : null}
           </div>
 
           <div className='feature-actions'>
             {trail.parkSlug ? (
               <Link to={`/parks/${trail.parkSlug}`}>
-                <Button variant='secondary'>Open Park Page</Button>
+                <Button variant='secondary'>Explore this park</Button>
               </Link>
             ) : null}
             <Button
@@ -185,9 +191,9 @@ const TrailDetailPage = () => {
             >
               {isAuthenticated
                 ? savedFavorite
-                  ? 'Saved To Favorites'
-                  : 'Save To Favorites'
-                : 'Sign In To Save'}
+                  ? 'Saved to favorites'
+                  : 'Save trail'
+                : 'Sign in to save'}
             </Button>
           </div>
         </div>
@@ -239,7 +245,7 @@ const TrailDetailPage = () => {
       <Card>
         <h2>Route map</h2>
         <p className='page-subtitle'>
-          Follow the route preview and trailhead before you go.
+          Preview the route and trailhead so you can start with confidence.
         </p>
         <TrailRouteMap trail={trail} />
       </Card>
@@ -259,12 +265,17 @@ const TrailDetailPage = () => {
       ) : null}
 
       <Card>
-        <h2>Reviews</h2>
+        <h2>Trail notes and reviews</h2>
         <div className='review-compose'>
+          <label htmlFor='trail-review-rating' className='sr-only'>
+            Review rating
+          </label>
           <select
+            id='trail-review-rating'
             value={rating}
             onChange={(event) => setRating(event.target.value)}
             disabled={!isAuthenticated}
+            aria-label='Select review rating'
           >
             <option value='5'>5 - Excellent</option>
             <option value='4'>4 - Great</option>
@@ -272,14 +283,19 @@ const TrailDetailPage = () => {
             <option value='2'>2 - Tough</option>
             <option value='1'>1 - Poor</option>
           </select>
+          <label htmlFor='trail-review-comment' className='sr-only'>
+            Review comment
+          </label>
           <textarea
+            id='trail-review-comment'
             value={comment}
             onChange={(event) => setComment(event.target.value)}
-            placeholder='Share trail conditions and tips'
+            placeholder='Share conditions, scenery, and pro tips for future hikers'
             disabled={!isAuthenticated}
+            aria-label='Write your trail review'
           />
           <Button onClick={submitReview} disabled={!isAuthenticated}>
-            {isAuthenticated ? 'Post Review' : 'Sign In To Post'}
+            {isAuthenticated ? 'Post trail note' : 'Sign in to post'}
           </Button>
         </div>
         <div className='review-list'>

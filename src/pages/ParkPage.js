@@ -93,16 +93,18 @@ const ParkPage = () => {
             {park.summary || 'No description available yet.'}
           </p>
           <div className='chip-row'>
-            <Chip>{park.category || 'Park'}</Chip>
-            {park.state ? <Chip>{park.state}</Chip> : null}
-            <Chip>{(park.topTrails || []).length} trails</Chip>
+            <Chip tone='nature'>{park.category || 'Park'}</Chip>
+            {park.state ? <Chip tone='sky'>{park.state}</Chip> : null}
+            <Chip tone='warm'>{(park.topTrails || []).length} trails</Chip>
           </div>
         </div>
       </Card>
 
       <Card>
-        <h2>Park map preview</h2>
-        <p className='page-subtitle'>Explore trails in and around this park.</p>
+        <h2>Map preview</h2>
+        <p className='page-subtitle'>
+          Browse routes in and around the park boundary.
+        </p>
         <TrailExploreMap
           trails={nearbyTrails}
           activeTrailId={activeTrailId}
@@ -127,7 +129,7 @@ const ParkPage = () => {
                   </p>
                 </div>
                 <Link to={`/trail/${trail.slug}`}>
-                  <Button variant='secondary'>View</Button>
+                  <Button variant='secondary'>View trail</Button>
                 </Link>
               </article>
             ))}
@@ -152,7 +154,7 @@ const ParkPage = () => {
                   </p>
                 </div>
                 <Link to={`/trail/${trail.slug}`}>
-                  <Button variant='ghost'>Open</Button>
+                  <Button variant='ghost'>View details</Button>
                 </Link>
               </article>
             ))}

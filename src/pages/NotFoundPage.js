@@ -6,9 +6,11 @@ const NotFoundPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>Page Not Found</h1>
-        <p className='page-subtitle'>The route you requested does not exist.</p>
-        <Link to='/explore'>Go to Explore</Link>
+        <h1 className='page-title'>You wandered off the trail</h1>
+        <p className='page-subtitle'>
+          This page does not exist, but plenty of great trails still do.
+        </p>
+        <Link to='/explore'>Back to explore</Link>
       </Card>
     </section>
   );

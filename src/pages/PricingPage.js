@@ -45,9 +45,10 @@ const PricingPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>Pricing</h1>
+        <h1 className='page-title'>Plans for every kind of explorer</h1>
         <p className='page-subtitle'>
-          Choose a plan that matches your trail planning workflow.
+          Choose a plan that matches how often you head out and how deeply you
+          plan each trip.
         </p>
       </Card>
 
@@ -72,7 +73,7 @@ const PricingPage = () => {
               ))}
             </ul>
             <Button variant={plan.featured ? 'primary' : 'ghost'}>
-              {plan.id === 'free' ? 'Start Free' : 'Choose Plan'}
+              {plan.id === 'free' ? 'Start free' : 'Choose this plan'}
             </Button>
           </Card>
         ))}

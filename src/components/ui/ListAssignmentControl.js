@@ -50,7 +50,7 @@ const ListAssignmentControl = ({ trailId }) => {
     setMessage('');
     try {
       await addTrailToList(selectedListId, trailId, tokens?.accessToken);
-      setMessage('Trail added to list.');
+      setMessage('Trail added to your collection.');
     } catch (error) {
       if (shouldForceSignOut(error)) {
         signOutSession();
@@ -64,11 +64,11 @@ const ListAssignmentControl = ({ trailId }) => {
   const hasLists = useMemo(() => lists.length > 0, [lists.length]);
 
   if (!isAuthenticated) {
-    return <Link to='/signin'>Sign in to add to a list</Link>;
+    return <Link to='/signin'>Sign in to save this trail to a collection</Link>;
   }
 
   if (!hasLists) {
-    return <Link to='/my-lists'>Create a list first</Link>;
+    return <Link to='/my-lists'>Create your first collection</Link>;
   }
 
   return (
@@ -84,7 +84,7 @@ const ListAssignmentControl = ({ trailId }) => {
         ))}
       </select>
       <Button variant='ghost' onClick={onAssign} disabled={loading}>
-        {loading ? 'Adding...' : 'Add To List'}
+        {loading ? 'Adding...' : 'Add to collection'}
       </Button>
       {message ? <span className='list-assign-message'>{message}</span> : null}
     </div>

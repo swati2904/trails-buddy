@@ -61,6 +61,8 @@ const HomePage = () => {
   const [featuredPopular, setFeaturedPopular] = useState([]);
   const [featuredNearby, setFeaturedNearby] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
+  const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] =
+    useState(-1);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [error, setError] = useState('');
 
@@ -138,6 +140,7 @@ const HomePage = () => {
   useEffect(() => {
     if (!searchInput || searchInput.trim().length < 2) {
       setSuggestions([]);
+      setHighlightedSuggestionIndex(-1);
       return;
     }
 
@@ -152,10 +155,12 @@ const HomePage = () => {
 
         if (!cancelled) {
           setSuggestions(Array.isArray(response?.items) ? response.items : []);
+          setHighlightedSuggestionIndex(-1);
         }
       } catch (loadError) {
         if (!cancelled) {
           setSuggestions([]);
+          setHighlightedSuggestionIndex(-1);
         }
       } finally {
         if (!cancelled) {
@@ -206,6 +211,50 @@ const HomePage = () => {
     );
   };
 
+  const onPickSuggestion = (value) => {
+    setSearchInput(value);
+    setSuggestions([]);
+    setHighlightedSuggestionIndex(-1);
+    navigate(`/search?q=${encodeURIComponent(value)}`);
+  };
+
+  const onSearchKeyDown = (event) => {
+    if (!suggestions.length) {
+      if (event.key === 'Escape') {
+        setSuggestions([]);
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setHighlightedSuggestionIndex((current) =>
+        current < suggestions.length - 1 ? current + 1 : 0,
+      );
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setHighlightedSuggestionIndex((current) =>
+        current > 0 ? current - 1 : suggestions.length - 1,
+      );
+      return;
+    }
+
+    if (event.key === 'Enter' && highlightedSuggestionIndex >= 0) {
+      event.preventDefault();
+      onPickSuggestion(suggestions[highlightedSuggestionIndex].value);
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setSuggestions([]);
+      setHighlightedSuggestionIndex(-1);
+    }
+  };
+
   const homeSections = useMemo(() => {
     if (featuredNearby.length > 0) {
       return [
@@ -214,12 +263,20 @@ const HomePage = () => {
           title: 'Explore near you',
           items: featuredNearby,
         },
-        { id: 'popular', title: 'Popular right now', items: featuredPopular },
+        {
+          id: 'popular',
+          title: 'Popular this weekend',
+          items: featuredPopular,
+        },
       ];
     }
 
     return [
-      { id: 'popular', title: 'Featured trails', items: featuredPopular },
+      {
+        id: 'popular',
+        title: 'Curated trail picks',
+        items: featuredPopular,
+      },
     ];
   }, [featuredNearby, featuredPopular]);
 
@@ -229,45 +286,61 @@ const HomePage = () => {
         <div className='home-hero__overlay' />
         <div className='home-hero__content'>
           <Chip>Trail Discovery App</Chip>
-          <h1 className='page-title'>Find your next trail adventure</h1>
+          <h1 className='page-title'>Find your next great day outside</h1>
           <p className='page-subtitle'>
-            Explore National and State Parks with map-first search, live nearby
-            discovery, and trail details built for planning real hikes.
+            Discover scenic routes, weekend escapes, and hidden favorites with
+            map-first search built for real trail planning.
           </p>
 
           <form className='hero-search' onSubmit={onSearchSubmit}>
             <div className='search-input-stack'>
               <input
+                id='home-search-input'
                 value={searchInput}
                 placeholder='Search trails, parks, or locations'
                 onChange={(event) => setSearchInput(event.target.value)}
+                onKeyDown={onSearchKeyDown}
+                role='combobox'
+                aria-autocomplete='list'
+                aria-expanded={Boolean(suggestions.length)}
+                aria-controls='home-search-suggestions'
+                aria-activedescendant={
+                  highlightedSuggestionIndex >= 0
+                    ? `home-suggestion-${highlightedSuggestionIndex}`
+                    : undefined
+                }
                 aria-label='Search trails, parks, or locations'
               />
               {loadingSuggestions ? (
                 <p className='suggestion-note'>Finding suggestions...</p>
               ) : null}
               {!loadingSuggestions && suggestions.length > 0 ? (
-                <div className='suggestions-panel'>
+                <ul className='suggestions-panel' id='home-search-suggestions' role='listbox'>
                   {suggestions.map((item, index) => (
-                    <button
+                    <li
                       key={`${item.type}-${item.id || item.value || index}`}
-                      type='button'
-                      className='suggestion-item'
-                      onClick={() => {
-                        setSearchInput(item.value);
-                        navigate(`/search?q=${encodeURIComponent(item.value)}`);
-                      }}
+                      id={`home-suggestion-${index}`}
+                      role='option'
+                      aria-selected={index === highlightedSuggestionIndex}
                     >
-                      <span>{item.label || item.value}</span>
-                      <small>{item.type}</small>
-                    </button>
+                      <button
+                        type='button'
+                        className={`suggestion-item ${index === highlightedSuggestionIndex ? 'suggestion-item--active' : ''}`.trim()}
+                        onMouseEnter={() => setHighlightedSuggestionIndex(index)}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => onPickSuggestion(item.value)}
+                      >
+                        <span>{item.label || item.value}</span>
+                        <small>{item.type}</small>
+                      </button>
+                    </li>
                   ))}
-                </div>
+                </ul>
               ) : null}
             </div>
-            <Button type='submit'>Search</Button>
+            <Button type='submit'>Start exploring</Button>
             <Button variant='secondary' onClick={onUseCurrentLocation}>
-              Use current location
+              Find trails near me
             </Button>
           </form>
 
@@ -326,18 +399,18 @@ const HomePage = () => {
                     {formatLocation(trail)}
                   </p>
                   <div className='chip-row'>
-                    <Chip>{trail.difficulty || 'general'}</Chip>
-                    <Chip>{trail.distanceKm || 0} km</Chip>
-                    <Chip>{formatRating(trail)}</Chip>
+                    <Chip tone='nature'>{trail.difficulty || 'general'}</Chip>
+                    <Chip tone='sky'>{trail.distanceKm || 0} km</Chip>
+                    <Chip tone='warm'>{formatRating(trail)}</Chip>
                   </div>
                 </div>
                 <div className='trail-card__actions'>
                   <Link to={`/trail/${trail.slug}`}>
-                    <Button variant='secondary'>View Trail</Button>
+                    <Button variant='secondary'>View trail</Button>
                   </Link>
                   {trail.parkSlug ? (
                     <Link to={`/parks/${trail.parkSlug}`}>
-                      <Button variant='ghost'>Open Park</Button>
+                      <Button variant='ghost'>Park details</Button>
                     </Link>
                   ) : null}
                 </div>

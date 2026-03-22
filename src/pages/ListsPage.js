@@ -113,9 +113,10 @@ const ListsPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>My Lists</h1>
+        <h1 className='page-title'>Trail collections</h1>
         <p className='page-subtitle'>
-          Build trip lists and organize trails by season or location.
+          Build collections for weekend trips, seasonal goals, and future
+          adventures.
         </p>
       </Card>
 
@@ -126,6 +127,8 @@ const ListsPage = () => {
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'lists-error' : undefined}
               required
             />
           </label>
@@ -146,7 +149,11 @@ const ListsPage = () => {
           <p>Loading lists...</p>
         </Card>
       ) : null}
-      {error ? <p className='error-copy'>{error}</p> : null}
+      {error ? (
+        <p id='lists-error' className='error-copy' role='alert'>
+          {error}
+        </p>
+      ) : null}
 
       <div className='cards-grid'>
         {items.map((item) => (
@@ -156,7 +163,7 @@ const ListsPage = () => {
               {item.trailCount || 0} trails •{' '}
               {item.isPublic ? 'Public' : 'Private'}
             </p>
-            <Link to={`/my-lists/${item.id}`}>Open list details</Link>
+            <Link to={`/my-lists/${item.id}`}>Open collection</Link>
             {Array.isArray(item.trails) && item.trails.length > 0 ? (
               <div className='list-trails'>
                 {item.trails.map((trail) => {
@@ -170,15 +177,18 @@ const ListsPage = () => {
                       <Button
                         variant='ghost'
                         onClick={() => onRemoveTrail(item.id, trailId)}
+                        aria-label={`Remove ${getTrailItemLabel(trail)} from ${item.name}`}
                       >
-                        Remove
+                        Remove trail
                       </Button>
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <p className='page-subtitle'>No trails in this list yet.</p>
+              <p className='page-subtitle'>
+                No trails here yet. Add one from Explore.
+              </p>
             )}
           </Card>
         ))}

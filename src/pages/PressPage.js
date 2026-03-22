@@ -3,14 +3,14 @@ import Card from '../components/ui/Card';
 
 const updates = [
   {
-    title: 'Trailbuddy ships account and list workflows',
+    title: 'Trail Buddy launches personalized collections',
     date: 'March 2026',
-    body: 'Users can now save favorites and organize route collections in personal lists.',
+    body: 'Hikers can now save favorites and organize routes into shareable trip collections.',
   },
   {
-    title: 'Map-first explore experience launched',
+    title: 'Map-first discovery experience now live',
     date: 'March 2026',
-    body: 'Search, filter, and sorting for the explore route has moved to the new UI architecture.',
+    body: 'Search, filters, and route browsing now run through a redesigned split map + list flow.',
   },
 ];
 
@@ -20,7 +20,7 @@ const PressPage = () => {
       <Card>
         <h1 className='page-title'>Press</h1>
         <p className='page-subtitle'>
-          Product updates, announcements, and media resources.
+          Product updates, release highlights, and media notes.
         </p>
       </Card>
 

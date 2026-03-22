@@ -117,7 +117,7 @@ const TrailExploreMap = ({
   if (!points.length) {
     return (
       <div className='map-panel map-panel--empty'>
-        No map points available for the current search.
+        No trail points yet for this view. Try widening your search radius.
       </div>
     );
   }
@@ -126,9 +126,8 @@ const TrailExploreMap = ({
     <div className='map-panel'>
       {points.length > visiblePoints.length ? (
         <div className='map-limit-note'>
-          Showing {visiblePoints.length} markers on map. Refine filters to view
-          {` `}
-          all {points.length} trails.
+          Showing {visiblePoints.length} map pins for clarity. Refine filters to
+          explore all {points.length} trails.
         </div>
       ) : null}
       <MapContainer
@@ -173,7 +172,7 @@ const TrailExploreMap = ({
                 >
                   <Popup>
                     <strong>{count} trails in this area</strong>
-                    {sample?.name ? <div>Try: {sample.name}</div> : null}
+                    {sample?.name ? <div>Suggested: {sample.name}</div> : null}
                   </Popup>
                 </CircleMarker>
               );

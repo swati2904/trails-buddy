@@ -64,9 +64,9 @@ const FavoritesPage = () => {
   return (
     <section className='page-block'>
       <Card>
-        <h1 className='page-title'>My Favorites</h1>
+        <h1 className='page-title'>Favorite trails</h1>
         <p className='page-subtitle'>
-          Saved trails for quick access and planning.
+          Your saved hikes, ready whenever adventure calls.
         </p>
       </Card>
 
@@ -75,12 +75,18 @@ const FavoritesPage = () => {
           <p>Loading favorites...</p>
         </Card>
       ) : null}
-      {error ? <p className='error-copy'>{error}</p> : null}
+      {error ? (
+        <p className='error-copy' role='alert'>
+          {error}
+        </p>
+      ) : null}
 
       {!loading && !error && items.length === 0 ? (
         <Card>
-          <p className='page-subtitle'>You have not saved any trails yet.</p>
-          <Link to='/explore'>Find trails</Link>
+          <p className='page-subtitle'>
+            No saved trails yet. Start with a scenic route nearby.
+          </p>
+          <Link to='/explore'>Browse trails</Link>
         </Card>
       ) : null}
 
@@ -96,13 +102,19 @@ const FavoritesPage = () => {
                 />
               ) : null}
               <h2>{item.name || item.trailId}</h2>
-              <p>{item.location || 'Trail info from backend catalog'}</p>
+              <p>
+                {item.location || 'Location details available in trail view'}
+              </p>
               {item.slug ? (
-                <Link to={`/trail/${item.slug}`}>Open Trail</Link>
+                <Link to={`/trail/${item.slug}`}>View trail</Link>
               ) : null}
               <div className='feature-actions'>
-                <Button variant='ghost' onClick={() => onRemove(item.trailId)}>
-                  Remove
+                <Button
+                  variant='ghost'
+                  onClick={() => onRemove(item.trailId)}
+                  aria-label={`Remove ${item.name || 'trail'} from favorites`}
+                >
+                  Remove from favorites
                 </Button>
               </div>
             </Card>

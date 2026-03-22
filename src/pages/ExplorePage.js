@@ -60,6 +60,8 @@ const ExplorePage = () => {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [activeTrailId, setActiveTrailId] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] =
+    useState(-1);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [filtersMetadata, setFiltersMetadata] = useState(null);
 
@@ -88,6 +90,7 @@ const ExplorePage = () => {
   useEffect(() => {
     if (!state.query || state.query.trim().length < 2) {
       setSuggestions([]);
+      setHighlightedSuggestionIndex(-1);
       return;
     }
 
@@ -102,10 +105,12 @@ const ExplorePage = () => {
 
         if (!cancelled) {
           setSuggestions(Array.isArray(response?.items) ? response.items : []);
+          setHighlightedSuggestionIndex(-1);
         }
       } catch (loadError) {
         if (!cancelled) {
           setSuggestions([]);
+          setHighlightedSuggestionIndex(-1);
           setError(
             getApiErrorMessage(
               loadError,
@@ -331,16 +336,16 @@ const ExplorePage = () => {
 
   const pageHeading =
     location.pathname === '/search'
-      ? 'Search trails'
+      ? 'Search adventures'
       : location.pathname === '/nearby'
-        ? 'Nearby trails'
-        : 'Explore trails';
+        ? 'Trails near you'
+        : 'Explore the trail map';
 
   const resultsContext = state.query.trim()
     ? `Results for "${state.query.trim()}"`
     : state.placeLabel
       ? `Using ${state.placeLabel}`
-      : 'Search by ZIP, city, state, park, or trail name.';
+      : 'Search by city, park, ZIP, or trail name.';
 
   const showList = state.view === 'split' || state.view === 'list';
   const showMap = state.view === 'split' || state.view === 'map';
@@ -368,6 +373,44 @@ const ExplorePage = () => {
     patchParams({ q: value, lat: '', lon: '', place: '' });
     setQueryInput(value);
     setSuggestions([]);
+    setHighlightedSuggestionIndex(-1);
+  };
+
+  const onQueryKeyDown = (event) => {
+    if (!suggestions.length) {
+      if (event.key === 'Escape') {
+        setSuggestions([]);
+      }
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setHighlightedSuggestionIndex((current) =>
+        current < suggestions.length - 1 ? current + 1 : 0,
+      );
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setHighlightedSuggestionIndex((current) =>
+        current > 0 ? current - 1 : suggestions.length - 1,
+      );
+      return;
+    }
+
+    if (event.key === 'Enter' && highlightedSuggestionIndex >= 0) {
+      event.preventDefault();
+      onPickSuggestion(suggestions[highlightedSuggestionIndex].value);
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setSuggestions([]);
+      setHighlightedSuggestionIndex(-1);
+    }
   };
 
   return (
@@ -383,18 +426,21 @@ const ExplorePage = () => {
             <Button
               variant={state.view === 'list' ? 'primary' : 'secondary'}
               onClick={() => setParam('view', 'list')}
+              aria-pressed={state.view === 'list'}
             >
               List
             </Button>
             <Button
               variant={state.view === 'map' ? 'primary' : 'secondary'}
               onClick={() => setParam('view', 'map')}
+              aria-pressed={state.view === 'map'}
             >
               Map
             </Button>
             <Button
               variant={state.view === 'split' ? 'primary' : 'secondary'}
               onClick={() => setParam('view', 'split')}
+              aria-pressed={state.view === 'split'}
             >
               Split
             </Button>
@@ -404,31 +450,52 @@ const ExplorePage = () => {
         <div className='filter-row filter-row--search-primary'>
           <div className='search-input-stack'>
             <input
+              id='explore-search-input'
               value={queryInput}
               placeholder='Search trails, parks, or locations'
               onChange={(event) => setQueryInput(event.target.value)}
+              onKeyDown={onQueryKeyDown}
+              role='combobox'
+              aria-autocomplete='list'
+              aria-expanded={Boolean(suggestions.length)}
+              aria-controls='explore-search-suggestions'
+              aria-activedescendant={
+                highlightedSuggestionIndex >= 0
+                  ? `explore-suggestion-${highlightedSuggestionIndex}`
+                  : undefined
+              }
+              aria-label='Search trails, parks, or locations'
             />
             {loadingSuggestions ? (
               <p className='suggestion-note'>Finding suggestions...</p>
             ) : null}
             {!loadingSuggestions && suggestions.length > 0 ? (
-              <div className='suggestions-panel'>
+              <ul className='suggestions-panel' id='explore-search-suggestions' role='listbox'>
                 {suggestions.map((item, index) => (
-                  <button
+                  <li
                     key={`${item.type}-${item.id || item.value || index}`}
-                    type='button'
-                    className='suggestion-item'
-                    onClick={() => onPickSuggestion(item.value)}
+                    id={`explore-suggestion-${index}`}
+                    role='option'
+                    aria-selected={index === highlightedSuggestionIndex}
                   >
-                    <span>{item.label || item.value}</span>
-                    <small>{item.type}</small>
-                  </button>
+                    <button
+                      type='button'
+                      className={`suggestion-item ${index === highlightedSuggestionIndex ? 'suggestion-item--active' : ''}`.trim()}
+                      onMouseEnter={() => setHighlightedSuggestionIndex(index)}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => onPickSuggestion(item.value)}
+                    >
+                      <span>{item.label || item.value}</span>
+                      <small>{item.type}</small>
+                    </button>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : null}
           </div>
 
           <select
+            aria-label='Filter by park category'
             value={state.category}
             onChange={(event) => setParam('category', event.target.value)}
           >
@@ -443,6 +510,7 @@ const ExplorePage = () => {
           </select>
 
           <select
+            aria-label='Sort search results'
             value={state.sort}
             onChange={(event) => setParam('sort', event.target.value)}
           >
@@ -457,7 +525,7 @@ const ExplorePage = () => {
 
           <div className='filter-toolbar-actions'>
             <Button variant='ghost' onClick={requestCurrentLocation}>
-              Near me
+              Use my location
             </Button>
             <Button variant='ghost' onClick={clearFilters}>
               Reset
@@ -467,6 +535,7 @@ const ExplorePage = () => {
 
         <div className='filter-row filter-row--search-secondary'>
           <select
+            aria-label='Filter by difficulty'
             value={state.difficulty}
             onChange={(event) => setParam('difficulty', event.target.value)}
           >
@@ -481,6 +550,7 @@ const ExplorePage = () => {
           </select>
 
           <select
+            aria-label='Filter by activity'
             value={state.activity}
             onChange={(event) => setParam('activity', event.target.value)}
           >
@@ -495,6 +565,7 @@ const ExplorePage = () => {
           </select>
 
           <select
+            aria-label='Filter by route type'
             value={state.routeType}
             onChange={(event) => setParam('routeType', event.target.value)}
           >
@@ -509,6 +580,7 @@ const ExplorePage = () => {
           </select>
 
           <select
+            aria-label='Search radius in kilometers'
             value={state.radiusKm}
             onChange={(event) => setParam('radiusKm', event.target.value)}
           >
@@ -520,6 +592,7 @@ const ExplorePage = () => {
           </select>
 
           <select
+            aria-label='Filter by state'
             value={state.stateCode}
             onChange={(event) => setParam('state', event.target.value)}
           >
@@ -540,6 +613,7 @@ const ExplorePage = () => {
                 type='button'
                 className='active-filter-chip'
                 onClick={() => setParam(filter.key, '')}
+                aria-label={`Remove ${filter.label}`}
               >
                 {filter.label} ×
               </button>
@@ -547,6 +621,10 @@ const ExplorePage = () => {
           </div>
         ) : null}
       </Card>
+
+      <p className='sr-only' aria-live='polite'>
+        {summary}. {resultsContext}
+      </p>
 
       {error ? <p className='error-copy'>{error}</p> : null}
       {locationNotice ? (
@@ -567,18 +645,18 @@ const ExplorePage = () => {
                 <Card className='no-results-card'>
                   <h2>No trails found near this area</h2>
                   <p className='page-subtitle'>
-                    Try broadening your filters or search another city, park, or
-                    state to see nearby alternatives.
+                    Try widening your radius or switch to another nearby park to
+                    uncover more routes.
                   </p>
                   <div className='results-actions'>
                     <Button
                       variant='secondary'
                       onClick={() => setParam('radiusKm', '100')}
                     >
-                      Expand Radius To 100 km
+                      Expand radius to 100 km
                     </Button>
                     <Button variant='ghost' onClick={clearFilters}>
-                      Reset Filters
+                      Clear filters
                     </Button>
                   </div>
                 </Card>
@@ -604,21 +682,25 @@ const ExplorePage = () => {
                       {formatLocation(trail)}
                     </p>
                     <div className='chip-row'>
-                      <Chip>{trail.difficulty || 'general'}</Chip>
-                      <Chip>{trail.distanceKm || 0} km</Chip>
-                      <Chip>{formatRating(trail)}</Chip>
-                      {trail.routeType ? <Chip>{trail.routeType}</Chip> : null}
+                      <Chip tone='nature'>{trail.difficulty || 'general'}</Chip>
+                      <Chip tone='sky'>{trail.distanceKm || 0} km</Chip>
+                      <Chip tone='warm'>{formatRating(trail)}</Chip>
+                      {trail.routeType ? (
+                        <Chip tone='default'>{trail.routeType}</Chip>
+                      ) : null}
                       {trail.distanceFromSearchKm ? (
-                        <Chip>
+                        <Chip tone='warm'>
                           {trail.distanceFromSearchKm.toFixed(1)} km away
                         </Chip>
                       ) : null}
                     </div>
                   </div>
                   <div className='feature-actions search-trail-card__actions'>
-                    <Link to={`/trail/${trail.slug}`}>Open details</Link>
+                    <Link to={`/trail/${trail.slug}`}>View details</Link>
                     <Button variant='ghost' onClick={() => onSave(trail.id)}>
-                      {favoriteIds.includes(trail.id) ? 'Saved' : 'Save'}
+                      {favoriteIds.includes(trail.id)
+                        ? 'Saved to favorites'
+                        : 'Save trail'}
                     </Button>
                   </div>
                   <ListAssignmentControl trailId={trail.id} />
@@ -634,12 +716,12 @@ const ExplorePage = () => {
                       setParam('page', String(Math.max(1, state.page - 1)))
                     }
                   >
-                    Previous Page
+                    Previous
                   </Button>
                   <Button
                     onClick={() => setParam('page', String(state.page + 1))}
                   >
-                    Next Page
+                    Next
                   </Button>
                 </div>
               ) : null}
