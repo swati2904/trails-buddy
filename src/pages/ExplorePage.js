@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
@@ -129,7 +135,9 @@ const ExplorePage = () => {
 
   const requestCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setLocationNotice('Location is unavailable in this browser. Search by ZIP or city.');
+      setLocationNotice(
+        'Location is unavailable in this browser. Search by ZIP or city.',
+      );
       return;
     }
 
@@ -147,7 +155,9 @@ const ExplorePage = () => {
         setLocationNotice('Showing nearby trails for your current location.');
       },
       () => {
-        setLocationNotice('Location access was denied. Search by ZIP, city, state, park, or trail.');
+        setLocationNotice(
+          'Location access was denied. Search by ZIP, city, state, park, or trail.',
+        );
       },
       {
         enableHighAccuracy: false,
@@ -215,9 +225,10 @@ const ExplorePage = () => {
           request.lon = Number(state.longitude);
         }
 
-        const result = hasCoordinates && !request.q
-          ? await searchNearbyTrails(request)
-          : await searchTrails(request);
+        const result =
+          hasCoordinates && !request.q
+            ? await searchNearbyTrails(request)
+            : await searchTrails(request);
 
         const nextItems = Array.isArray(result?.items) ? result.items : [];
         setItems(nextItems);
@@ -258,7 +269,10 @@ const ExplorePage = () => {
       list.push({ key: 'category', label: `Category: ${state.category}` });
     }
     if (state.difficulty) {
-      list.push({ key: 'difficulty', label: `Difficulty: ${state.difficulty}` });
+      list.push({
+        key: 'difficulty',
+        label: `Difficulty: ${state.difficulty}`,
+      });
     }
     if (state.activity) {
       list.push({ key: 'activity', label: `Activity: ${state.activity}` });
@@ -377,11 +391,13 @@ const ExplorePage = () => {
             onChange={(event) => setParam('category', event.target.value)}
           >
             <option value=''>All Park Categories</option>
-            {(filtersMetadata?.categories || [
-              'National Parks',
-              'State Parks',
-              'Regional Parks',
-            ]).map((value) => (
+            {(
+              filtersMetadata?.categories || [
+                'National Parks',
+                'State Parks',
+                'Regional Parks',
+              ]
+            ).map((value) => (
               <option key={value} value={value}>
                 {value}
               </option>
@@ -433,13 +449,13 @@ const ExplorePage = () => {
             onChange={(event) => setParam('difficulty', event.target.value)}
           >
             <option value=''>All Difficulties</option>
-            {(filtersMetadata?.difficulties || ['easy', 'moderate', 'hard']).map(
-              (value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ),
-            )}
+            {(
+              filtersMetadata?.difficulties || ['easy', 'moderate', 'hard']
+            ).map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
           </select>
 
           <select
@@ -447,12 +463,14 @@ const ExplorePage = () => {
             onChange={(event) => setParam('activity', event.target.value)}
           >
             <option value=''>All Activities</option>
-            {(filtersMetadata?.activities || [
-              'hiking',
-              'walking',
-              'trail-running',
-              'mountain-biking',
-            ]).map((value) => (
+            {(
+              filtersMetadata?.activities || [
+                'hiking',
+                'walking',
+                'trail-running',
+                'mountain-biking',
+              ]
+            ).map((value) => (
               <option key={value} value={value}>
                 {value}
               </option>
@@ -464,11 +482,13 @@ const ExplorePage = () => {
             onChange={(event) => setParam('routeType', event.target.value)}
           >
             <option value=''>Any Route Type</option>
-            {(filtersMetadata?.routeTypes || [
-              'out-and-back',
-              'loop',
-              'point-to-point',
-            ]).map((value) => (
+            {(
+              filtersMetadata?.routeTypes || [
+                'out-and-back',
+                'loop',
+                'point-to-point',
+              ]
+            ).map((value) => (
               <option key={value} value={value}>
                 {value}
               </option>
@@ -516,24 +536,32 @@ const ExplorePage = () => {
       </Card>
 
       {error ? <p className='error-copy'>{error}</p> : null}
-      {locationNotice ? <p className='page-subtitle'>{locationNotice}</p> : null}
+      {locationNotice ? (
+        <p className='page-subtitle'>{locationNotice}</p>
+      ) : null}
 
       {loading ? (
         <Card>
           <Skeleton lines={6} />
         </Card>
       ) : (
-        <div className={`search-results-layout search-results-layout--${state.view}`}>
+        <div
+          className={`search-results-layout search-results-layout--${state.view}`}
+        >
           {showList ? (
             <div className='search-results-list'>
               {!items.length ? (
                 <Card className='no-results-card'>
                   <h2>No trails match this search yet</h2>
                   <p className='page-subtitle'>
-                    Try broadening your filters or search by a nearby city, state, or park.
+                    Try broadening your filters or search by a nearby city,
+                    state, or park.
                   </p>
                   <div className='results-actions'>
-                    <Button variant='secondary' onClick={() => setParam('radiusKm', '100')}>
+                    <Button
+                      variant='secondary'
+                      onClick={() => setParam('radiusKm', '100')}
+                    >
                       Expand Radius To 100 km
                     </Button>
                     <Button variant='ghost' onClick={clearFilters}>
@@ -546,7 +574,9 @@ const ExplorePage = () => {
               {items.map((trail) => (
                 <Card
                   key={trail.id}
-                  className={trail.id === activeTrailId ? 'ui-card--active' : ''}
+                  className={
+                    trail.id === activeTrailId ? 'ui-card--active' : ''
+                  }
                 >
                   <img
                     className='trail-thumb'
@@ -565,7 +595,9 @@ const ExplorePage = () => {
                     <Chip>{trail.distanceKm} km</Chip>
                     {trail.routeType ? <Chip>{trail.routeType}</Chip> : null}
                     {trail.distanceFromSearchKm ? (
-                      <Chip>{trail.distanceFromSearchKm.toFixed(1)} km away</Chip>
+                      <Chip>
+                        {trail.distanceFromSearchKm.toFixed(1)} km away
+                      </Chip>
                     ) : null}
                   </div>
                   <div className='feature-actions'>
@@ -583,11 +615,15 @@ const ExplorePage = () => {
                   <Button
                     variant='secondary'
                     disabled={state.page <= 1}
-                    onClick={() => setParam('page', String(Math.max(1, state.page - 1)))}
+                    onClick={() =>
+                      setParam('page', String(Math.max(1, state.page - 1)))
+                    }
                   >
                     Previous Page
                   </Button>
-                  <Button onClick={() => setParam('page', String(state.page + 1))}>
+                  <Button
+                    onClick={() => setParam('page', String(state.page + 1))}
+                  >
                     Next Page
                   </Button>
                 </div>

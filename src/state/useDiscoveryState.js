@@ -38,9 +38,13 @@ export const useDiscoveryState = () => {
   const setParam = useCallback(
     (key, value) => {
       const next = new URLSearchParams(params);
-      const normalizedValue = value === undefined || value === null ? '' : value;
+      const normalizedValue =
+        value === undefined || value === null ? '' : value;
 
-      if (String(normalizedValue).trim() === '' || normalizedValue === DEFAULTS[key]) {
+      if (
+        String(normalizedValue).trim() === '' ||
+        normalizedValue === DEFAULTS[key]
+      ) {
         next.delete(key);
       } else {
         next.set(key, String(normalizedValue));
@@ -60,7 +64,11 @@ export const useDiscoveryState = () => {
       const next = new URLSearchParams(params);
 
       Object.entries(updates).forEach(([key, value]) => {
-        if (value === undefined || value === null || String(value).trim() === '') {
+        if (
+          value === undefined ||
+          value === null ||
+          String(value).trim() === ''
+        ) {
           next.delete(key);
           return;
         }
@@ -95,7 +103,13 @@ export const useDiscoveryState = () => {
       next.set('lon', state.longitude);
     }
     setParams(next, { replace: true });
-  }, [setParams, state.latitude, state.longitude, state.placeLabel, state.query]);
+  }, [
+    setParams,
+    state.latitude,
+    state.longitude,
+    state.placeLabel,
+    state.query,
+  ]);
 
   return {
     state,

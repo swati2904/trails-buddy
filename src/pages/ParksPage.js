@@ -71,7 +71,9 @@ const ParksPage = () => {
           <input
             value={state.stateCode}
             placeholder='State (e.g. CA)'
-            onChange={(event) => setParam('state', event.target.value.toUpperCase())}
+            onChange={(event) =>
+              setParam('state', event.target.value.toUpperCase())
+            }
             maxLength={2}
           />
         </div>
@@ -87,9 +89,15 @@ const ParksPage = () => {
         <div className='cards-grid'>
           {items.map((park) => (
             <Card key={park.id}>
-              <img className='trail-thumb' src={park.heroImageUrl} alt={park.name} />
+              <img
+                className='trail-thumb'
+                src={park.heroImageUrl}
+                alt={park.name}
+              />
               <h2>{park.name}</h2>
-              <p className='page-subtitle'>{park.summary || 'Park overview coming soon.'}</p>
+              <p className='page-subtitle'>
+                {park.summary || 'Park overview coming soon.'}
+              </p>
               <div className='chip-row'>
                 <Chip>{park.category}</Chip>
                 {park.state ? <Chip>{park.state}</Chip> : null}

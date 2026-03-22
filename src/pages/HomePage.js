@@ -152,7 +152,9 @@ const HomePage = () => {
 
   const onUseCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setError('Location is unavailable in this browser. Search by ZIP or city.');
+      setError(
+        'Location is unavailable in this browser. Search by ZIP or city.',
+      );
       return;
     }
 
@@ -160,10 +162,14 @@ const HomePage = () => {
       (position) => {
         const lat = Number(position.coords.latitude).toFixed(6);
         const lon = Number(position.coords.longitude).toFixed(6);
-        navigate(`/nearby?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&place=${encodeURIComponent('Current Location')}`);
+        navigate(
+          `/nearby?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&place=${encodeURIComponent('Current Location')}`,
+        );
       },
       () => {
-        setError('Unable to access current location. Try searching by city, state, or ZIP.');
+        setError(
+          'Unable to access current location. Try searching by city, state, or ZIP.',
+        );
       },
       {
         enableHighAccuracy: false,
@@ -252,10 +258,14 @@ const HomePage = () => {
             <h2>{category.title}</h2>
             <p>{category.subtitle}</p>
             <div className='feature-actions'>
-              <Link to={`/search?category=${encodeURIComponent(category.queryValue)}`}>
+              <Link
+                to={`/search?category=${encodeURIComponent(category.queryValue)}`}
+              >
                 <Button variant='ghost'>Explore Trails</Button>
               </Link>
-              <Link to={`/parks?category=${encodeURIComponent(category.queryValue)}`}>
+              <Link
+                to={`/parks?category=${encodeURIComponent(category.queryValue)}`}
+              >
                 <Button variant='secondary'>Browse Parks</Button>
               </Link>
             </div>
@@ -279,7 +289,11 @@ const HomePage = () => {
           <div className='cards-grid'>
             {section.items.map((trail) => (
               <Card key={`${section.id}-${trail.id}`}>
-                <img className='trail-thumb' src={trail.thumbnailUrl} alt={trail.name} />
+                <img
+                  className='trail-thumb'
+                  src={trail.thumbnailUrl}
+                  alt={trail.name}
+                />
                 <h3>{trail.name}</h3>
                 <p>{trail.parkName}</p>
                 <div className='chip-row'>
