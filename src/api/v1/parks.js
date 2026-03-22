@@ -50,7 +50,7 @@ export const normalizePark = (park) => {
 
 export const searchParks = async (query = {}) => {
   const response = await requestJson({
-    path: '/search/parks',
+    path: '/parks',
     query,
     fallbackMessage: 'Unable to load parks',
   });

@@ -33,7 +33,7 @@ const normalizeDiscoveryResults = (response, query = {}) => {
 
 export const searchDiscovery = async (query = {}) => {
   const response = await requestJson({
-    path: '/search',
+    path: '/search/global',
     query,
     fallbackMessage: 'Unable to run global search',
   });
@@ -53,7 +53,7 @@ export const searchNearbyTrails = async (query = {}) => {
 
 export const getSearchSuggestions = async (query = {}) => {
   const response = await requestJson({
-    path: '/search/suggestions',
+    path: '/search/autocomplete',
     query,
     fallbackMessage: 'Unable to load search suggestions',
   });
@@ -68,7 +68,7 @@ export const getSearchSuggestions = async (query = {}) => {
 
 export const getFiltersMetadata = async (query = {}) => {
   const response = await requestJson({
-    path: '/search/filters',
+    path: '/metadata/filters',
     query,
     fallbackMessage: 'Unable to load search filters',
   });

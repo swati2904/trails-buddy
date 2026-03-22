@@ -79,7 +79,11 @@ export const normalizeFiltersMetadata = (response = {}) => {
   const source = response.filters || response;
 
   return {
-    categories: Array.isArray(source?.categories) ? source.categories : [],
+    categories: Array.isArray(source?.parkCategories)
+      ? source.parkCategories
+      : Array.isArray(source?.categories)
+        ? source.categories
+        : [],
     difficulties: Array.isArray(source?.difficulties)
       ? source.difficulties
       : [],

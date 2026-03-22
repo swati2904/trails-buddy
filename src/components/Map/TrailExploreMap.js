@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 
 const DEFAULT_CENTER = [39.7392, -104.9903];
+const CLUSTER_THRESHOLD = 140;
 
 const isFiniteNumber = (value) => Number.isFinite(Number(value));
 
@@ -25,6 +26,42 @@ const normalizeCoordinate = (coordinate) => {
   }
 
   return null;
+};
+
+const toGridKey = (position, size) => {
+  const [lat, lon] = position;
+  const latCell = Math.floor(lat / size);
+  const lonCell = Math.floor(lon / size);
+  return `${latCell}:${lonCell}`;
+};
+
+const clusterPoints = (points, size = 0.12) => {
+  const buckets = new Map();
+
+  points.forEach((item) => {
+    const key = toGridKey(item.position, size);
+    const existing = buckets.get(key);
+    if (!existing) {
+      buckets.set(key, {
+        points: [item],
+        sumLat: item.position[0],
+        sumLon: item.position[1],
+      });
+      return;
+    }
+
+    existing.points.push(item);
+    existing.sumLat += item.position[0];
+    existing.sumLon += item.position[1];
+  });
+
+  return Array.from(buckets.values()).map((bucket) => ({
+    items: bucket.points,
+    center: [
+      bucket.sumLat / bucket.points.length,
+      bucket.sumLon / bucket.points.length,
+    ],
+  }));
 };
 
 const TrailExploreMap = ({
@@ -54,6 +91,14 @@ const TrailExploreMap = ({
 
     return points.slice(0, markerLimit);
   }, [points, markerLimit]);
+
+  const clustered = useMemo(() => {
+    if (visiblePoints.length <= CLUSTER_THRESHOLD) {
+      return null;
+    }
+
+    return clusterPoints(visiblePoints);
+  }, [visiblePoints]);
 
   const center = useMemo(() => {
     if (!visiblePoints.length) {
@@ -96,35 +141,72 @@ const TrailExploreMap = ({
           attribution='&copy; OpenStreetMap contributors'
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         />
-        {visiblePoints.map(({ trail, position }) => {
-          const active = trail.id === activeTrailId;
-          return (
-            <CircleMarker
-              key={trail.id}
-              center={position}
-              radius={active ? 9 : 7}
-              pathOptions={{
-                color: active ? '#ff5f2e' : '#245139',
-                fillColor: active ? '#ff7b42' : '#2f6b4a',
-                fillOpacity: 0.9,
-                weight: active ? 3 : 2,
-              }}
-              eventHandlers={{
-                click: () => {
-                  if (onPickTrail) {
-                    onPickTrail(trail.id);
-                  }
-                },
-              }}
-            >
-              <Popup>
-                <strong>{trail.name}</strong>
-                <div>{trail.location}</div>
-                <div>{trail.distanceKm} km</div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
+        {clustered
+          ? clustered.map((group, index) => {
+              const sample = group.items[0]?.trail;
+              const activeInCluster = group.items.some(
+                (entry) => entry.trail.id === activeTrailId,
+              );
+              const count = group.items.length;
+
+              return (
+                <CircleMarker
+                  key={`${sample?.id || index}-cluster`}
+                  center={group.center}
+                  radius={Math.max(
+                    8,
+                    Math.min(16, 6 + Math.log2(count + 1) * 2),
+                  )}
+                  pathOptions={{
+                    color: activeInCluster ? '#F59E0B' : '#2E7D32',
+                    fillColor: activeInCluster ? '#F59E0B' : '#66BB6A',
+                    fillOpacity: 0.9,
+                    weight: activeInCluster ? 3 : 2,
+                  }}
+                  eventHandlers={{
+                    click: () => {
+                      if (onPickTrail && sample?.id) {
+                        onPickTrail(sample.id);
+                      }
+                    },
+                  }}
+                >
+                  <Popup>
+                    <strong>{count} trails in this area</strong>
+                    {sample?.name ? <div>Try: {sample.name}</div> : null}
+                  </Popup>
+                </CircleMarker>
+              );
+            })
+          : visiblePoints.map(({ trail, position }) => {
+              const active = trail.id === activeTrailId;
+              return (
+                <CircleMarker
+                  key={trail.id}
+                  center={position}
+                  radius={active ? 9 : 7}
+                  pathOptions={{
+                    color: active ? '#F59E0B' : '#2E7D32',
+                    fillColor: active ? '#F59E0B' : '#66BB6A',
+                    fillOpacity: 0.9,
+                    weight: active ? 3 : 2,
+                  }}
+                  eventHandlers={{
+                    click: () => {
+                      if (onPickTrail) {
+                        onPickTrail(trail.id);
+                      }
+                    },
+                  }}
+                >
+                  <Popup>
+                    <strong>{trail.name}</strong>
+                    <div>{trail.location}</div>
+                    <div>{trail.distanceKm} km</div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
       </MapContainer>
     </div>
   );

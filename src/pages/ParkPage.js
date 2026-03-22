@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
 import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
 import { getParkBySlug } from '../api/v1/parks';
 import { searchTrails } from '../api/v1/trails';
 import TrailExploreMap from '../components/Map/TrailExploreMap';
 import { getApiErrorMessage } from '../api/v1/errorMessages';
+
+const PARK_HERO_FALLBACK =
+  'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60';
 
 const ParkPage = () => {
   const { slug } = useParams();
@@ -74,26 +78,31 @@ const ParkPage = () => {
   }
 
   return (
-    <section className='page-block'>
-      <Card>
-        <img className='trail-hero' src={park.heroImageUrl} alt={park.name} />
-        <h1 className='page-title'>{park.name}</h1>
-        <p className='page-subtitle'>
-          {park.summary ||
-            'Park description will appear here when available from the backend.'}
-        </p>
-        <div className='chip-row'>
-          <Chip>{park.category}</Chip>
-          {park.state ? <Chip>{park.state}</Chip> : null}
-          <Chip>{park.topTrails.length} available trails</Chip>
+    <section className='park-detail-page'>
+      <Card className='park-detail-hero'>
+        <img
+          className='trail-hero'
+          src={park.heroImageUrl || PARK_HERO_FALLBACK}
+          alt={park.name}
+          loading='lazy'
+        />
+        <div className='trail-detail-hero__overlay' />
+        <div className='trail-detail-hero__content'>
+          <h1 className='page-title'>{park.name}</h1>
+          <p className='page-subtitle'>
+            {park.summary || 'No description available yet.'}
+          </p>
+          <div className='chip-row'>
+            <Chip>{park.category || 'Park'}</Chip>
+            {park.state ? <Chip>{park.state}</Chip> : null}
+            <Chip>{(park.topTrails || []).length} trails</Chip>
+          </div>
         </div>
       </Card>
 
       <Card>
-        <h2>Park Area Map</h2>
-        <p className='page-subtitle'>
-          View trails in and around the park area.
-        </p>
+        <h2>Park map preview</h2>
+        <p className='page-subtitle'>Explore trails in and around this park.</p>
         <TrailExploreMap
           trails={nearbyTrails}
           activeTrailId={activeTrailId}
@@ -103,18 +112,26 @@ const ParkPage = () => {
       </Card>
 
       <Card>
-        <h2>Trails In This Park</h2>
+        <h2>Top trails in this park</h2>
         {Array.isArray(park.topTrails) && park.topTrails.length > 0 ? (
-          <ul className='link-list'>
+          <div className='park-trails-list'>
             {park.topTrails.map((trail) => (
-              <li key={trail.id}>
+              <article key={trail.id} className='park-trail-row'>
+                <div>
+                  <h3>{trail.name}</h3>
+                  <p className='page-subtitle'>
+                    {trail.difficulty || 'general'} •{' '}
+                    {Number(trail.rating) > 0
+                      ? `${Number(trail.rating).toFixed(1)} rated`
+                      : 'Not yet rated'}
+                  </p>
+                </div>
                 <Link to={`/trail/${trail.slug}`}>
-                  {trail.name} ({trail.difficulty || 'moderate'},{' '}
-                  {trail.rating || 0} stars)
+                  <Button variant='secondary'>View</Button>
                 </Link>
-              </li>
+              </article>
             ))}
-          </ul>
+          </div>
         ) : (
           <p className='page-subtitle'>
             No park-specific trails are available yet.
@@ -125,29 +142,27 @@ const ParkPage = () => {
       <Card>
         <h2>Nearby Trails</h2>
         {nearbyTrails.length ? (
-          <ul className='link-list'>
+          <div className='park-trails-list'>
             {nearbyTrails.map((trail) => (
-              <li key={trail.id}>
+              <article key={trail.id} className='park-trail-row'>
+                <div>
+                  <h3>{trail.name}</h3>
+                  <p className='page-subtitle'>
+                    {trail.parkCategory || 'Park'} • {trail.distanceKm || 0} km
+                  </p>
+                </div>
                 <Link to={`/trail/${trail.slug}`}>
-                  {trail.name} ({trail.parkCategory}, {trail.distanceKm} km)
+                  <Button variant='ghost'>Open</Button>
                 </Link>
-              </li>
+              </article>
             ))}
-          </ul>
+          </div>
         ) : (
           <p className='page-subtitle'>
-            Nearby trail recommendations will appear once location-aware park
-            indexing is available.
+            No trails found near this area yet. Try nearby alternatives from the
+            Explore page.
           </p>
         )}
-      </Card>
-
-      <Card>
-        <h2>Nearby Parks Placeholder</h2>
-        <p className='page-subtitle'>
-          Future backend support can power nearby park suggestions from this
-          park profile.
-        </p>
       </Card>
 
       {error ? <p className='error-copy'>{error}</p> : null}

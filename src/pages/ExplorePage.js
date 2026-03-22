@@ -28,6 +28,24 @@ import { useDiscoveryState } from '../state/useDiscoveryState';
 
 const PAGE_SIZE = 24;
 const BASE_RADIUS_OPTIONS = [10, 25, 50, 100];
+const TRAIL_PLACEHOLDER =
+  'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=60';
+
+const formatLocation = (trail) => {
+  const parts = [trail?.location, trail?.zipCode].filter(Boolean);
+  const built = parts.join(' • ').trim();
+  return built || 'Location unavailable';
+};
+
+const formatRating = (trail) => {
+  const rating = Number(trail?.rating);
+  const count = Number(trail?.reviewCount || trail?.rating?.count || 0);
+  if (!Number.isFinite(rating) || rating <= 0) {
+    return 'Not yet rated';
+  }
+
+  return count > 0 ? `${rating.toFixed(1)} (${count})` : rating.toFixed(1);
+};
 
 const ExplorePage = () => {
   const location = useLocation();
@@ -313,10 +331,10 @@ const ExplorePage = () => {
 
   const pageHeading =
     location.pathname === '/search'
-      ? 'Search Trails'
+      ? 'Search trails'
       : location.pathname === '/nearby'
-        ? 'Nearby Trails'
-        : 'Explore Trails';
+        ? 'Nearby trails'
+        : 'Explore trails';
 
   const resultsContext = state.query.trim()
     ? `Results for "${state.query.trim()}"`
@@ -353,69 +371,15 @@ const ExplorePage = () => {
   };
 
   return (
-    <section className='page-block'>
+    <section className='explore-page'>
       <Card className='explore-filters'>
-        <h1 className='page-title'>{pageHeading}</h1>
-        <p className='page-subtitle'>{summary}</p>
-        <p className='page-subtitle'>{resultsContext}</p>
-
-        <div className='filter-row filter-row--search-primary'>
-          <div className='search-input-stack'>
-            <input
-              value={queryInput}
-              placeholder='Search ZIP, city, state, park, or trail'
-              onChange={(event) => setQueryInput(event.target.value)}
-            />
-            {loadingSuggestions ? (
-              <p className='suggestion-note'>Finding suggestions...</p>
-            ) : null}
-            {!loadingSuggestions && suggestions.length > 0 ? (
-              <div className='suggestions-panel'>
-                {suggestions.map((item) => (
-                  <button
-                    key={`${item.type}-${item.id}`}
-                    type='button'
-                    className='suggestion-item'
-                    onClick={() => onPickSuggestion(item.value)}
-                  >
-                    <span>{item.label}</span>
-                    <small>{item.type}</small>
-                  </button>
-                ))}
-              </div>
-            ) : null}
+        <div className='explore-headline'>
+          <div>
+            <h1 className='page-title'>{pageHeading}</h1>
+            <p className='page-subtitle'>{summary}</p>
+            <p className='page-subtitle'>{resultsContext}</p>
           </div>
-
-          <select
-            value={state.category}
-            onChange={(event) => setParam('category', event.target.value)}
-          >
-            <option value=''>All Park Categories</option>
-            {(
-              filtersMetadata?.categories || [
-                'National Parks',
-                'State Parks',
-                'Regional Parks',
-              ]
-            ).map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={state.sort}
-            onChange={(event) => setParam('sort', event.target.value)}
-          >
-            <option value='most-relevant'>Most Relevant</option>
-            <option value='nearest'>Nearest</option>
-            <option value='easiest'>Easiest</option>
-            <option value='shortest'>Shortest</option>
-            <option value='longest'>Longest</option>
-          </select>
-
-          <div className='filter-toolbar-actions'>
+          <div className='explore-view-toggle'>
             <Button
               variant={state.view === 'list' ? 'primary' : 'secondary'}
               onClick={() => setParam('view', 'list')}
@@ -434,8 +398,66 @@ const ExplorePage = () => {
             >
               Split
             </Button>
+          </div>
+        </div>
+
+        <div className='filter-row filter-row--search-primary'>
+          <div className='search-input-stack'>
+            <input
+              value={queryInput}
+              placeholder='Search trails, parks, or locations'
+              onChange={(event) => setQueryInput(event.target.value)}
+            />
+            {loadingSuggestions ? (
+              <p className='suggestion-note'>Finding suggestions...</p>
+            ) : null}
+            {!loadingSuggestions && suggestions.length > 0 ? (
+              <div className='suggestions-panel'>
+                {suggestions.map((item, index) => (
+                  <button
+                    key={`${item.type}-${item.id || item.value || index}`}
+                    type='button'
+                    className='suggestion-item'
+                    onClick={() => onPickSuggestion(item.value)}
+                  >
+                    <span>{item.label || item.value}</span>
+                    <small>{item.type}</small>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <select
+            value={state.category}
+            onChange={(event) => setParam('category', event.target.value)}
+          >
+            <option value=''>All park categories</option>
+            {(
+              filtersMetadata?.categories || ['NATIONAL_PARK', 'STATE_PARK']
+            ).map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={state.sort}
+            onChange={(event) => setParam('sort', event.target.value)}
+          >
+            <option value='most-relevant'>Relevance</option>
+            <option value='distance'>Distance</option>
+            <option value='nearest'>Nearest</option>
+            <option value='easiest'>Easiest</option>
+            <option value='shortest'>Shortest</option>
+            <option value='longest'>Longest</option>
+            <option value='alphabetical'>Alphabetical</option>
+          </select>
+
+          <div className='filter-toolbar-actions'>
             <Button variant='ghost' onClick={requestCurrentLocation}>
-              Use Current Location
+              Near me
             </Button>
             <Button variant='ghost' onClick={clearFilters}>
               Reset
@@ -448,7 +470,7 @@ const ExplorePage = () => {
             value={state.difficulty}
             onChange={(event) => setParam('difficulty', event.target.value)}
           >
-            <option value=''>All Difficulties</option>
+            <option value=''>Difficulty</option>
             {(
               filtersMetadata?.difficulties || ['easy', 'moderate', 'hard']
             ).map((value) => (
@@ -462,37 +484,28 @@ const ExplorePage = () => {
             value={state.activity}
             onChange={(event) => setParam('activity', event.target.value)}
           >
-            <option value=''>All Activities</option>
-            {(
-              filtersMetadata?.activities || [
-                'hiking',
-                'walking',
-                'trail-running',
-                'mountain-biking',
-              ]
-            ).map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
+            <option value=''>Activity</option>
+            {(filtersMetadata?.activities || ['hiking', 'running']).map(
+              (value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ),
+            )}
           </select>
 
           <select
             value={state.routeType}
             onChange={(event) => setParam('routeType', event.target.value)}
           >
-            <option value=''>Any Route Type</option>
-            {(
-              filtersMetadata?.routeTypes || [
-                'out-and-back',
-                'loop',
-                'point-to-point',
-              ]
-            ).map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
+            <option value=''>Route type</option>
+            {(filtersMetadata?.routeTypes || ['loop', 'out-and-back']).map(
+              (value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ),
+            )}
           </select>
 
           <select
@@ -510,7 +523,7 @@ const ExplorePage = () => {
             value={state.stateCode}
             onChange={(event) => setParam('state', event.target.value)}
           >
-            <option value=''>All States</option>
+            <option value=''>State</option>
             {(filtersMetadata?.states || []).map((value) => (
               <option key={value} value={value}>
                 {value}
@@ -552,10 +565,10 @@ const ExplorePage = () => {
             <div className='search-results-list'>
               {!items.length ? (
                 <Card className='no-results-card'>
-                  <h2>No trails match this search yet</h2>
+                  <h2>No trails found near this area</h2>
                   <p className='page-subtitle'>
-                    Try broadening your filters or search by a nearby city,
-                    state, or park.
+                    Try broadening your filters or search another city, park, or
+                    state to see nearby alternatives.
                   </p>
                   <div className='results-actions'>
                     <Button
@@ -574,33 +587,35 @@ const ExplorePage = () => {
               {items.map((trail) => (
                 <Card
                   key={trail.id}
-                  className={
-                    trail.id === activeTrailId ? 'ui-card--active' : ''
-                  }
+                  className={`search-trail-card ${trail.id === activeTrailId ? 'ui-card--active' : ''}`.trim()}
                 >
                   <img
                     className='trail-thumb'
-                    src={trail.thumbnailUrl}
+                    src={trail.thumbnailUrl || TRAIL_PLACEHOLDER}
                     alt={trail.name}
+                    loading='lazy'
                     onMouseEnter={() => setActiveTrailId(trail.id)}
                     onClick={() => setActiveTrailId(trail.id)}
                   />
-                  <h2>{trail.name}</h2>
-                  <p>
-                    {trail.parkName} · {trail.location}
-                  </p>
-                  <div className='chip-row'>
-                    <Chip>{trail.parkCategory}</Chip>
-                    <Chip>{trail.difficulty}</Chip>
-                    <Chip>{trail.distanceKm} km</Chip>
-                    {trail.routeType ? <Chip>{trail.routeType}</Chip> : null}
-                    {trail.distanceFromSearchKm ? (
-                      <Chip>
-                        {trail.distanceFromSearchKm.toFixed(1)} km away
-                      </Chip>
-                    ) : null}
+                  <div className='search-trail-card__body'>
+                    <h2>{trail.name}</h2>
+                    <p className='search-trail-card__park'>{trail.parkName}</p>
+                    <p className='search-trail-card__meta'>
+                      {formatLocation(trail)}
+                    </p>
+                    <div className='chip-row'>
+                      <Chip>{trail.difficulty || 'general'}</Chip>
+                      <Chip>{trail.distanceKm || 0} km</Chip>
+                      <Chip>{formatRating(trail)}</Chip>
+                      {trail.routeType ? <Chip>{trail.routeType}</Chip> : null}
+                      {trail.distanceFromSearchKm ? (
+                        <Chip>
+                          {trail.distanceFromSearchKm.toFixed(1)} km away
+                        </Chip>
+                      ) : null}
+                    </div>
                   </div>
-                  <div className='feature-actions'>
+                  <div className='feature-actions search-trail-card__actions'>
                     <Link to={`/trail/${trail.slug}`}>Open details</Link>
                     <Button variant='ghost' onClick={() => onSave(trail.id)}>
                       {favoriteIds.includes(trail.id) ? 'Saved' : 'Save'}

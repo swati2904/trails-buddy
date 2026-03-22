@@ -61,7 +61,7 @@ const TrailRouteMap = ({ trail }) => {
         {route.length >= 2 ? (
           <Polyline
             positions={route}
-            pathOptions={{ color: '#ff5f2e', weight: 5, opacity: 0.9 }}
+            pathOptions={{ color: '#2E7D32', weight: 5, opacity: 0.9 }}
           />
         ) : null}
         {start ? (
@@ -69,8 +69,8 @@ const TrailRouteMap = ({ trail }) => {
             center={start}
             radius={8}
             pathOptions={{
-              color: '#245139',
-              fillColor: '#2f6b4a',
+              color: '#1B5E20',
+              fillColor: '#66BB6A',
               fillOpacity: 0.95,
               weight: 2,
             }}

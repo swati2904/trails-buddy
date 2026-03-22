@@ -9,24 +9,51 @@ import { getApiErrorMessage } from '../api/v1/errorMessages';
 
 const PARK_CATEGORIES = [
   {
-    id: 'national',
+    id: 'NATIONAL_PARK',
     title: 'National Parks',
-    subtitle: 'Iconic landscapes and destination-worthy trails.',
-    queryValue: 'National Parks',
+    subtitle: 'Iconic landscapes and bucket-list routes.',
+    queryValue: 'NATIONAL_PARK',
   },
   {
-    id: 'state',
+    id: 'STATE_PARK',
     title: 'State Parks',
-    subtitle: 'Weekender favorites with approachable trail systems.',
-    queryValue: 'State Parks',
+    subtitle: 'Weekend escapes with approachable terrain.',
+    queryValue: 'STATE_PARK',
   },
   {
-    id: 'regional',
-    title: 'Regional Parks',
-    subtitle: 'Quick local escapes and everyday discovery loops.',
-    queryValue: 'Regional Parks',
+    id: 'nearby',
+    title: 'Nearby Trails',
+    subtitle: 'Use your location to find what is closest today.',
+    queryValue: 'nearby',
   },
 ];
+
+const FALLBACK_TRAIL_IMAGE =
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=60';
+
+const formatLocation = (trail) => {
+  const raw = String(trail?.location || '').trim();
+  if (raw) {
+    return raw;
+  }
+
+  const parts = [trail?.city, trail?.state].filter(Boolean);
+  return parts.join(', ') || 'Location unavailable';
+};
+
+const formatRating = (trail) => {
+  const rating = Number(trail?.rating);
+  const count = Number(trail?.reviewCount || trail?.rating?.count || 0);
+  if (!Number.isFinite(rating) || rating <= 0) {
+    return 'Not yet rated';
+  }
+
+  if (!Number.isFinite(count) || count <= 0) {
+    return `${rating.toFixed(1)} rated`;
+  }
+
+  return `${rating.toFixed(1)} (${count})`;
+};
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -45,8 +72,8 @@ const HomePage = () => {
 
       try {
         const popularResult = await getFeaturedTrails({
-          sort: 'popular',
-          pageSize: 4,
+          sort: 'relevance',
+          pageSize: 6,
         });
 
         if (isMounted) {
@@ -70,9 +97,9 @@ const HomePage = () => {
         async (position) => {
           try {
             const nearbyResult = await getFeaturedTrails({
-              sort: 'nearest',
+              sort: 'distance',
               radiusKm: 50,
-              pageSize: 4,
+              pageSize: 6,
               lat: Number(position.coords.latitude),
               lon: Number(position.coords.longitude),
             });
@@ -184,126 +211,136 @@ const HomePage = () => {
       return [
         {
           id: 'nearby',
-          title: 'Featured Nearby Trails',
+          title: 'Explore near you',
           items: featuredNearby,
         },
-        { id: 'popular', title: 'Popular This Week', items: featuredPopular },
+        { id: 'popular', title: 'Popular right now', items: featuredPopular },
       ];
     }
 
-    return [{ id: 'popular', title: 'Popular Trails', items: featuredPopular }];
+    return [
+      { id: 'popular', title: 'Featured trails', items: featuredPopular },
+    ];
   }, [featuredNearby, featuredPopular]);
 
   return (
-    <section className='page-block'>
-      <div className='home-hero home-hero--discovery'>
-        <h1 className='page-title'>Discover Trails Across U.S. Parks</h1>
-        <p className='page-subtitle'>
-          Search by ZIP, city, state, park name, or trail name. Browse National,
-          State, and Regional Parks with list + map discovery.
-        </p>
+    <section className='home-page'>
+      <div className='home-hero'>
+        <div className='home-hero__overlay' />
+        <div className='home-hero__content'>
+          <Chip>Trail Discovery App</Chip>
+          <h1 className='page-title'>Find your next trail adventure</h1>
+          <p className='page-subtitle'>
+            Explore National and State Parks with map-first search, live nearby
+            discovery, and trail details built for planning real hikes.
+          </p>
 
-        <form className='discovery-search' onSubmit={onSearchSubmit}>
-          <div className='search-input-stack'>
-            <input
-              value={searchInput}
-              placeholder='Search by ZIP, city, state, park, or trail'
-              onChange={(event) => setSearchInput(event.target.value)}
-              aria-label='Search trails'
-            />
-            {loadingSuggestions ? (
-              <p className='suggestion-note'>Finding suggestions...</p>
-            ) : null}
-            {!loadingSuggestions && suggestions.length > 0 ? (
-              <div className='suggestions-panel'>
-                {suggestions.map((item) => (
-                  <button
-                    key={`${item.type}-${item.id}`}
-                    type='button'
-                    className='suggestion-item'
-                    onClick={() => {
-                      setSearchInput(item.value);
-                      navigate(`/search?q=${encodeURIComponent(item.value)}`);
-                    }}
-                  >
-                    <span>{item.label}</span>
-                    <small>{item.type}</small>
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          <div className='home-search-actions'>
-            <Button type='submit'>Search Trails</Button>
+          <form className='hero-search' onSubmit={onSearchSubmit}>
+            <div className='search-input-stack'>
+              <input
+                value={searchInput}
+                placeholder='Search trails, parks, or locations'
+                onChange={(event) => setSearchInput(event.target.value)}
+                aria-label='Search trails, parks, or locations'
+              />
+              {loadingSuggestions ? (
+                <p className='suggestion-note'>Finding suggestions...</p>
+              ) : null}
+              {!loadingSuggestions && suggestions.length > 0 ? (
+                <div className='suggestions-panel'>
+                  {suggestions.map((item, index) => (
+                    <button
+                      key={`${item.type}-${item.id || item.value || index}`}
+                      type='button'
+                      className='suggestion-item'
+                      onClick={() => {
+                        setSearchInput(item.value);
+                        navigate(`/search?q=${encodeURIComponent(item.value)}`);
+                      }}
+                    >
+                      <span>{item.label || item.value}</span>
+                      <small>{item.type}</small>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <Button type='submit'>Search</Button>
             <Button variant='secondary' onClick={onUseCurrentLocation}>
-              Use Current Location
+              Use current location
             </Button>
-          </div>
-        </form>
+          </form>
 
-        <div className='chip-row'>
-          <Chip>ZIP</Chip>
-          <Chip>City</Chip>
-          <Chip>State</Chip>
-          <Chip>Park Name</Chip>
-          <Chip>Trail Name</Chip>
-          <Chip>AI-Ready Smart Search</Chip>
+          <div className='home-hero__quick-categories'>
+            {PARK_CATEGORIES.map((category) =>
+              category.id === 'nearby' ? (
+                <button
+                  key={category.id}
+                  type='button'
+                  className='home-quick-category'
+                  onClick={onUseCurrentLocation}
+                >
+                  <h3>{category.title}</h3>
+                  <p>{category.subtitle}</p>
+                </button>
+              ) : (
+                <Link
+                  key={category.id}
+                  className='home-quick-category'
+                  to={`/search?category=${encodeURIComponent(category.queryValue)}`}
+                >
+                  <h3>{category.title}</h3>
+                  <p>{category.subtitle}</p>
+                </Link>
+              ),
+            )}
+          </div>
         </div>
       </div>
-
-      <div className='category-grid'>
-        {PARK_CATEGORIES.map((category) => (
-          <Card key={category.id} className='category-card'>
-            <h2>{category.title}</h2>
-            <p>{category.subtitle}</p>
-            <div className='feature-actions'>
-              <Link
-                to={`/search?category=${encodeURIComponent(category.queryValue)}`}
-              >
-                <Button variant='ghost'>Explore Trails</Button>
-              </Link>
-              <Link
-                to={`/parks?category=${encodeURIComponent(category.queryValue)}`}
-              >
-                <Button variant='secondary'>Browse Parks</Button>
-              </Link>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <h2>Future AI Discovery</h2>
-        <p className='page-subtitle'>
-          Planned: natural language queries like "easy hikes near San Diego" and
-          personalized recommendations by activity and difficulty.
-        </p>
-      </Card>
 
       {error ? <p className='error-copy'>{error}</p> : null}
 
       {homeSections.map((section) => (
-        <section key={section.id}>
-          <h2>{section.title}</h2>
-          <div className='cards-grid'>
+        <section key={section.id} className='home-section'>
+          <div className='home-section__head'>
+            <h2>{section.title}</h2>
+            <Link to={section.id === 'nearby' ? '/nearby' : '/explore'}>
+              View all
+            </Link>
+          </div>
+          <div className='trail-grid'>
             {section.items.map((trail) => (
-              <Card key={`${section.id}-${trail.id}`}>
+              <Card key={`${section.id}-${trail.id}`} className='trail-card'>
                 <img
                   className='trail-thumb'
-                  src={trail.thumbnailUrl}
+                  src={trail.thumbnailUrl || FALLBACK_TRAIL_IMAGE}
                   alt={trail.name}
+                  loading='lazy'
                 />
-                <h3>{trail.name}</h3>
-                <p>{trail.parkName}</p>
-                <div className='chip-row'>
-                  <Chip>{trail.parkCategory}</Chip>
-                  <Chip>{trail.difficulty}</Chip>
-                  <Chip>{trail.distanceKm} km</Chip>
+                <div className='trail-card__content'>
+                  <h3>{trail.name}</h3>
+                  <p className='trail-card__park'>
+                    {trail.parkName || 'Unknown park'}
+                  </p>
+                  <p className='trail-card__location'>
+                    {formatLocation(trail)}
+                  </p>
+                  <div className='chip-row'>
+                    <Chip>{trail.difficulty || 'general'}</Chip>
+                    <Chip>{trail.distanceKm || 0} km</Chip>
+                    <Chip>{formatRating(trail)}</Chip>
+                  </div>
                 </div>
-                <Link to={`/trail/${trail.slug}`}>
-                  <Button variant='ghost'>View Trail</Button>
-                </Link>
+                <div className='trail-card__actions'>
+                  <Link to={`/trail/${trail.slug}`}>
+                    <Button variant='secondary'>View Trail</Button>
+                  </Link>
+                  {trail.parkSlug ? (
+                    <Link to={`/parks/${trail.parkSlug}`}>
+                      <Button variant='ghost'>Open Park</Button>
+                    </Link>
+                  ) : null}
+                </div>
               </Card>
             ))}
           </div>

@@ -18,6 +18,17 @@ import {
 } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
 
+const TRAIL_HERO_FALLBACK =
+  'https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1200&q=60';
+
+const valueOrFallback = (value, fallback) => {
+  if (value === null || value === undefined || value === '') {
+    return fallback;
+  }
+
+  return value;
+};
+
 const TrailDetailPage = () => {
   const { isAuthenticated, tokens, signOutSession } = useAuth();
   const { slug } = useParams();
@@ -26,6 +37,7 @@ const TrailDetailPage = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
+  const [rating, setRating] = useState('5');
   const [savedFavorite, setSavedFavorite] = useState(false);
   const [error, setError] = useState('');
 
@@ -69,7 +81,7 @@ const TrailDetailPage = () => {
       await createTrailReview(
         trail.id,
         {
-          rating: 5,
+          rating: Number(rating),
           comment: comment.trim(),
           condition: 'good',
           activity: 'hiking',
@@ -80,6 +92,7 @@ const TrailDetailPage = () => {
       const refreshedReviews = await getTrailReviews(trail.id, 1, 20);
       setReviews(refreshedReviews.items || []);
       setComment('');
+      setRating('5');
     } catch (submitError) {
       if (shouldForceSignOut(submitError)) {
         signOutSession();
@@ -128,89 +141,105 @@ const TrailDetailPage = () => {
   }
 
   return (
-    <section className='page-block'>
-      <Card>
-        <img className='trail-hero' src={trail.thumbnailUrl} alt={trail.name} />
-        <h1 className='page-title'>{trail.name}</h1>
-        <p className='page-subtitle'>
-          {trail.parkName} · {trail.state || trail.location}
-        </p>
-        <div className='chip-row'>
-          <Chip>{trail.parkCategory}</Chip>
-          <Chip>{trail.difficulty}</Chip>
-          <Chip>{trail.stats?.distanceKm || trail.distanceKm} km</Chip>
-          <Chip>
-            {trail.stats?.elevationGainM || trail.elevationGainM} m elevation
-          </Chip>
-          <Chip>{trail.routeType}</Chip>
-          {trail.distanceFromSearchKm ? (
-            <Chip>{trail.distanceFromSearchKm.toFixed(1)} km from search</Chip>
-          ) : null}
+    <section className='trail-detail-page'>
+      <Card className='trail-detail-hero'>
+        <img
+          className='trail-hero'
+          src={trail.thumbnailUrl || TRAIL_HERO_FALLBACK}
+          alt={trail.name}
+          loading='lazy'
+        />
+        <div className='trail-detail-hero__overlay' />
+        <div className='trail-detail-hero__content'>
+          <h1 className='page-title'>{trail.name}</h1>
+          <p className='page-subtitle'>
+            {trail.parkName} •{' '}
+            {valueOrFallback(
+              trail.state || trail.location,
+              'Location unavailable',
+            )}
+          </p>
+          <div className='chip-row'>
+            <Chip>{valueOrFallback(trail.parkCategory, 'Park')}</Chip>
+            <Chip>{valueOrFallback(trail.difficulty, 'general')}</Chip>
+            <Chip>
+              {Number(trail?.rating) > 0
+                ? `${Number(trail.rating).toFixed(1)} rated`
+                : 'Not yet rated'}
+            </Chip>
+            {trail.distanceFromSearchKm ? (
+              <Chip>{trail.distanceFromSearchKm.toFixed(1)} km away</Chip>
+            ) : null}
+          </div>
+
+          <div className='feature-actions'>
+            {trail.parkSlug ? (
+              <Link to={`/parks/${trail.parkSlug}`}>
+                <Button variant='secondary'>Open Park Page</Button>
+              </Link>
+            ) : null}
+            <Button
+              variant='ghost'
+              onClick={onSaveFavorite}
+              disabled={!isAuthenticated}
+            >
+              {isAuthenticated
+                ? savedFavorite
+                  ? 'Saved To Favorites'
+                  : 'Save To Favorites'
+                : 'Sign In To Save'}
+            </Button>
+          </div>
         </div>
-        {trail.summary ? <p>{trail.summary}</p> : null}
+      </Card>
+
+      <div className='trail-stats-grid'>
+        <Card className='trail-stat-card'>
+          <h3>Distance</h3>
+          <p>
+            {valueOrFallback(
+              trail.stats?.distanceKm || trail.distanceKm,
+              'N/A',
+            )}{' '}
+            km
+          </p>
+        </Card>
+        <Card className='trail-stat-card'>
+          <h3>Elevation</h3>
+          <p>
+            {valueOrFallback(
+              trail.stats?.elevationGainM || trail.elevationGainM,
+              'N/A',
+            )}{' '}
+            m
+          </p>
+        </Card>
+        <Card className='trail-stat-card'>
+          <h3>Route Type</h3>
+          <p>
+            {valueOrFallback(
+              trail.stats?.routeType || trail.routeType,
+              'Unknown',
+            )}
+          </p>
+        </Card>
+      </div>
+
+      <Card>
+        <h2>About this trail</h2>
+        <p>{valueOrFallback(trail.summary, 'No description available yet.')}</p>
         {searchParams.get('q') ? (
           <p className='page-subtitle'>
             Result for: <strong>{searchParams.get('q')}</strong>
           </p>
         ) : null}
-        <div className='feature-actions'>
-          {trail.parkSlug ? (
-            <Link to={`/parks/${trail.parkSlug}`}>
-              <Button variant='secondary'>Open Park Page</Button>
-            </Link>
-          ) : null}
-          <Button
-            variant='ghost'
-            onClick={onSaveFavorite}
-            disabled={!isAuthenticated}
-          >
-            {isAuthenticated
-              ? savedFavorite
-                ? 'Saved To Favorites'
-                : 'Save To Favorites'
-              : 'Sign In To Save'}
-          </Button>
-        </div>
         <ListAssignmentControl trailId={trail.id} />
       </Card>
 
       <Card>
-        <h2>Trail Snapshot</h2>
-        <ul className='detail-list'>
-          <li>Park Category: {trail.parkCategory}</li>
-          <li>Park: {trail.parkName}</li>
-          <li>Difficulty: {trail.difficulty}</li>
-          <li>Length: {trail.distanceKm} km</li>
-          <li>Elevation Gain: {trail.elevationGainM} m</li>
-          <li>Route Type: {trail.routeType}</li>
-          <li>Activity: {trail.activityType}</li>
-          <li>Location: {trail.state || trail.location}</li>
-        </ul>
-      </Card>
-
-      <Card>
-        <h2>AI Summary Placeholder</h2>
+        <h2>Route map</h2>
         <p className='page-subtitle'>
-          This section is reserved for a concise AI-generated hike summary.
-        </p>
-        <p>
-          {trail.aiSummary ||
-            'Soon: a short trail insight covering terrain, crowd patterns, and suggested start time.'}
-        </p>
-      </Card>
-
-      <Card>
-        <h2>Related And Nearby Trails</h2>
-        <p className='page-subtitle'>
-          This section is reserved for future recommendation endpoints (similar
-          trails, nearby alternatives, and personalized picks).
-        </p>
-      </Card>
-
-      <Card>
-        <h2>Route Map</h2>
-        <p className='page-subtitle'>
-          Preview trailhead and route shape before starting your hike.
+          Follow the route preview and trailhead before you go.
         </p>
         <TrailRouteMap trail={trail} />
       </Card>
@@ -232,6 +261,17 @@ const TrailDetailPage = () => {
       <Card>
         <h2>Reviews</h2>
         <div className='review-compose'>
+          <select
+            value={rating}
+            onChange={(event) => setRating(event.target.value)}
+            disabled={!isAuthenticated}
+          >
+            <option value='5'>5 - Excellent</option>
+            <option value='4'>4 - Great</option>
+            <option value='3'>3 - Good</option>
+            <option value='2'>2 - Tough</option>
+            <option value='1'>1 - Poor</option>
+          </select>
           <textarea
             value={comment}
             onChange={(event) => setComment(event.target.value)}
@@ -243,12 +283,18 @@ const TrailDetailPage = () => {
           </Button>
         </div>
         <div className='review-list'>
-          {reviews.map((review) => (
-            <article key={review.id} className='review-item'>
-              <strong>{review.user.displayName}</strong>
-              <p>{review.comment}</p>
-            </article>
-          ))}
+          {reviews.length ? (
+            reviews.map((review) => (
+              <article key={review.id} className='review-item'>
+                <strong>{review?.user?.displayName || 'Trail Explorer'}</strong>
+                <p>{valueOrFallback(review.comment, 'No written review.')}</p>
+              </article>
+            ))
+          ) : (
+            <p className='page-subtitle'>
+              No reviews yet. Be the first to share conditions.
+            </p>
+          )}
         </div>
       </Card>
     </section>
