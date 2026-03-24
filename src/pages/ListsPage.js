@@ -140,7 +140,7 @@ const ListsPage = () => {
             />
             <span>Make list public</span>
           </label>
-          <Button>Create list</Button>
+          <Button type='submit'>Create list</Button>
         </form>
       </Card>
 

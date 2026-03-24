@@ -74,7 +74,9 @@ const TrailExploreMap = ({
     () =>
       (trails || [])
         .map((trail) => {
-          const position = normalizeCoordinate(trail.coordinate);
+          const position =
+            normalizeCoordinate(trail.coordinate) ||
+            normalizeCoordinate({ lat: trail.lat, lon: trail.lon });
           if (!position) {
             return null;
           }
@@ -117,7 +119,7 @@ const TrailExploreMap = ({
   if (!points.length) {
     return (
       <div className='map-panel map-panel--empty'>
-        No trail points yet for this view. Try widening your search radius.
+        No park locations yet for this view. Try widening your search radius.
       </div>
     );
   }
@@ -127,7 +129,7 @@ const TrailExploreMap = ({
       {points.length > visiblePoints.length ? (
         <div className='map-limit-note'>
           Showing {visiblePoints.length} map pins for clarity. Refine filters to
-          explore all {points.length} trails.
+          explore all {points.length} parks.
         </div>
       ) : null}
       <MapContainer
@@ -171,7 +173,7 @@ const TrailExploreMap = ({
                   }}
                 >
                   <Popup>
-                    <strong>{count} trails in this area</strong>
+                    <strong>{count} parks in this area</strong>
                     {sample?.name ? <div>Suggested: {sample.name}</div> : null}
                   </Popup>
                 </CircleMarker>
@@ -200,8 +202,14 @@ const TrailExploreMap = ({
                 >
                   <Popup>
                     <strong>{trail.name}</strong>
-                    <div>{trail.location}</div>
-                    <div>{trail.distanceKm} km</div>
+                    <div>
+                      {[trail.city, trail.state].filter(Boolean).join(', ') ||
+                        trail.state ||
+                        'United States'}
+                    </div>
+                    {trail.distanceFromSearchKm ? (
+                      <div>{trail.distanceFromSearchKm.toFixed(1)} km away</div>
+                    ) : null}
                   </Popup>
                 </CircleMarker>
               );

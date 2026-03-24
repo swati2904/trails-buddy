@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { signIn } from '../api/v1/auth';
@@ -22,7 +22,7 @@ const SignInPage = () => {
     try {
       const result = await signIn({ email, password });
       signInSession(result.user, result.tokens);
-      navigate('/explore');
+      navigate('/passbook');
     } catch (submitError) {
       setError(getApiErrorMessage(submitError, 'Unable to sign in.'));
     } finally {
@@ -32,12 +32,22 @@ const SignInPage = () => {
 
   return (
     <section className='page-block'>
-      <Card className='auth-card'>
-        <h1 className='page-title'>Welcome back, explorer</h1>
-        <p className='page-subtitle'>
-          Sign in to continue building lists, saving routes, and tracking your
-          next adventure.
-        </p>
+      <Card className='auth-card auth-card--split'>
+        <div className='auth-journey'>
+          <ChiplessTitle />
+          <p className='page-subtitle'>
+            Continue your National Parks journey and keep your park memories in
+            one place.
+          </p>
+          <ul className='auth-benefits'>
+            <li>Track visited parks and passbook stamps</li>
+            <li>Add visit notes and date-stamped memories</li>
+            <li>Pick up your trip planning right where you left off</li>
+          </ul>
+          <p className='page-subtitle'>
+            New here? <Link to='/signup'>Create your account</Link>
+          </p>
+        </div>
 
         <form className='auth-form' onSubmit={onSubmit}>
           <label>
@@ -70,13 +80,17 @@ const SignInPage = () => {
             </p>
           ) : null}
 
-          <Button disabled={loading}>
-            {loading ? 'Signing in...' : 'Continue to Trail Buddy'}
+          <Button type='submit' disabled={loading}>
+            {loading ? 'Signing in...' : 'Open my passbook'}
           </Button>
         </form>
       </Card>
     </section>
   );
 };
+
+const ChiplessTitle = () => (
+  <h1 className='page-title'>Welcome back, explorer</h1>
+);
 
 export default SignInPage;

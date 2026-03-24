@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { signOut } from '../api/v1/auth';
 
 const AuthContext = createContext(null);
 
@@ -65,10 +66,21 @@ export const AuthProvider = ({ children }) => {
     writeStoredSession({ user: nextUser, tokens: nextTokens });
   };
 
-  const signOutSession = () => {
-    setUser(null);
-    setTokens(null);
-    clearStoredSession();
+  const signOutSession = async () => {
+    const refreshToken = tokens?.refreshToken;
+    const accessToken = tokens?.accessToken;
+
+    try {
+      if (accessToken) {
+        await signOut({ refreshToken }, accessToken);
+      }
+    } catch (error) {
+      // Local session must always be cleared even if API signout fails.
+    } finally {
+      setUser(null);
+      setTokens(null);
+      clearStoredSession();
+    }
   };
 
   const value = useMemo(

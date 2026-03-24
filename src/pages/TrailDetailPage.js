@@ -51,7 +51,7 @@ const TrailDetailPage = () => {
 
         if (trailData) {
           const reviewData = await getTrailReviews(trailData.id, 1, 20);
-          setReviews(reviewData.items);
+          setReviews(Array.isArray(reviewData?.items) ? reviewData.items : []);
         }
       } catch (loadError) {
         if (shouldForceSignOut(loadError)) {
@@ -90,7 +90,9 @@ const TrailDetailPage = () => {
       );
 
       const refreshedReviews = await getTrailReviews(trail.id, 1, 20);
-      setReviews(refreshedReviews.items || []);
+      setReviews(
+        Array.isArray(refreshedReviews?.items) ? refreshedReviews.items : [],
+      );
       setComment('');
       setRating('5');
     } catch (submitError) {
@@ -181,7 +183,7 @@ const TrailDetailPage = () => {
           <div className='feature-actions'>
             {trail.parkSlug ? (
               <Link to={`/parks/${trail.parkSlug}`}>
-                <Button variant='secondary'>Explore this park</Button>
+                <Button variant='secondary'>Back to park</Button>
               </Link>
             ) : null}
             <Button
@@ -229,11 +231,20 @@ const TrailDetailPage = () => {
             )}
           </p>
         </Card>
+        <Card className='trail-stat-card'>
+          <h3>Activity</h3>
+          <p>{valueOrFallback(trail.activityType, 'Hiking')}</p>
+        </Card>
       </div>
 
       <Card>
-        <h2>About this trail</h2>
-        <p>{valueOrFallback(trail.summary, 'No description available yet.')}</p>
+        <h2>Trail summary</h2>
+        <p>
+          {valueOrFallback(trail.summary, 'No trail summary available yet.')}
+        </p>
+        {trail.aiSummary ? (
+          <p className='page-subtitle'>{trail.aiSummary}</p>
+        ) : null}
         {searchParams.get('q') ? (
           <p className='page-subtitle'>
             Result for: <strong>{searchParams.get('q')}</strong>
@@ -245,7 +256,7 @@ const TrailDetailPage = () => {
       <Card>
         <h2>Route map</h2>
         <p className='page-subtitle'>
-          Preview the route and trailhead so you can start with confidence.
+          Preview route geometry and trailhead before heading out.
         </p>
         <TrailRouteMap trail={trail} />
       </Card>
@@ -255,7 +266,7 @@ const TrailDetailPage = () => {
       {Array.isArray(trail?.conditions?.highlights) &&
       trail.conditions.highlights.length ? (
         <Card>
-          <h2>Current Conditions</h2>
+          <h2>Current conditions</h2>
           <ul>
             {trail.conditions.highlights.map((item) => (
               <li key={item}>{item}</li>
@@ -290,7 +301,7 @@ const TrailDetailPage = () => {
             id='trail-review-comment'
             value={comment}
             onChange={(event) => setComment(event.target.value)}
-            placeholder='Share conditions, scenery, and pro tips for future hikers'
+            placeholder='Share scenery, trail conditions, and helpful planning tips'
             disabled={!isAuthenticated}
             aria-label='Write your trail review'
           />
@@ -308,7 +319,7 @@ const TrailDetailPage = () => {
             ))
           ) : (
             <p className='page-subtitle'>
-              No reviews yet. Be the first to share conditions.
+              No reviews yet. Be the first to leave a trail note.
             </p>
           )}
         </div>

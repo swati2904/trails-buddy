@@ -26,3 +26,13 @@ export const refreshSession = async ({ refreshToken }) => {
     fallbackMessage: 'Unable to refresh authentication session',
   });
 };
+
+export const signOut = async ({ refreshToken } = {}, token) => {
+  return requestJson({
+    path: '/auth/signout',
+    method: 'POST',
+    token,
+    body: refreshToken ? { refreshToken } : undefined,
+    fallbackMessage: 'Unable to sign out',
+  });
+};

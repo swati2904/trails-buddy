@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { signUp } from '../api/v1/auth';
@@ -23,7 +23,7 @@ const SignUpPage = () => {
     try {
       const result = await signUp({ displayName, email, password });
       signInSession(result.user, result.tokens);
-      navigate('/explore');
+      navigate('/passbook');
     } catch (submitError) {
       setError(getApiErrorMessage(submitError, 'Unable to create account.'));
     } finally {
@@ -33,11 +33,22 @@ const SignUpPage = () => {
 
   return (
     <section className='page-block'>
-      <Card className='auth-card'>
-        <h1 className='page-title'>Create your trail profile</h1>
-        <p className='page-subtitle'>
-          Save trails, organize trip lists, and keep your next hike a tap away.
-        </p>
+      <Card className='auth-card auth-card--split'>
+        <div className='auth-journey'>
+          <h1 className='page-title'>Start your National Parks passbook</h1>
+          <p className='page-subtitle'>
+            Build your memory collection across all U.S. National Parks with
+            digital stamps, travel notes, and visit tracking.
+          </p>
+          <ul className='auth-benefits'>
+            <li>Save park visits and stamp entries</li>
+            <li>Track progress toward all 63 National Parks</li>
+            <li>Keep a personal park passport for every trip</li>
+          </ul>
+          <p className='page-subtitle'>
+            Already have an account? <Link to='/signin'>Sign in</Link>
+          </p>
+        </div>
 
         <form className='auth-form' onSubmit={onSubmit}>
           <label>
@@ -81,8 +92,8 @@ const SignUpPage = () => {
             </p>
           ) : null}
 
-          <Button disabled={loading}>
-            {loading ? 'Creating...' : 'Start exploring'}
+          <Button type='submit' disabled={loading}>
+            {loading ? 'Creating account...' : 'Create passbook account'}
           </Button>
         </form>
       </Card>

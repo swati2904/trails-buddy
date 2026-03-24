@@ -22,8 +22,9 @@ const ParksPage = () => {
       try {
         const result = await searchParks({
           q: state.query.trim(),
-          category: state.category,
           state: state.stateCode,
+          city: state.city,
+          zipCode: state.zipCode,
           page: state.page,
           pageSize: 18,
         });
@@ -37,7 +38,7 @@ const ParksPage = () => {
     };
 
     load();
-  }, [state.category, state.page, state.query, state.stateCode]);
+  }, [state.city, state.page, state.query, state.stateCode, state.zipCode]);
 
   const pageSummary = useMemo(() => {
     if (loading) {
@@ -49,24 +50,26 @@ const ParksPage = () => {
   return (
     <section className='page-block parks-page'>
       <Card>
-        <h1 className='page-title'>Find parks worth exploring</h1>
+        <h1 className='page-title'>Explore U.S. National Parks</h1>
         <p className='page-subtitle'>{pageSummary}</p>
         <div className='filter-row filter-row--search-secondary'>
           <input
             value={state.query}
-            placeholder='Search parks by name, city, state, or ZIP'
+            placeholder='Search by park name'
             onChange={(event) => setParam('q', event.target.value)}
           />
 
-          <select
-            value={state.category}
-            onChange={(event) => setParam('category', event.target.value)}
-          >
-            <option value=''>All Categories</option>
-            <option value='NATIONAL_PARK'>National Parks</option>
-            <option value='STATE_PARK'>State Parks</option>
-            <option value='REGIONAL_PARK'>Regional Parks</option>
-          </select>
+          <input
+            value={state.city || ''}
+            placeholder='City'
+            onChange={(event) => setParam('city', event.target.value)}
+          />
+
+          <input
+            value={state.zipCode || ''}
+            placeholder='ZIP'
+            onChange={(event) => setParam('zip', event.target.value)}
+          />
 
           <input
             value={state.stateCode}
@@ -102,16 +105,16 @@ const ParksPage = () => {
               <div className='chip-row'>
                 <Chip tone='nature'>{park.category}</Chip>
                 {park.state ? <Chip tone='sky'>{park.state}</Chip> : null}
-                <Chip tone='warm'>{(park.topTrails || []).length} trails</Chip>
+                {park.zipCode ? (
+                  <Chip tone='warm'>ZIP {park.zipCode}</Chip>
+                ) : null}
               </div>
               <div className='feature-actions'>
                 <Link to={`/parks/${park.slug}`}>
                   <Button variant='ghost'>Park details</Button>
                 </Link>
-                <Link
-                  to={`/search?category=${encodeURIComponent(park.category)}&q=${encodeURIComponent(park.name)}`}
-                >
-                  <Button variant='secondary'>Find nearby trails</Button>
+                <Link to={`/search?q=${encodeURIComponent(park.name)}`}>
+                  <Button variant='secondary'>Search nearby parks</Button>
                 </Link>
               </div>
             </Card>

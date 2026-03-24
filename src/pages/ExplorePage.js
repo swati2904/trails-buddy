@@ -10,62 +10,64 @@ import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
 import Button from '../components/ui/Button';
-import ListAssignmentControl from '../components/ui/ListAssignmentControl';
 import TrailExploreMap from '../components/Map/TrailExploreMap';
-import { searchTrails } from '../api/v1/trails';
 import {
-  getFiltersMetadata,
   getSearchSuggestions,
-  searchNearbyTrails,
+  searchNearbyParksBySearch,
 } from '../api/v1/discovery';
-import { addFavorite, getFavorites } from '../api/v1/user';
-import {
-  getApiErrorMessage,
-  shouldForceSignOut,
-} from '../api/v1/errorMessages';
-import { useAuth } from '../state/AuthContext';
+import { searchParks } from '../api/v1/parks';
+import { getApiErrorMessage } from '../api/v1/errorMessages';
 import { useDiscoveryState } from '../state/useDiscoveryState';
 
 const PAGE_SIZE = 24;
-const BASE_RADIUS_OPTIONS = [10, 25, 50, 100];
-const TRAIL_PLACEHOLDER =
+const BASE_RADIUS_OPTIONS = [25, 50, 100, 200, 300];
+const PARK_PLACEHOLDER =
   'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=60';
 
-const formatLocation = (trail) => {
-  const parts = [trail?.location, trail?.zipCode].filter(Boolean);
-  const built = parts.join(' • ').trim();
-  return built || 'Location unavailable';
-};
-
-const formatRating = (trail) => {
-  const rating = Number(trail?.rating);
-  const count = Number(trail?.reviewCount || trail?.rating?.count || 0);
-  if (!Number.isFinite(rating) || rating <= 0) {
-    return 'Not yet rated';
+const formatLocation = (park) => {
+  const cityState = [park?.city, park?.state].filter(Boolean).join(', ');
+  if (cityState) {
+    return cityState;
   }
 
-  return count > 0 ? `${rating.toFixed(1)} (${count})` : rating.toFixed(1);
+  if (park?.state) {
+    return park.state;
+  }
+
+  return 'U.S. National Park';
 };
 
 const ExplorePage = () => {
   const location = useLocation();
-  const { isAuthenticated, tokens, signOutSession } = useAuth();
   const { state, setParam, patchParams, clearFilters } = useDiscoveryState();
 
   const [queryInput, setQueryInput] = useState(state.query || '');
   const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [locationNotice, setLocationNotice] = useState('');
-  const [favoriteIds, setFavoriteIds] = useState([]);
-  const [activeTrailId, setActiveTrailId] = useState('');
+  const [activeParkId, setActiveParkId] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] =
     useState(-1);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [filtersMetadata, setFiltersMetadata] = useState(null);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const requestedGeoRef = useRef(false);
+
+  useEffect(() => {
+    const syncFiltersPanel = () => {
+      setIsMobileFiltersOpen(window.innerWidth >= 860);
+    };
+
+    syncFiltersPanel();
+    window.addEventListener('resize', syncFiltersPanel);
+
+    return () => {
+      window.removeEventListener('resize', syncFiltersPanel);
+    };
+  }, []);
 
   useEffect(() => {
     setQueryInput(state.query || '');
@@ -131,40 +133,15 @@ const ExplorePage = () => {
     };
   }, [state.query]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadFiltersMetadata = async () => {
-      try {
-        const metadata = await getFiltersMetadata({
-          q: state.query.trim(),
-        });
-        if (!cancelled) {
-          setFiltersMetadata(metadata);
-        }
-      } catch (loadError) {
-        if (!cancelled) {
-          setFiltersMetadata(null);
-        }
-      }
-    };
-
-    loadFiltersMetadata();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [state.query]);
-
   const requestCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setLocationNotice(
-        'Location is unavailable in this browser. Search by ZIP or city.',
+        'Location is unavailable in this browser. Search by ZIP, city, or state.',
       );
       return;
     }
 
-    setLocationNotice('Finding trails near your current location...');
+    setLocationNotice('Finding nearby national parks...');
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -172,14 +149,13 @@ const ExplorePage = () => {
           lat: Number(position.coords.latitude).toFixed(6),
           lon: Number(position.coords.longitude).toFixed(6),
           place: 'Current Location',
-          q: '',
           page: 1,
         });
-        setLocationNotice('Showing nearby trails for your current location.');
+        setLocationNotice('Showing nearby parks for your current location.');
       },
       () => {
         setLocationNotice(
-          'Location access was denied. Search by ZIP, city, state, park, or trail.',
+          'Location access was denied. Search by ZIP, city, state, or park name.',
         );
       },
       {
@@ -191,7 +167,14 @@ const ExplorePage = () => {
   }, [patchParams]);
 
   useEffect(() => {
-    if (state.query.trim() || state.latitude || state.longitude) {
+    if (
+      state.query.trim() ||
+      state.stateCode ||
+      state.city ||
+      state.zipCode ||
+      state.latitude ||
+      state.longitude
+    ) {
       return;
     }
 
@@ -201,27 +184,15 @@ const ExplorePage = () => {
 
     requestedGeoRef.current = true;
     requestCurrentLocation();
-  }, [requestCurrentLocation, state.latitude, state.longitude, state.query]);
-
-  useEffect(() => {
-    const loadFavorites = async () => {
-      if (!isAuthenticated) {
-        setFavoriteIds([]);
-        return;
-      }
-
-      try {
-        const result = await getFavorites(tokens?.accessToken);
-        setFavoriteIds((result.items || []).map((item) => item.trailId));
-      } catch (loadError) {
-        if (shouldForceSignOut(loadError)) {
-          signOutSession();
-        }
-      }
-    };
-
-    loadFavorites();
-  }, [isAuthenticated, signOutSession, tokens?.accessToken]);
+  }, [
+    requestCurrentLocation,
+    state.city,
+    state.latitude,
+    state.longitude,
+    state.query,
+    state.stateCode,
+    state.zipCode,
+  ]);
 
   useEffect(() => {
     const load = async () => {
@@ -231,33 +202,38 @@ const ExplorePage = () => {
       try {
         const request = {
           q: state.query.trim(),
-          category: state.category,
-          difficulty: state.difficulty,
-          activity: state.activity,
-          routeType: state.routeType,
           state: state.stateCode,
-          radiusKm: state.radiusKm,
-          sort: state.sort === 'most-relevant' ? 'relevance' : state.sort,
+          city: state.city,
+          zipCode: state.zipCode,
+          sort: state.sort,
           page: state.page,
           pageSize: PAGE_SIZE,
         };
 
         const hasCoordinates = Boolean(state.latitude && state.longitude);
-        if (hasCoordinates && !request.q) {
-          request.lat = Number(state.latitude);
-          request.lon = Number(state.longitude);
-        }
+        const hasLocationFilters =
+          Boolean(request.q) ||
+          Boolean(request.state) ||
+          Boolean(request.city) ||
+          Boolean(request.zipCode);
 
         const result =
-          hasCoordinates && !request.q
-            ? await searchNearbyTrails(request)
-            : await searchTrails(request);
+          hasCoordinates && !hasLocationFilters
+            ? await searchNearbyParksBySearch({
+                lat: Number(state.latitude),
+                lon: Number(state.longitude),
+                radiusKm: Number(state.radiusKm || '50'),
+                page: state.page,
+                pageSize: PAGE_SIZE,
+              })
+            : await searchParks(request);
 
         const nextItems = Array.isArray(result?.items) ? result.items : [];
         setItems(nextItems);
-        setActiveTrailId((current) => current || nextItems?.[0]?.id || '');
+        setTotal(Number(result?.total || nextItems.length || 0));
+        setActiveParkId((current) => current || nextItems?.[0]?.id || '');
       } catch (loadError) {
-        setError(getApiErrorMessage(loadError, 'Unable to load trails.'));
+        setError(getApiErrorMessage(loadError, 'Unable to load parks.'));
       } finally {
         setLoading(false);
       }
@@ -265,112 +241,64 @@ const ExplorePage = () => {
 
     load();
   }, [
-    state.activity,
-    state.category,
-    state.difficulty,
+    state.city,
     state.latitude,
     state.longitude,
     state.page,
     state.query,
     state.radiusKm,
-    state.routeType,
     state.sort,
     state.stateCode,
+    state.zipCode,
   ]);
 
   const summary = useMemo(() => {
     if (loading) {
-      return 'Loading trails...';
+      return 'Loading parks...';
     }
 
-    return `${items.length} trails found`;
-  }, [items.length, loading]);
+    return `${total || items.length} parks found`;
+  }, [items.length, loading, total]);
 
   const activeFilters = useMemo(() => {
     const list = [];
-    if (state.category) {
-      list.push({ key: 'category', label: `Category: ${state.category}` });
-    }
-    if (state.difficulty) {
-      list.push({
-        key: 'difficulty',
-        label: `Difficulty: ${state.difficulty}`,
-      });
-    }
-    if (state.activity) {
-      list.push({ key: 'activity', label: `Activity: ${state.activity}` });
-    }
-    if (state.routeType) {
-      list.push({ key: 'routeType', label: `Route: ${state.routeType}` });
-    }
     if (state.stateCode) {
       list.push({ key: 'state', label: `State: ${state.stateCode}` });
+    }
+    if (state.city) {
+      list.push({ key: 'city', label: `City: ${state.city}` });
+    }
+    if (state.zipCode) {
+      list.push({ key: 'zip', label: `ZIP: ${state.zipCode}` });
     }
     if (state.radiusKm && state.radiusKm !== '50') {
       list.push({ key: 'radiusKm', label: `Radius: ${state.radiusKm} km` });
     }
-    if (state.sort && state.sort !== 'most-relevant') {
+    if (state.sort && state.sort !== 'relevance') {
       list.push({ key: 'sort', label: `Sort: ${state.sort}` });
     }
 
     return list;
-  }, [
-    state.activity,
-    state.category,
-    state.difficulty,
-    state.radiusKm,
-    state.routeType,
-    state.sort,
-    state.stateCode,
-  ]);
-
-  const radiusOptions = useMemo(() => {
-    const serverOptions = Array.isArray(filtersMetadata?.radiusOptionsKm)
-      ? filtersMetadata.radiusOptionsKm
-      : [];
-
-    return Array.from(new Set([...BASE_RADIUS_OPTIONS, ...serverOptions])).sort(
-      (a, b) => a - b,
-    );
-  }, [filtersMetadata?.radiusOptionsKm]);
+  }, [state.city, state.radiusKm, state.sort, state.stateCode, state.zipCode]);
 
   const pageHeading =
     location.pathname === '/search'
-      ? 'Search adventures'
+      ? 'Search U.S. National Parks'
       : location.pathname === '/nearby'
-        ? 'Trails near you'
-        : 'Explore the trail map';
+        ? 'National Parks near you'
+        : 'Explore all 63 U.S. National Parks';
 
   const resultsContext = state.query.trim()
     ? `Results for "${state.query.trim()}"`
     : state.placeLabel
       ? `Using ${state.placeLabel}`
-      : 'Search by city, park, ZIP, or trail name.';
+      : 'Search by park name, state, city, ZIP, or nearby location.';
 
   const showList = state.view === 'split' || state.view === 'list';
   const showMap = state.view === 'split' || state.view === 'map';
 
-  const onSave = async (trailId) => {
-    if (!isAuthenticated) {
-      setError('Sign in to save favorites.');
-      return;
-    }
-
-    try {
-      await addFavorite(trailId, tokens?.accessToken);
-      setFavoriteIds((current) =>
-        current.includes(trailId) ? current : [...current, trailId],
-      );
-    } catch (saveError) {
-      if (shouldForceSignOut(saveError)) {
-        signOutSession();
-      }
-      setError(getApiErrorMessage(saveError, 'Unable to save favorite.'));
-    }
-  };
-
   const onPickSuggestion = (value) => {
-    patchParams({ q: value, lat: '', lon: '', place: '' });
+    patchParams({ q: value });
     setQueryInput(value);
     setSuggestions([]);
     setHighlightedSuggestionIndex(-1);
@@ -413,6 +341,8 @@ const ExplorePage = () => {
     }
   };
 
+  const pageCount = Math.max(1, Math.ceil((total || 0) / PAGE_SIZE));
+
   return (
     <section className='explore-page'>
       <Card className='explore-filters'>
@@ -422,6 +352,15 @@ const ExplorePage = () => {
             <p className='page-subtitle'>{summary}</p>
             <p className='page-subtitle'>{resultsContext}</p>
           </div>
+          <button
+            type='button'
+            className='explore-filters-toggle'
+            aria-expanded={isMobileFiltersOpen}
+            aria-controls='explore-advanced-filters'
+            onClick={() => setIsMobileFiltersOpen((current) => !current)}
+          >
+            {isMobileFiltersOpen ? 'Hide filters' : 'Show filters'}
+          </button>
           <div className='explore-view-toggle'>
             <Button
               variant={state.view === 'list' ? 'primary' : 'secondary'}
@@ -452,7 +391,7 @@ const ExplorePage = () => {
             <input
               id='explore-search-input'
               value={queryInput}
-              placeholder='Search trails, parks, or locations'
+              placeholder='Search by park name, state, city, or ZIP'
               onChange={(event) => setQueryInput(event.target.value)}
               onKeyDown={onQueryKeyDown}
               role='combobox'
@@ -464,7 +403,7 @@ const ExplorePage = () => {
                   ? `explore-suggestion-${highlightedSuggestionIndex}`
                   : undefined
               }
-              aria-label='Search trails, parks, or locations'
+              aria-label='Search by park name, state, city, or ZIP'
             />
             {loadingSuggestions ? (
               <p className='suggestion-note'>Finding suggestions...</p>
@@ -499,88 +438,12 @@ const ExplorePage = () => {
           </div>
 
           <select
-            aria-label='Filter by park category'
-            value={state.category}
-            onChange={(event) => setParam('category', event.target.value)}
-          >
-            <option value=''>All park categories</option>
-            {(
-              filtersMetadata?.categories || ['NATIONAL_PARK', 'STATE_PARK']
-            ).map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-
-          <select
             aria-label='Sort search results'
             value={state.sort}
             onChange={(event) => setParam('sort', event.target.value)}
           >
-            <option value='most-relevant'>Relevance</option>
-            <option value='distance'>Distance</option>
-            <option value='nearest'>Nearest</option>
-            <option value='easiest'>Easiest</option>
-            <option value='shortest'>Shortest</option>
-            <option value='longest'>Longest</option>
+            <option value='relevance'>Relevance</option>
             <option value='alphabetical'>Alphabetical</option>
-          </select>
-
-          <div className='filter-toolbar-actions'>
-            <Button variant='ghost' onClick={requestCurrentLocation}>
-              Use my location
-            </Button>
-            <Button variant='ghost' onClick={clearFilters}>
-              Reset
-            </Button>
-          </div>
-        </div>
-
-        <div className='filter-row filter-row--search-secondary'>
-          <select
-            aria-label='Filter by difficulty'
-            value={state.difficulty}
-            onChange={(event) => setParam('difficulty', event.target.value)}
-          >
-            <option value=''>Difficulty</option>
-            {(
-              filtersMetadata?.difficulties || ['easy', 'moderate', 'hard']
-            ).map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label='Filter by activity'
-            value={state.activity}
-            onChange={(event) => setParam('activity', event.target.value)}
-          >
-            <option value=''>Activity</option>
-            {(filtersMetadata?.activities || ['hiking', 'running']).map(
-              (value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ),
-            )}
-          </select>
-
-          <select
-            aria-label='Filter by route type'
-            value={state.routeType}
-            onChange={(event) => setParam('routeType', event.target.value)}
-          >
-            <option value=''>Route type</option>
-            {(filtersMetadata?.routeTypes || ['loop', 'out-and-back']).map(
-              (value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ),
-            )}
           </select>
 
           <select
@@ -588,42 +451,69 @@ const ExplorePage = () => {
             value={state.radiusKm}
             onChange={(event) => setParam('radiusKm', event.target.value)}
           >
-            {radiusOptions.map((value) => (
+            {BASE_RADIUS_OPTIONS.map((value) => (
               <option key={value} value={String(value)}>
                 {value} km radius
               </option>
             ))}
           </select>
 
-          <select
-            aria-label='Filter by state'
-            value={state.stateCode}
-            onChange={(event) => setParam('state', event.target.value)}
-          >
-            <option value=''>State</option>
-            {(filtersMetadata?.states || []).map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
+          <div className='filter-toolbar-actions'>
+            <Button variant='ghost' onClick={requestCurrentLocation}>
+              Use nearby
+            </Button>
+            <Button variant='ghost' onClick={clearFilters}>
+              Reset
+            </Button>
+          </div>
         </div>
 
-        {activeFilters.length ? (
-          <div className='active-filter-row'>
-            {activeFilters.map((filter) => (
-              <button
-                key={filter.key}
-                type='button'
-                className='active-filter-chip'
-                onClick={() => setParam(filter.key, '')}
-                aria-label={`Remove ${filter.label}`}
-              >
-                {filter.label} ×
-              </button>
-            ))}
+        <div
+          id='explore-advanced-filters'
+          className={`explore-filter-panel ${isMobileFiltersOpen ? 'explore-filter-panel--open' : 'explore-filter-panel--closed'}`}
+        >
+          <div className='filter-row filter-row--search-secondary'>
+            <input
+              value={state.city}
+              placeholder='City'
+              onChange={(event) => setParam('city', event.target.value)}
+              aria-label='Filter by city'
+            />
+
+            <input
+              value={state.zipCode}
+              placeholder='ZIP code'
+              onChange={(event) => setParam('zip', event.target.value)}
+              aria-label='Filter by ZIP code'
+            />
+
+            <input
+              value={state.stateCode}
+              placeholder='State (e.g. CA)'
+              onChange={(event) =>
+                setParam('state', event.target.value.toUpperCase())
+              }
+              maxLength={2}
+              aria-label='Filter by state'
+            />
           </div>
-        ) : null}
+
+          {activeFilters.length ? (
+            <div className='active-filter-row'>
+              {activeFilters.map((filter) => (
+                <button
+                  key={filter.key}
+                  type='button'
+                  className='active-filter-chip'
+                  onClick={() => setParam(filter.key, '')}
+                  aria-label={`Remove ${filter.label}`}
+                >
+                  {filter.label} ×
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </Card>
 
       <p className='sr-only' aria-live='polite'>
@@ -647,10 +537,10 @@ const ExplorePage = () => {
             <div className='search-results-list'>
               {!items.length ? (
                 <Card className='no-results-card'>
-                  <h2>No trails found near this area</h2>
+                  <h2>No parks found for this search.</h2>
                   <p className='page-subtitle'>
-                    Try widening your radius or switch to another nearby park to
-                    uncover more routes.
+                    Try a different park name, state, city, ZIP code, or nearby
+                    location.
                   </p>
                   <div className='results-actions'>
                     <Button
@@ -666,52 +556,51 @@ const ExplorePage = () => {
                 </Card>
               ) : null}
 
-              {items.map((trail) => (
+              {items.map((park) => (
                 <Card
-                  key={trail.id}
-                  className={`search-trail-card ${trail.id === activeTrailId ? 'ui-card--active' : ''}`.trim()}
+                  key={park.id}
+                  className={`search-trail-card ${park.id === activeParkId ? 'ui-card--active' : ''}`.trim()}
                 >
                   <img
                     className='trail-thumb'
-                    src={trail.thumbnailUrl || TRAIL_PLACEHOLDER}
-                    alt={trail.name}
+                    src={park.heroImageUrl || PARK_PLACEHOLDER}
+                    alt={park.name}
                     loading='lazy'
-                    onMouseEnter={() => setActiveTrailId(trail.id)}
-                    onClick={() => setActiveTrailId(trail.id)}
+                    onMouseEnter={() => setActiveParkId(park.id)}
+                    onClick={() => setActiveParkId(park.id)}
                   />
                   <div className='search-trail-card__body'>
-                    <h2>{trail.name}</h2>
-                    <p className='search-trail-card__park'>{trail.parkName}</p>
+                    <h2>{park.name}</h2>
+                    <p className='search-trail-card__park'>{park.category}</p>
                     <p className='search-trail-card__meta'>
-                      {formatLocation(trail)}
+                      {formatLocation(park)}
                     </p>
                     <div className='chip-row'>
-                      <Chip tone='nature'>{trail.difficulty || 'general'}</Chip>
-                      <Chip tone='sky'>{trail.distanceKm || 0} km</Chip>
-                      <Chip tone='warm'>{formatRating(trail)}</Chip>
-                      {trail.routeType ? (
-                        <Chip tone='default'>{trail.routeType}</Chip>
+                      <Chip tone='nature'>
+                        {park.category || 'National Park'}
+                      </Chip>
+                      {park.state ? <Chip tone='sky'>{park.state}</Chip> : null}
+                      {park.zipCode ? (
+                        <Chip tone='warm'>ZIP {park.zipCode}</Chip>
                       ) : null}
-                      {trail.distanceFromSearchKm ? (
+                      {park.distanceFromSearchKm ? (
                         <Chip tone='warm'>
-                          {trail.distanceFromSearchKm.toFixed(1)} km away
+                          {park.distanceFromSearchKm.toFixed(1)} km away
                         </Chip>
                       ) : null}
                     </div>
+                    <p className='page-subtitle'>
+                      {park.summary ||
+                        'A destination worth adding to your park passbook.'}
+                    </p>
                   </div>
                   <div className='feature-actions search-trail-card__actions'>
-                    <Link to={`/trail/${trail.slug}`}>View details</Link>
-                    <Button variant='ghost' onClick={() => onSave(trail.id)}>
-                      {favoriteIds.includes(trail.id)
-                        ? 'Saved to favorites'
-                        : 'Save trail'}
-                    </Button>
+                    <Link to={`/parks/${park.slug}`}>View park</Link>
                   </div>
-                  <ListAssignmentControl trailId={trail.id} />
                 </Card>
               ))}
 
-              {items.length >= PAGE_SIZE ? (
+              {pageCount > 1 ? (
                 <div className='results-actions'>
                   <Button
                     variant='secondary'
@@ -723,7 +612,13 @@ const ExplorePage = () => {
                     Previous
                   </Button>
                   <Button
-                    onClick={() => setParam('page', String(state.page + 1))}
+                    disabled={state.page >= pageCount}
+                    onClick={() =>
+                      setParam(
+                        'page',
+                        String(Math.min(pageCount, state.page + 1)),
+                      )
+                    }
                   >
                     Next
                   </Button>
@@ -736,8 +631,8 @@ const ExplorePage = () => {
             <div className='search-results-map'>
               <TrailExploreMap
                 trails={items}
-                activeTrailId={activeTrailId}
-                onPickTrail={setActiveTrailId}
+                activeTrailId={activeParkId}
+                onPickTrail={setActiveParkId}
                 markerLimit={120}
               />
             </div>

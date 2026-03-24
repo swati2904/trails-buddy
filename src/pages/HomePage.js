@@ -3,63 +3,33 @@ import { Link, useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Chip from '../components/ui/Chip';
 import Button from '../components/ui/Button';
-import { getFeaturedTrails } from '../api/v1/trails';
 import { getSearchSuggestions } from '../api/v1/discovery';
+import { searchNearbyParks, searchParks } from '../api/v1/parks';
 import { getApiErrorMessage } from '../api/v1/errorMessages';
+import { useAuth } from '../state/AuthContext';
 
-const PARK_CATEGORIES = [
-  {
-    id: 'NATIONAL_PARK',
-    title: 'National Parks',
-    subtitle: 'Iconic landscapes and bucket-list routes.',
-    queryValue: 'NATIONAL_PARK',
-  },
-  {
-    id: 'STATE_PARK',
-    title: 'State Parks',
-    subtitle: 'Weekend escapes with approachable terrain.',
-    queryValue: 'STATE_PARK',
-  },
-  {
-    id: 'nearby',
-    title: 'Nearby Trails',
-    subtitle: 'Use your location to find what is closest today.',
-    queryValue: 'nearby',
-  },
-];
+const FALLBACK_PARK_IMAGE =
+  'https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1400&q=60';
 
-const FALLBACK_TRAIL_IMAGE =
-  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=60';
-
-const formatLocation = (trail) => {
-  const raw = String(trail?.location || '').trim();
-  if (raw) {
-    return raw;
+const formatParkLocation = (park) => {
+  const cityState = [park?.city, park?.state].filter(Boolean).join(', ');
+  if (cityState) {
+    return cityState;
   }
 
-  const parts = [trail?.city, trail?.state].filter(Boolean);
-  return parts.join(', ') || 'Location unavailable';
-};
-
-const formatRating = (trail) => {
-  const rating = Number(trail?.rating);
-  const count = Number(trail?.reviewCount || trail?.rating?.count || 0);
-  if (!Number.isFinite(rating) || rating <= 0) {
-    return 'Not yet rated';
+  if (park?.state) {
+    return park.state;
   }
 
-  if (!Number.isFinite(count) || count <= 0) {
-    return `${rating.toFixed(1)} rated`;
-  }
-
-  return `${rating.toFixed(1)} (${count})`;
+  return 'U.S. National Park';
 };
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [searchInput, setSearchInput] = useState('');
-  const [featuredPopular, setFeaturedPopular] = useState([]);
-  const [featuredNearby, setFeaturedNearby] = useState([]);
+  const [featuredParks, setFeaturedParks] = useState([]);
+  const [nearbyParks, setNearbyParks] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] =
     useState(-1);
@@ -69,24 +39,27 @@ const HomePage = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const loadFeatured = async () => {
+    const loadHomeData = async () => {
       setError('');
 
       try {
-        const popularResult = await getFeaturedTrails({
-          sort: 'relevance',
+        const parksResponse = await searchParks({
+          page: 1,
           pageSize: 6,
         });
 
         if (isMounted) {
-          setFeaturedPopular(
-            Array.isArray(popularResult?.items) ? popularResult.items : [],
+          setFeaturedParks(
+            Array.isArray(parksResponse?.items) ? parksResponse.items : [],
           );
         }
       } catch (loadError) {
         if (isMounted) {
           setError(
-            getApiErrorMessage(loadError, 'Unable to load featured trails.'),
+            getApiErrorMessage(
+              loadError,
+              'Unable to load national park highlights.',
+            ),
           );
         }
       }
@@ -98,28 +71,28 @@ const HomePage = () => {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            const nearbyResult = await getFeaturedTrails({
-              sort: 'distance',
-              radiusKm: 50,
-              pageSize: 6,
+            const nearbyResult = await searchNearbyParks({
               lat: Number(position.coords.latitude),
               lon: Number(position.coords.longitude),
+              radiusKm: 300,
+              page: 1,
+              pageSize: 4,
             });
 
             if (isMounted) {
-              setFeaturedNearby(
+              setNearbyParks(
                 Array.isArray(nearbyResult?.items) ? nearbyResult.items : [],
               );
             }
           } catch (nearbyError) {
             if (isMounted) {
-              setFeaturedNearby([]);
+              setNearbyParks([]);
             }
           }
         },
         () => {
           if (isMounted) {
-            setFeaturedNearby([]);
+            setNearbyParks([]);
           }
         },
         {
@@ -130,7 +103,7 @@ const HomePage = () => {
       );
     };
 
-    loadFeatured();
+    loadHomeData();
 
     return () => {
       isMounted = false;
@@ -150,7 +123,7 @@ const HomePage = () => {
       try {
         const response = await getSearchSuggestions({
           q: searchInput.trim(),
-          limit: 7,
+          limit: 8,
         });
 
         if (!cancelled) {
@@ -175,6 +148,12 @@ const HomePage = () => {
     };
   }, [searchInput]);
 
+  const passbookSummary = useMemo(() => {
+    return isAuthenticated
+      ? 'Keep every park memory in one place with stamps, visit dates, and notes.'
+      : 'Sign in to start your digital park passport and collect your first stamp.';
+  }, [isAuthenticated]);
+
   const onSearchSubmit = (event) => {
     event.preventDefault();
     const trimmed = searchInput.trim();
@@ -185,7 +164,7 @@ const HomePage = () => {
   const onUseCurrentLocation = () => {
     if (!navigator.geolocation) {
       setError(
-        'Location is unavailable in this browser. Search by ZIP or city.',
+        'Location is unavailable in this browser. Search by ZIP, city, or state.',
       );
       return;
     }
@@ -195,7 +174,7 @@ const HomePage = () => {
         const lat = Number(position.coords.latitude).toFixed(6);
         const lon = Number(position.coords.longitude).toFixed(6);
         navigate(
-          `/nearby?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&place=${encodeURIComponent('Current Location')}`,
+          `/nearby?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&radiusKm=300&place=${encodeURIComponent('Current Location')}`,
         );
       },
       () => {
@@ -255,41 +234,16 @@ const HomePage = () => {
     }
   };
 
-  const homeSections = useMemo(() => {
-    if (featuredNearby.length > 0) {
-      return [
-        {
-          id: 'nearby',
-          title: 'Explore near you',
-          items: featuredNearby,
-        },
-        {
-          id: 'popular',
-          title: 'Popular this weekend',
-          items: featuredPopular,
-        },
-      ];
-    }
-
-    return [
-      {
-        id: 'popular',
-        title: 'Curated trail picks',
-        items: featuredPopular,
-      },
-    ];
-  }, [featuredNearby, featuredPopular]);
-
   return (
     <section className='home-page'>
-      <div className='home-hero'>
+      <div className='home-hero home-hero--parks'>
         <div className='home-hero__overlay' />
         <div className='home-hero__content'>
-          <Chip>Trail Discovery App</Chip>
-          <h1 className='page-title'>Find your next great day outside</h1>
+          <Chip tone='warm'>U.S. National Parks Explorer</Chip>
+          <h1 className='page-title'>Explore all 63 U.S. National Parks</h1>
           <p className='page-subtitle'>
-            Discover scenic routes, weekend escapes, and hidden favorites with
-            map-first search built for real trail planning.
+            Search by park name, state, city, ZIP, or nearby location and build
+            your personal digital passbook.
           </p>
 
           <form className='hero-search' onSubmit={onSearchSubmit}>
@@ -297,7 +251,7 @@ const HomePage = () => {
               <input
                 id='home-search-input'
                 value={searchInput}
-                placeholder='Search trails, parks, or locations'
+                placeholder='Search parks by name, state, city, or ZIP'
                 onChange={(event) => setSearchInput(event.target.value)}
                 onKeyDown={onSearchKeyDown}
                 role='combobox'
@@ -309,7 +263,7 @@ const HomePage = () => {
                     ? `home-suggestion-${highlightedSuggestionIndex}`
                     : undefined
                 }
-                aria-label='Search trails, parks, or locations'
+                aria-label='Search parks by name, state, city, or ZIP'
               />
               {loadingSuggestions ? (
                 <p className='suggestion-note'>Finding suggestions...</p>
@@ -344,87 +298,99 @@ const HomePage = () => {
                 </ul>
               ) : null}
             </div>
-            <Button type='submit'>Start exploring</Button>
-            <Button variant='secondary' onClick={onUseCurrentLocation}>
-              Find trails near me
-            </Button>
+            <div className='home-hero__cta-row'>
+              <Button type='submit'>Explore parks</Button>
+              <Button variant='secondary' onClick={onUseCurrentLocation}>
+                Parks near me
+              </Button>
+            </div>
           </form>
-
-          <div className='home-hero__quick-categories'>
-            {PARK_CATEGORIES.map((category) =>
-              category.id === 'nearby' ? (
-                <button
-                  key={category.id}
-                  type='button'
-                  className='home-quick-category'
-                  onClick={onUseCurrentLocation}
-                >
-                  <h3>{category.title}</h3>
-                  <p>{category.subtitle}</p>
-                </button>
-              ) : (
-                <Link
-                  key={category.id}
-                  className='home-quick-category'
-                  to={`/search?category=${encodeURIComponent(category.queryValue)}`}
-                >
-                  <h3>{category.title}</h3>
-                  <p>{category.subtitle}</p>
-                </Link>
-              ),
-            )}
-          </div>
         </div>
       </div>
 
       {error ? <p className='error-copy'>{error}</p> : null}
 
-      {homeSections.map((section) => (
-        <section key={section.id} className='home-section'>
-          <div className='home-section__head'>
-            <h2>{section.title}</h2>
-            <Link to={section.id === 'nearby' ? '/nearby' : '/explore'}>
-              View all
-            </Link>
-          </div>
-          <div className='trail-grid'>
-            {section.items.map((trail) => (
-              <Card key={`${section.id}-${trail.id}`} className='trail-card'>
+      <section className='home-section'>
+        <div className='home-section__head'>
+          <h2>Featured National Parks</h2>
+          <Link to='/explore'>See all 63 parks</Link>
+        </div>
+        <div className='cards-grid'>
+          {featuredParks.map((park) => (
+            <Card key={park.id} className='park-card'>
+              <img
+                className='trail-thumb'
+                src={park.heroImageUrl || FALLBACK_PARK_IMAGE}
+                alt={park.name}
+                loading='lazy'
+              />
+              <h3>{park.name}</h3>
+              <p className='page-subtitle'>
+                {park.summary ||
+                  'A beautiful destination for your next national park adventure.'}
+              </p>
+              <div className='chip-row'>
+                <Chip tone='nature'>{park.category || 'National Park'}</Chip>
+                <Chip tone='sky'>{formatParkLocation(park)}</Chip>
+                {park.zipCode ? (
+                  <Chip tone='warm'>ZIP {park.zipCode}</Chip>
+                ) : null}
+              </div>
+              <div className='feature-actions'>
+                <Link to={`/parks/${park.slug}`}>View park</Link>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className='home-section'>
+        <div className='home-section__head'>
+          <h2>Parks Nearby</h2>
+          <Link to='/nearby'>Open nearby search</Link>
+        </div>
+        {nearbyParks.length ? (
+          <div className='cards-grid'>
+            {nearbyParks.map((park) => (
+              <Card key={`nearby-${park.id}`} className='park-card'>
                 <img
                   className='trail-thumb'
-                  src={trail.thumbnailUrl || FALLBACK_TRAIL_IMAGE}
-                  alt={trail.name}
+                  src={park.heroImageUrl || FALLBACK_PARK_IMAGE}
+                  alt={park.name}
                   loading='lazy'
                 />
-                <div className='trail-card__content'>
-                  <h3>{trail.name}</h3>
-                  <p className='trail-card__park'>
-                    {trail.parkName || 'Unknown park'}
-                  </p>
-                  <p className='trail-card__location'>
-                    {formatLocation(trail)}
-                  </p>
-                  <div className='chip-row'>
-                    <Chip tone='nature'>{trail.difficulty || 'general'}</Chip>
-                    <Chip tone='sky'>{trail.distanceKm || 0} km</Chip>
-                    <Chip tone='warm'>{formatRating(trail)}</Chip>
-                  </div>
-                </div>
-                <div className='trail-card__actions'>
-                  <Link to={`/trail/${trail.slug}`}>
-                    <Button variant='secondary'>View trail</Button>
-                  </Link>
-                  {trail.parkSlug ? (
-                    <Link to={`/parks/${trail.parkSlug}`}>
-                      <Button variant='ghost'>Park details</Button>
-                    </Link>
-                  ) : null}
+                <h3>{park.name}</h3>
+                <p className='page-subtitle'>{formatParkLocation(park)}</p>
+                <div className='feature-actions'>
+                  <Link to={`/parks/${park.slug}`}>Park details</Link>
                 </div>
               </Card>
             ))}
           </div>
-        </section>
-      ))}
+        ) : (
+          <Card className='no-results-card'>
+            <h3>No nearby parks found from your location.</h3>
+            <p className='page-subtitle'>
+              Try searching by city, ZIP code, or state to discover parks around
+              your next trip.
+            </p>
+            <Button variant='secondary' onClick={onUseCurrentLocation}>
+              Try location again
+            </Button>
+          </Card>
+        )}
+      </section>
+
+      <section className='home-section'>
+        <Card className='passbook-cta-card'>
+          <h2>Start your park passbook</h2>
+          <p className='page-subtitle'>{passbookSummary}</p>
+          <div className='feature-actions'>
+            <Link to='/passbook'>Open passbook</Link>
+            {!isAuthenticated ? <Link to='/signup'>Create account</Link> : null}
+          </div>
+        </Card>
+      </section>
     </section>
   );
 };

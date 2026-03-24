@@ -3,13 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 
 const DEFAULTS = {
   q: '',
-  category: '',
-  difficulty: '',
-  activity: '',
-  routeType: '',
   state: '',
+  city: '',
+  zipCode: '',
   radiusKm: '50',
-  sort: 'most-relevant',
+  sort: 'relevance',
   page: '1',
   view: 'split',
 };
@@ -20,11 +18,9 @@ export const useDiscoveryState = () => {
   const state = useMemo(() => {
     return {
       query: params.get('q') || DEFAULTS.q,
-      category: params.get('category') || DEFAULTS.category,
-      difficulty: params.get('difficulty') || DEFAULTS.difficulty,
-      activity: params.get('activity') || DEFAULTS.activity,
-      routeType: params.get('routeType') || DEFAULTS.routeType,
       stateCode: params.get('state') || DEFAULTS.state,
+      city: params.get('city') || DEFAULTS.city,
+      zipCode: params.get('zip') || DEFAULTS.zipCode,
       radiusKm: params.get('radiusKm') || DEFAULTS.radiusKm,
       sort: params.get('sort') || DEFAULTS.sort,
       page: Number(params.get('page') || DEFAULTS.page),

@@ -4,29 +4,25 @@ import { normalizeListResponse } from './contracts';
 const PARK_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1200&q=60';
 
+const toNumber = (value, fallback = null) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 const normalizeParkCategory = (value) => {
-  const raw = String(value || '').toLowerCase();
-
-  if (raw.includes('national')) {
-    return 'National Parks';
-  }
-  if (raw.includes('regional')) {
-    return 'Regional Parks';
-  }
-  if (raw.includes('state')) {
-    return 'State Parks';
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return 'National Park';
   }
 
-  return value || 'Park';
+  return raw
+    .toLowerCase()
+    .split(/[_\s]+/)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(' ');
 };
 
 export const normalizePark = (park) => {
-  const topTrails = Array.isArray(park?.topTrails)
-    ? park.topTrails
-    : Array.isArray(park?.trails)
-      ? park.trails
-      : [];
-
   return {
     ...park,
     id: String(park?.id || park?._id || park?.slug || park?.name || ''),
@@ -34,17 +30,14 @@ export const normalizePark = (park) => {
     name: park?.name || 'Unnamed Park',
     summary: park?.summary || park?.overview || '',
     category: normalizeParkCategory(park?.category || park?.parkCategory),
+    sourceDataset: park?.sourceDataset || '',
+    city: park?.city || park?.location?.city || '',
     state: park?.state || park?.location?.state || '',
+    zipCode: park?.zipCode || park?.zip || '',
+    lat: toNumber(park?.lat ?? park?.latitude, null),
+    lon: toNumber(park?.lon ?? park?.lng ?? park?.longitude, null),
     heroImageUrl:
       park?.heroImageUrl || park?.media?.heroImageUrl || PARK_FALLBACK_IMAGE,
-    topTrails,
-    mapArea:
-      park?.mapArea ||
-      park?.map?.boundary ||
-      park?.geojson ||
-      park?.boundary ||
-      null,
-    nearbyTrails: Array.isArray(park?.nearbyTrails) ? park.nearbyTrails : [],
   };
 };
 
@@ -70,4 +63,19 @@ export const getParkBySlug = async (slug) => {
   });
 
   return normalizePark(response);
+};
+
+export const searchNearbyParks = async (query = {}) => {
+  const response = await requestJson({
+    path: '/parks/nearby',
+    query,
+    fallbackMessage: 'Unable to load nearby parks',
+  });
+
+  return normalizeListResponse({
+    response,
+    itemNormalizer: normalizePark,
+    fallbackPage: query?.page || 1,
+    fallbackSize: query?.pageSize || 20,
+  });
 };

@@ -1,6 +1,6 @@
 import { requestJson } from './http';
-import { normalizeFiltersMetadata, normalizeListResponse } from './contracts';
-import { normalizeTrail } from './trails';
+import { normalizeListResponse } from './contracts';
+import { normalizePark } from './parks';
 
 const normalizeSuggestion = (item) => {
   if (!item || typeof item !== 'object') {
@@ -25,27 +25,17 @@ const normalizeSuggestion = (item) => {
 const normalizeDiscoveryResults = (response, query = {}) => {
   return normalizeListResponse({
     response,
-    itemNormalizer: normalizeTrail,
+    itemNormalizer: normalizePark,
     fallbackPage: query?.page || 1,
     fallbackSize: query?.pageSize || 20,
   });
 };
 
-export const searchDiscovery = async (query = {}) => {
+export const searchNearbyParksBySearch = async (query = {}) => {
   const response = await requestJson({
-    path: '/search/global',
+    path: '/search/nearby-parks',
     query,
-    fallbackMessage: 'Unable to run global search',
-  });
-
-  return normalizeDiscoveryResults(response, query);
-};
-
-export const searchNearbyTrails = async (query = {}) => {
-  const response = await requestJson({
-    path: '/search/nearby',
-    query,
-    fallbackMessage: 'Unable to load nearby trails',
+    fallbackMessage: 'Unable to load nearby parks',
   });
 
   return normalizeDiscoveryResults(response, query);
@@ -64,14 +54,4 @@ export const getSearchSuggestions = async (query = {}) => {
       ? response.items.map((item) => normalizeSuggestion(item))
       : [],
   };
-};
-
-export const getFiltersMetadata = async (query = {}) => {
-  const response = await requestJson({
-    path: '/metadata/filters',
-    query,
-    fallbackMessage: 'Unable to load search filters',
-  });
-
-  return normalizeFiltersMetadata(response);
 };
