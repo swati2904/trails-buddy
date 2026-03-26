@@ -8,6 +8,18 @@ import { searchParks } from '../api/v1/parks';
 import { useDiscoveryState } from '../state/useDiscoveryState';
 import { getApiErrorMessage } from '../api/v1/errorMessages';
 
+const FALLBACK_PARK_IMAGE =
+  'https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1400&q=60';
+
+const onImageError = (event) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') {
+    return;
+  }
+
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = FALLBACK_PARK_IMAGE;
+};
+
 const ParksPage = () => {
   const { state, setParam } = useDiscoveryState();
   const [items, setItems] = useState([]);
@@ -94,9 +106,10 @@ const ParksPage = () => {
             <Card key={park.id} className='park-card'>
               <img
                 className='trail-thumb'
-                src={park.heroImageUrl}
+                src={park.heroImageUrl || FALLBACK_PARK_IMAGE}
                 alt={park.name}
                 loading='lazy'
+                onError={onImageError}
               />
               <h2>{park.name}</h2>
               <p className='page-subtitle'>

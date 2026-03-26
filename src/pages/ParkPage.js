@@ -16,6 +16,15 @@ import { useAuth } from '../state/AuthContext';
 const PARK_HERO_FALLBACK =
   'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60';
 
+const onImageError = (event) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') {
+    return;
+  }
+
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = PARK_HERO_FALLBACK;
+};
+
 const formatVisitDate = (value) => {
   if (!value) {
     return 'Date not available';
@@ -192,6 +201,7 @@ const ParkPage = () => {
           src={park.heroImageUrl || PARK_HERO_FALLBACK}
           alt={park.name}
           loading='lazy'
+          onError={onImageError}
         />
         <div className='trail-detail-hero__overlay' />
         <div className='trail-detail-hero__content'>

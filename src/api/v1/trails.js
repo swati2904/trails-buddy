@@ -1,8 +1,6 @@
 import { requestJson } from './http';
 import { normalizeListResponse } from './contracts';
-
-const TRAIL_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=60';
+import { normalizeImageUrl } from './media';
 
 const toNumber = (value, fallback = null) => {
   const parsed = Number(value);
@@ -136,12 +134,7 @@ export const normalizeTrail = (trail) => {
     id: String(trail?.id || trail?._id || trail?.slug || trail?.name || ''),
     slug: trail?.slug || String(trail?.id || '').toLowerCase(),
     name: trail?.name || 'Unnamed Trail',
-    thumbnailUrl:
-      trail?.thumbnailUrl ||
-      trail?.media?.thumbnailUrl ||
-      trail?.media?.heroImageUrl ||
-      trail?.heroImageUrl ||
-      TRAIL_FALLBACK_IMAGE,
+    thumbnailUrl: normalizeImageUrl(trail?.thumbnailUrl),
     difficulty,
     distanceKm,
     distanceFromSearchKm,

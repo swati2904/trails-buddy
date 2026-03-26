@@ -21,6 +21,15 @@ import { useAuth } from '../state/AuthContext';
 const TRAIL_HERO_FALLBACK =
   'https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1200&q=60';
 
+const onImageError = (event) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') {
+    return;
+  }
+
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = TRAIL_HERO_FALLBACK;
+};
+
 const valueOrFallback = (value, fallback) => {
   if (value === null || value === undefined || value === '') {
     return fallback;
@@ -150,6 +159,7 @@ const TrailDetailPage = () => {
           src={trail.thumbnailUrl || TRAIL_HERO_FALLBACK}
           alt={trail.name}
           loading='lazy'
+          onError={onImageError}
         />
         <div className='trail-detail-hero__overlay' />
         <div className='trail-detail-hero__content'>

@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -60,13 +61,13 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const signInSession = (nextUser, nextTokens) => {
+  const signInSession = useCallback((nextUser, nextTokens) => {
     setUser(nextUser);
     setTokens(nextTokens);
     writeStoredSession({ user: nextUser, tokens: nextTokens });
-  };
+  }, []);
 
-  const signOutSession = async () => {
+  const signOutSession = useCallback(async () => {
     const refreshToken = tokens?.refreshToken;
     const accessToken = tokens?.accessToken;
 
@@ -81,7 +82,7 @@ export const AuthProvider = ({ children }) => {
       setTokens(null);
       clearStoredSession();
     }
-  };
+  }, [tokens?.accessToken, tokens?.refreshToken]);
 
   const value = useMemo(
     () => ({
@@ -91,7 +92,7 @@ export const AuthProvider = ({ children }) => {
       signInSession,
       signOutSession,
     }),
-    [tokens, user],
+    [signInSession, signOutSession, tokens, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

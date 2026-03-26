@@ -24,6 +24,15 @@ const BASE_RADIUS_OPTIONS = [25, 50, 100, 200, 300];
 const PARK_PLACEHOLDER =
   'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=60';
 
+const onImageError = (event) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') {
+    return;
+  }
+
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = PARK_PLACEHOLDER;
+};
+
 const formatLocation = (park) => {
   const cityState = [park?.city, park?.state].filter(Boolean).join(', ');
   if (cityState) {
@@ -566,6 +575,7 @@ const ExplorePage = () => {
                     src={park.heroImageUrl || PARK_PLACEHOLDER}
                     alt={park.name}
                     loading='lazy'
+                    onError={onImageError}
                     onMouseEnter={() => setActiveParkId(park.id)}
                     onClick={() => setActiveParkId(park.id)}
                   />

@@ -1,8 +1,6 @@
 import { requestJson } from './http';
 import { normalizeListResponse } from './contracts';
-
-const PARK_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1200&q=60';
+import { normalizeImageUrl } from './media';
 
 const toNumber = (value, fallback = null) => {
   const parsed = Number(value);
@@ -36,8 +34,7 @@ export const normalizePark = (park) => {
     zipCode: park?.zipCode || park?.zip || '',
     lat: toNumber(park?.lat ?? park?.latitude, null),
     lon: toNumber(park?.lon ?? park?.lng ?? park?.longitude, null),
-    heroImageUrl:
-      park?.heroImageUrl || park?.media?.heroImageUrl || PARK_FALLBACK_IMAGE,
+    heroImageUrl: normalizeImageUrl(park?.heroImageUrl),
   };
 };
 

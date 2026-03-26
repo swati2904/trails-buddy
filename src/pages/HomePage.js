@@ -11,6 +11,15 @@ import { useAuth } from '../state/AuthContext';
 const FALLBACK_PARK_IMAGE =
   'https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1400&q=60';
 
+const onImageError = (event) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') {
+    return;
+  }
+
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = FALLBACK_PARK_IMAGE;
+};
+
 const formatParkLocation = (park) => {
   const cityState = [park?.city, park?.state].filter(Boolean).join(', ');
   if (cityState) {
@@ -323,6 +332,7 @@ const HomePage = () => {
                 src={park.heroImageUrl || FALLBACK_PARK_IMAGE}
                 alt={park.name}
                 loading='lazy'
+                onError={onImageError}
               />
               <h3>{park.name}</h3>
               <p className='page-subtitle'>
@@ -358,6 +368,7 @@ const HomePage = () => {
                   src={park.heroImageUrl || FALLBACK_PARK_IMAGE}
                   alt={park.name}
                   loading='lazy'
+                  onError={onImageError}
                 />
                 <h3>{park.name}</h3>
                 <p className='page-subtitle'>{formatParkLocation(park)}</p>

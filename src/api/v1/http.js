@@ -139,6 +139,7 @@ const refreshAccessToken = async () => {
 
     const response = await fetch(buildUrl('/auth/refresh'), {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -232,6 +233,7 @@ export const requestJson = async ({
     const hasBody = body !== undefined;
     const response = await fetch(buildUrl(path, query), {
       method,
+      cache: 'no-store',
       headers: {
         Accept: 'application/json',
         ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
