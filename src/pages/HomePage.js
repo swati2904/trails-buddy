@@ -249,7 +249,7 @@ const HomePage = () => {
         <div className='home-hero__overlay' />
         <div className='home-hero__content'>
           <Chip tone='warm'>U.S. National Parks Explorer</Chip>
-          <h1 className='page-title'>Explore all 63 U.S. National Parks</h1>
+          <h1 className='page-title'>Explore U.S. National Parks</h1>
           <p className='page-subtitle'>
             Search by park name, state, city, ZIP, or nearby location and build
             your personal digital passbook.
@@ -322,7 +322,7 @@ const HomePage = () => {
       <section className='home-section'>
         <div className='home-section__head'>
           <h2>Featured National Parks</h2>
-          <Link to='/explore'>See all 63 parks</Link>
+          <Link to='/explore'>See all parks</Link>
         </div>
         <div className='cards-grid'>
           {featuredParks.map((park) => (

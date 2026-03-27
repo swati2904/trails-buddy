@@ -295,7 +295,7 @@ const ExplorePage = () => {
       ? 'Search U.S. National Parks'
       : location.pathname === '/nearby'
         ? 'National Parks near you'
-        : 'Explore all 63 U.S. National Parks';
+        : 'Explore U.S. National Parks';
 
   const resultsContext = state.query.trim()
     ? `Results for "${state.query.trim()}"`

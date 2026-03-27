@@ -175,7 +175,7 @@ const ProfilePage = () => {
           <>
             <p className='page-subtitle'>
               Start your park passport, collect digital stamps, and track your
-              journey across all 63 U.S. National Parks.
+              journey across U.S. National Parks.
             </p>
             <div className='feature-actions'>
               <Link to='/signin'>Sign in</Link>
@@ -187,9 +187,7 @@ const ProfilePage = () => {
             <p className='page-subtitle'>
               Welcome, {user?.displayName || 'Park Explorer'}.
             </p>
-            <p className='page-subtitle'>
-              {uniqueVisitedParks} of {TOTAL_NATIONAL_PARKS} parks visited
-            </p>
+            <p className='page-subtitle'>{uniqueVisitedParks} parks visited</p>
             <div className='passbook-progress'>
               <div
                 className='passbook-progress__bar'

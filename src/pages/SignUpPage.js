@@ -42,7 +42,7 @@ const SignUpPage = () => {
           </p>
           <ul className='auth-benefits'>
             <li>Save park visits and stamp entries</li>
-            <li>Track progress toward all 63 National Parks</li>
+            <li>Track progress across National Parks</li>
             <li>Keep a personal park passport for every trip</li>
           </ul>
           <p className='page-subtitle'>
