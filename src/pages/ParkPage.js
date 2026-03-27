@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Chip from '../components/ui/Chip';
@@ -44,6 +44,7 @@ const formatVisitDate = (value) => {
 
 const ParkPage = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { isAuthenticated, tokens, signOutSession } = useAuth();
   const [park, setPark] = useState(null);
   const [nearbyParks, setNearbyParks] = useState([]);
@@ -160,7 +161,10 @@ const ParkPage = () => {
       setVisitMessage('Stamped in your passbook. Adventure logged.');
     } catch (saveError) {
       if (shouldForceSignOut(saveError)) {
+        setVisitStatus('error');
+        setVisitMessage('Your session expired. Please sign in and try again.');
         await signOutSession();
+        navigate('/signin');
         return;
       }
       setVisitStatus('error');
@@ -262,10 +266,7 @@ const ParkPage = () => {
               maxLength={280}
             />
           </label>
-          <Button
-            type='submit'
-            disabled={visitStatus === 'saving' || !isAuthenticated}
-          >
+          <Button type='submit' disabled={visitStatus === 'saving'}>
             {!isAuthenticated
               ? 'Sign in to stamp this park'
               : visitStatus === 'saving'
@@ -292,8 +293,11 @@ const ParkPage = () => {
         <h2>Nearby parks to add next</h2>
         {nearbyParks.length ? (
           <div className='park-trails-list'>
-            {nearbyParks.map((nearbyPark) => (
-              <article key={nearbyPark.id} className='park-trail-row'>
+            {nearbyParks.map((nearbyPark, index) => (
+              <article
+                key={`${nearbyPark.id || nearbyPark.slug || 'nearby'}-${nearbyPark.slug || 'park'}-${index}`}
+                className='park-trail-row'
+              >
                 <div>
                   <h3>{nearbyPark.name}</h3>
                   <p className='page-subtitle'>
@@ -321,8 +325,11 @@ const ParkPage = () => {
         <Card>
           <h2>Your visits here</h2>
           <div className='park-trails-list'>
-            {visitsForPark.map((visit) => (
-              <article key={visit.visitId} className='park-trail-row'>
+            {visitsForPark.map((visit, index) => (
+              <article
+                key={`${visit.visitId || 'visit'}-${visit.createdAt || visit.visitDate || 'date'}-${index}`}
+                className='park-trail-row'
+              >
                 <div>
                   <h3>{formatVisitDate(visit.visitDate)}</h3>
                   <p className='page-subtitle'>

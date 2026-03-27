@@ -7,6 +7,49 @@ const REFRESHABLE_AUTH_CODES = new Set([
   'AUTH_TOKEN_INVALID',
 ]);
 
+const normalizeAccessToken = (value) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  return trimmed.replace(/^Bearer\s+/i, '').trim();
+};
+
+const createCorrelationId = () => {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return `tb-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+const decodeJwtPayload = (token) => {
+  if (typeof token !== 'string' || !token) {
+    return null;
+  }
+
+  const parts = token.split('.');
+  if (parts.length < 2) {
+    return null;
+  }
+
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    return JSON.parse(atob(padded));
+  } catch (error) {
+    return null;
+  }
+};
+
 const buildBaseUrl = () => {
   const exactUrl = process.env.REACT_APP_API_URL;
   if (exactUrl && exactUrl.trim()) {
@@ -122,6 +165,7 @@ const refreshAccessToken = async () => {
   }
 
   refreshInFlightPromise = (async () => {
+    const correlationId = createCorrelationId();
     const session = readStoredSession();
     const refreshToken = session?.tokens?.refreshToken;
 
@@ -143,6 +187,7 @@ const refreshAccessToken = async () => {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        'X-Correlation-Id': correlationId,
       },
       body: JSON.stringify({ refreshToken }),
     });
@@ -229,15 +274,45 @@ export const requestJson = async ({
   token,
   fallbackMessage = 'Request failed',
 }) => {
+  const debugAuth =
+    process.env.NODE_ENV !== 'production' &&
+    typeof window !== 'undefined' &&
+    window.localStorage?.getItem('tb.debug.auth') === '1';
+
   const runRequest = async (authToken) => {
+    const normalizedToken = normalizeAccessToken(authToken);
+    const correlationId = createCorrelationId();
+    const authHeader = normalizedToken ? `Bearer ${normalizedToken}` : '';
+    const decodedPayload = decodeJwtPayload(normalizedToken);
+
+    if (debugAuth) {
+      console.info('[tb-auth]', {
+        method,
+        path,
+        correlationId,
+        hasAuthorizationHeader: Boolean(normalizedToken),
+        tokenLength: normalizedToken.length,
+        tokenPrefixLooksJwt: /^\S+\.\S+\.\S+$/.test(normalizedToken),
+        hasQuote: normalizedToken.includes('"'),
+        authorizationHeaderLength: authHeader.length,
+        authPreview: authHeader.slice(0, 30),
+        sub: decodedPayload?.sub || null,
+        exp: decodedPayload?.exp || null,
+        now: Math.floor(Date.now() / 1000),
+      });
+    }
+
     const hasBody = body !== undefined;
     const response = await fetch(buildUrl(path, query), {
       method,
       cache: 'no-store',
       headers: {
         Accept: 'application/json',
+        'X-Correlation-Id': correlationId,
         ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(normalizedToken
+          ? { Authorization: `Bearer ${normalizedToken}` }
+          : {}),
       },
       ...(hasBody ? { body: JSON.stringify(body) } : {}),
     });
@@ -245,6 +320,20 @@ export const requestJson = async ({
     const payload = await readPayload(response);
 
     if (!response.ok) {
+      if (debugAuth && response.status === 401) {
+        console.warn('[tb-auth] unauthorized', {
+          method,
+          path,
+          correlationId,
+          responseCorrelationId:
+            response.headers.get('X-Correlation-Id') || null,
+          hasAuthorizationHeader: Boolean(normalizedToken),
+          errorCode: payload?.error?.code || payload?.code || null,
+          errorMessage: payload?.error?.message || payload?.message || null,
+          requestId: payload?.meta?.requestId || null,
+        });
+      }
+
       throw createRequestError(response, payload, fallbackMessage);
     }
 
@@ -252,12 +341,13 @@ export const requestJson = async ({
   };
 
   const storedToken = readStoredSession()?.tokens?.accessToken;
-  const initialToken = storedToken || token || null;
+  const initialToken = token || storedToken || null;
 
   try {
     return await runRequest(initialToken);
   } catch (error) {
-    if (!token || !shouldRefreshAndRetry(error)) {
+    const canRetryWithRefresh = Boolean(initialToken);
+    if (!canRetryWithRefresh || !shouldRefreshAndRetry(error)) {
       throw error;
     }
 
