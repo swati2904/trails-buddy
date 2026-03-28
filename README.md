@@ -191,4 +191,178 @@ This frontend expects the Trails Buddy services backend.
 - Keep API docs in this README aligned with `src/api/v1/*` modules.
 - Prefer updating normalization contracts before adding page-level response parsing.
 
+## DevOps Architecture (Zero-Cost First)
+
+- Frontend runtime: Docker container with Nginx serving static React build.
+- Frontend-to-backend integration in container mode: Nginx reverse proxy to backend service `http://backend:8080`.
+- Backend routes proxied by frontend container:
+  - `/v1 -> http://backend:8080/v1`
+  - `/api -> http://backend:8080/api`
+  - `/actuator -> http://backend:8080/actuator`
+- Local developer mode remains unchanged and free:
+  - Run backend locally at `http://localhost:8080`
+  - Run frontend via CRA dev server at `http://localhost:3000`
+- Optional cloud usage is manual opt-in only:
+  - Store built image in GCP Artifact Registry (no always-on compute)
+
+## Local Run (Non-Container Developer Path)
+
+1. Install dependencies:
+
+  ```bash
+  npm install
+  ```
+
+2. Start frontend dev server:
+
+  ```bash
+  npm start
+  ```
+
+3. Ensure backend is running at `http://localhost:8080`.
+
+4. Optional: customize backend URL with environment variables in `.env`:
+
+  ```env
+  REACT_APP_API_URL=
+  REACT_APP_API_ORIGIN=
+  REACT_APP_API_BASE_PATH=
+  REACT_APP_API_VERSION=v1
+  ```
+
+## Docker Build and Run
+
+This repo includes a production multi-stage Dockerfile:
+
+- Build stage: Node 20
+- Runtime stage: Nginx Alpine
+- Supports build output folder detection for both `dist` and `build`
+
+Build image:
+
+```bash
+docker build -t trails-buddy-frontend:local .
+```
+
+Run container (attached to the same Docker network as backend container named/service `backend`):
+
+```bash
+docker run --rm -p 3000:80 --name trails-buddy-frontend trails-buddy-frontend:local
+```
+
+In container mode, API calls are reverse-proxied by Nginx and do not require frontend environment variable overrides.
+
+## GitHub Actions CI/CD Flow
+
+Workflow file: `.github/workflows/frontend-ci-cd.yml`
+
+### On push and pull_request
+
+- Install dependencies
+- Build frontend
+- Run tests if test script is present
+- Build Docker image only (no push)
+
+### On manual workflow_dispatch
+
+- Same CI build/test/image-build steps
+- Optional image push to GCP Artifact Registry only when `enable_gcp_push=true`
+- Uses OIDC authentication only (no static key JSON files)
+
+Required GitHub Secrets:
+
+- `GCP_WORKLOAD_IDENTITY_PROVIDER`
+- `GCP_SERVICE_ACCOUNT`
+- `GCP_PROJECT_ID`
+
+Optional GitHub Variables:
+
+- `GCP_REGION` (default: `us-central1`)
+- `GAR_REPOSITORY` (default: `trailservices`)
+
+## Manual Image Push to Artifact Registry (Optional)
+
+This is optional and should only be done when you intentionally want to store images remotely.
+
+1. Authenticate with gcloud locally:
+
+  ```bash
+  gcloud auth login
+  gcloud config set project YOUR_PROJECT_ID
+  ```
+
+2. Configure Docker auth for GAR:
+
+  ```bash
+  gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+  ```
+
+3. Build and tag image:
+
+  ```bash
+  docker build -t us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:latest .
+  docker tag us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:latest us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:sha-$(git rev-parse --short HEAD)
+  ```
+
+4. Push tags:
+
+  ```bash
+  docker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:latest
+  docker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:sha-$(git rev-parse --short HEAD)
+  ```
+
+## Local Kubernetes Deploy (Kind/Minikube)
+
+Manifest file: `k8s/frontend.yaml`
+
+Default image in manifest:
+
+`us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:latest`
+
+Deploy to local cluster:
+
+```bash
+kubectl apply -f k8s/frontend.yaml
+kubectl get pods -l app=frontend
+kubectl get svc frontend
+```
+
+Access app:
+
+- NodePort is configured as `30080`
+- Open `http://localhost:30080` (or Minikube service URL if applicable)
+
+## Zero-Cost Guardrails
+
+- No Cloud SQL
+- No always-on GKE clusters
+- No always-on paid managed services
+- No mandatory cloud deployment path
+- Cloud is optional and limited to storing container images in Artifact Registry when manually enabled
+
+Tradeoff:
+
+- This setup optimizes for zero baseline cost, so there is no always-on hosted demo environment by default.
+- Demo runtime is local Docker/Kind/Minikube unless you manually choose to run paid compute services.
+
+## Cleanup Old Image Tags
+
+List tags:
+
+```bash
+gcloud artifacts docker tags list us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend
+```
+
+Delete an old tag:
+
+```bash
+gcloud artifacts docker images delete us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:OLD_TAG --delete-tags --quiet
+```
+
+Delete old untagged digests:
+
+```bash
+gcloud artifacts docker images list us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend
+```
+
 
