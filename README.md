@@ -311,58 +311,29 @@ This is optional and should only be done when you intentionally want to store im
   docker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:sha-$(git rev-parse --short HEAD)
   ```
 
-## Local Kubernetes Deploy (Kind/Minikube)
+## Docker Smoke Test (Frontend)
 
-Manifest file: `k8s/frontend.yaml`
+To verify the frontend build and API contract in a containerized environment:
 
-Default image in manifest:
-
-`us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:latest`
-
-Deploy to local cluster:
+1. Ensure your backend API is running on your host at http://localhost:8081
+2. Build and run the frontend smoke container:
 
 ```bash
-kubectl apply -f k8s/frontend.yaml
-kubectl get pods -l app=frontend
-kubectl get svc frontend
+docker build -t trails-buddy:smoke -f Dockerfile .
+docker run --rm -it -p 8080:80 trails-buddy:smoke
 ```
 
-Access app:
+- The app will be available at http://localhost:8080
+- The container is preconfigured to proxy API requests to http://host.docker.internal:8081
+- Parks endpoint is validated with: http://localhost:8080/v1/parks?page=1&pageSize=6
 
-- NodePort is configured as `30080`
-- Open `http://localhost:30080` (or Minikube service URL if applicable)
-
-## Zero-Cost Guardrails
-
-- No Cloud SQL
-- No always-on GKE clusters
-- No always-on paid managed services
-- No mandatory cloud deployment path
-- Cloud is optional and limited to storing container images in Artifact Registry when manually enabled
-
-Tradeoff:
-
-- This setup optimizes for zero baseline cost, so there is no always-on hosted demo environment by default.
-- Demo runtime is local Docker/Kind/Minikube unless you manually choose to run paid compute services.
-
-## Cleanup Old Image Tags
-
-List tags:
+To stop the container:
 
 ```bash
-gcloud artifacts docker tags list us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend
+docker ps # find the container ID if running detached
+docker stop <container_id>
 ```
 
-Delete an old tag:
-
-```bash
-gcloud artifacts docker images delete us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend:OLD_TAG --delete-tags --quiet
-```
-
-Delete old untagged digests:
-
-```bash
-gcloud artifacts docker images list us-central1-docker.pkg.dev/YOUR_PROJECT_ID/trailservices/frontend
-```
+This flow ensures your frontend is always aligned with backend contract in local Docker.
 
 
