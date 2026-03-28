@@ -1,0 +1,106 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+    inputs:
+      enable_gcp_push:
+        description: "Push image to GCP Artifact Registry"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_REGION: ${{ vars.GCP_REGION != '' && vars.GCP_REGION || 'us-central1' }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY != '' && vars.GAR_REPOSITORY || 'trailservices' }}
+
+jobs:
+  ci:
+    name: Install, Build, Test, Docker Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --legacy-peer-deps
+          else
+            npm install --legacy-peer-deps
+          fi
+
+      - name: Build app
+        run: npm run build
+
+      - name: Detect test script
+        id: testscript
+        run: |
+          if npm pkg get scripts.test | grep -qv 'null'; then
+            echo "has_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_tests=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run tests (if present)
+        if: steps.testscript.outputs.has_tests == 'true'
+        run: CI=true npm test -- --watch=false --passWithNoTests
+
+      - name: Build Docker image (no push)
+        run: docker build -t trails-buddy-frontend:${{ github.sha }} .
+
+  push-gar:
+    name: Optional Push To GAR
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.event_name == 'workflow_dispatch' && inputs.enable_gcp_push == true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (OIDC)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configure Docker auth for GAR
+        run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
+
+      - name: Build and tag GAR image
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        run: |
+          IMAGE_BASE="${GCP_REGION}-docker.pkg.dev/${PROJECT_ID}/${GAR_REPOSITORY}/frontend"
+          docker build \
+            -t "${IMAGE_BASE}:sha-${GITHUB_SHA}" \
+            -t "${IMAGE_BASE}:latest" \
+            .
+          echo "IMAGE_BASE=${IMAGE_BASE}" >> "$GITHUB_ENV"
+
+      - name: Push GAR image tags
+        run: |
+          docker push "${IMAGE_BASE}:sha-${GITHUB_SHA}"
+          docker push "${IMAGE_BASE}:latest"
