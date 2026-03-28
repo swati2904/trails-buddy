@@ -50,13 +50,29 @@ const decodeJwtPayload = (token) => {
   }
 };
 
+const inferLocalDevOrigin = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  const hostname = window.location.hostname;
+  if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    return '';
+  }
+
+  // Local smoke and host-browser runs use backend on 8081 by default.
+  return 'http://localhost:8081';
+};
+
 const buildBaseUrl = () => {
   const exactUrl = process.env.REACT_APP_API_URL;
   if (exactUrl && exactUrl.trim()) {
     return trimTrailingSlash(exactUrl);
   }
 
-  const origin = trimTrailingSlash(process.env.REACT_APP_API_ORIGIN || '');
+  const origin = trimTrailingSlash(
+    process.env.REACT_APP_API_ORIGIN || inferLocalDevOrigin(),
+  );
   const basePath = trimLeadingSlash(process.env.REACT_APP_API_BASE_PATH || '');
   const version = trimLeadingSlash(process.env.REACT_APP_API_VERSION || 'v1');
 
