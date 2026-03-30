@@ -31,8 +31,8 @@ const SignInPage = () => {
   };
 
   return (
-    <section className='page-block'>
-      <Card className='auth-card auth-card--split'>
+    <section className='page-block auth-page auth-page--signin'>
+      <Card className='auth-card auth-card--split auth-shell-card'>
         <div className='auth-journey'>
           <ChiplessTitle />
           <p className='page-subtitle'>

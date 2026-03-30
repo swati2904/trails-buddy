@@ -168,7 +168,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <section className='page-block'>
+    <section className='page-block profile-page'>
       <Card className='passbook-header-card'>
         <h1 className='page-title'>National Park Passbook</h1>
         {!isAuthenticated ? (
@@ -223,7 +223,7 @@ const ProfilePage = () => {
 
       {isAuthenticated ? (
         <>
-          <Card>
+          <Card className='profile-page__stamps'>
             <h2>Digital stamp collection</h2>
             {loading ? (
               <p className='page-subtitle'>Loading stamps...</p>
@@ -283,7 +283,7 @@ const ProfilePage = () => {
             ) : null}
           </Card>
 
-          <Card>
+          <Card className='profile-page__visits'>
             <h2>Visited parks</h2>
             {loading ? (
               <p className='page-subtitle'>Loading visits...</p>

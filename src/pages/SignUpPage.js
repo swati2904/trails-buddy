@@ -32,8 +32,8 @@ const SignUpPage = () => {
   };
 
   return (
-    <section className='page-block'>
-      <Card className='auth-card auth-card--split'>
+    <section className='page-block auth-page auth-page--signup'>
+      <Card className='auth-card auth-card--split auth-shell-card'>
         <div className='auth-journey'>
           <h1 className='page-title'>Start your National Parks passbook</h1>
           <p className='page-subtitle'>

@@ -39,6 +39,14 @@ const ShellLayout = () => {
     ];
   }, [isAuthenticated]);
 
+  const isRouteActive = (to) => {
+    if (to === '/') {
+      return location.pathname === '/';
+    }
+
+    return location.pathname === to || location.pathname.startsWith(`${to}/`);
+  };
+
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsProfileMenuOpen(false);
@@ -183,7 +191,11 @@ const ShellLayout = () => {
             aria-label='Primary'
           >
             {primaryNav.map((item) => (
-              <Link key={item.to} className='site-nav-link' to={item.to}>
+              <Link
+                key={item.to}
+                className={`site-nav-link ${isRouteActive(item.to) ? 'site-nav-link--active' : ''}`.trim()}
+                to={item.to}
+              >
                 {item.label}
               </Link>
             ))}
@@ -301,7 +313,7 @@ const ShellLayout = () => {
                 {mobileDrawerNav.map((item) => (
                   <Link
                     key={item.to}
-                    className='site-mobile-drawer__link'
+                    className={`site-mobile-drawer__link ${isRouteActive(item.to) ? 'site-mobile-drawer__link--active' : ''}`.trim()}
                     to={item.to}
                     role='menuitem'
                     onClick={closeMobileMenu}

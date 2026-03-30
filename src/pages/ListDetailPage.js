@@ -75,7 +75,7 @@ const ListDetailPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <section className='page-block'>
+      <section className='page-block list-detail-page'>
         <Card>
           <h1 className='page-title'>List Details</h1>
           <p className='page-subtitle'>Sign in to view this list.</p>
@@ -87,7 +87,7 @@ const ListDetailPage = () => {
 
   if (loading) {
     return (
-      <section className='page-block'>
+      <section className='page-block list-detail-page'>
         <Card>
           <p className='page-subtitle'>Loading list...</p>
         </Card>
@@ -97,7 +97,7 @@ const ListDetailPage = () => {
 
   if (!list) {
     return (
-      <section className='page-block'>
+      <section className='page-block list-detail-page'>
         <Card>
           <h1 className='page-title'>List Not Found</h1>
           <p className='page-subtitle'>The selected list is unavailable.</p>
@@ -108,8 +108,8 @@ const ListDetailPage = () => {
   }
 
   return (
-    <section className='page-block'>
-      <Card>
+    <section className='page-block list-detail-page'>
+      <Card className='list-detail-page__intro'>
         <h1 className='page-title'>{list.name}</h1>
         <p className='page-subtitle'>
           {trails.length} saved trails • {list.isPublic ? 'Public' : 'Private'}
@@ -125,7 +125,7 @@ const ListDetailPage = () => {
       <div className='cards-grid'>
         {trails.map((trail) => {
           return (
-            <Card key={`${list.id}-${trail.trailId}`}>
+            <Card key={`${list.id}-${trail.trailId}`} className='list-detail-page__trail-card'>
               {trail.thumbnailUrl ? (
                 <img
                   className='trail-thumb'

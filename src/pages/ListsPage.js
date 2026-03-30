@@ -98,7 +98,7 @@ const ListsPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <section className='page-block'>
+      <section className='page-block lists-page'>
         <Card>
           <h1 className='page-title'>My Lists</h1>
           <p className='page-subtitle'>
@@ -111,8 +111,8 @@ const ListsPage = () => {
   }
 
   return (
-    <section className='page-block'>
-      <Card>
+    <section className='page-block lists-page'>
+      <Card className='lists-page__intro'>
         <h1 className='page-title'>Trail collections</h1>
         <p className='page-subtitle'>
           Build collections for weekend trips, seasonal goals, and future
@@ -120,7 +120,7 @@ const ListsPage = () => {
         </p>
       </Card>
 
-      <Card>
+      <Card className='lists-page__create'>
         <form className='auth-form' onSubmit={onCreate}>
           <label>
             <span>List name</span>
@@ -157,7 +157,7 @@ const ListsPage = () => {
 
       <div className='cards-grid'>
         {items.map((item) => (
-          <Card key={item.id}>
+          <Card key={item.id} className='lists-page__card'>
             <h2>{item.name}</h2>
             <p>
               {item.trailCount || 0} trails •{' '}

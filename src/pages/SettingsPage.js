@@ -44,15 +44,15 @@ const SettingsPage = () => {
   };
 
   return (
-    <section className='page-block'>
-      <Card>
+    <section className='page-block settings-page'>
+      <Card className='settings-page__intro'>
         <h1 className='page-title'>Trail preferences</h1>
         <p className='page-subtitle'>
           Personalize language, units, and alerts for your next adventure.
         </p>
       </Card>
 
-      <Card className='auth-form'>
+      <Card className='auth-form settings-page__form'>
         <label>
           <span>Language</span>
           <select
