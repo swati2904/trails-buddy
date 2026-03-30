@@ -51,6 +51,15 @@ The current route configuration is defined in `src/components/App.js`.
 
 See exact package versions in `package.json`.
 
+## UI and responsive design
+
+The interface is built as a single cohesive design system in **`src/index.css`**: CSS variables for color, spacing, radii, and shadows; shared patterns for cards, buttons, chips, maps, and forms; and responsive breakpoints for phone, tablet, and desktop.
+
+- **App shell:** `src/components/Shell/ShellLayout.js` provides the sticky header, global search, account menu, mobile navigation drawer, and active-route highlighting for primary links.
+- **Primitives:** Reusable building blocks live under `src/components/ui/` (for example `Button`, `Card`, `Chip`, `Skeleton`).
+- **Page polish:** Route pages add scoped class names where helpful (auth split layout, lists, list detail, settings, passbook sections) so layouts stay consistent without duplicating structure.
+- **Accessibility:** Visible focus styles for interactive elements; animation intensity respects `prefers-reduced-motion` where global motion is used.
+
 ## API Integration
 
 HTTP requests are centralized in `src/api/v1/http.js` through `requestJson`.
@@ -335,5 +344,26 @@ docker stop <container_id>
 ```
 
 This flow ensures your frontend is always aligned with backend contract in local Docker.
+
+## Deploying Frontend to Vercel (Free & Public)
+
+You can deploy this React frontend for free using [Vercel](https://vercel.com/):
+
+1. Push your code to a public GitHub repository.
+2. Go to https://vercel.com/import and select "Import Git Repository".
+3. Log in with GitHub and select your repo.
+4. For **Framework Preset**, choose **Create React App** (or leave as detected).
+5. Click **Deploy**. Vercel will build and host your app at `https://<your-project>.vercel.app`.
+6. (Optional) Set a custom domain for free in Vercel dashboard.
+
+**API Integration:**
+- If your backend is public, set `REACT_APP_API_URL` in Vercel project settings to your backend’s public URL.
+- If backend is private, only frontend will be public.
+
+**CI/CD:**
+- Every push to `main` (or any branch) auto-deploys a new version.
+- Preview URLs are created for every pull request.
+
+**No credit card required. Always free for open source and personal use.**
 
 
