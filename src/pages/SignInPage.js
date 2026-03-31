@@ -31,25 +31,14 @@ const SignInPage = () => {
   };
 
   return (
-    <section className='page-block auth-page auth-page--signin'>
-      <Card className='auth-card auth-card--split auth-shell-card'>
-        <div className='auth-journey'>
-          <ChiplessTitle />
-          <p className='page-subtitle'>
-            Continue your National Parks journey and keep your park memories in
-            one place.
-          </p>
-          <ul className='auth-benefits'>
-            <li>Track visited parks and passbook stamps</li>
-            <li>Add visit notes and date-stamped memories</li>
-            <li>Pick up your trip planning right where you left off</li>
-          </ul>
-          <p className='page-subtitle'>
-            New here? <Link to='/signup'>Create your account</Link>
-          </p>
-        </div>
+    <section className='page-block auth-page auth-page--signin page-shell'>
+      <Card className='auth-card auth-card--modern auth-shell-card'>
+        <h1 className='auth-modern__title'>Sign in</h1>
+        <p className='auth-modern__lede'>
+          Sync visits and stamps across devices. No clutter—just your account.
+        </p>
 
-        <form className='auth-form' onSubmit={onSubmit}>
+        <form className='auth-form auth-form--modern' onSubmit={onSubmit}>
           <label>
             <span>Email</span>
             <input
@@ -81,16 +70,21 @@ const SignInPage = () => {
           ) : null}
 
           <Button type='submit' disabled={loading}>
-            {loading ? 'Signing in...' : 'Open my passbook'}
+            {loading ? 'Signing in...' : 'Continue'}
           </Button>
         </form>
+
+        <p className='auth-modern__switch'>
+          New here? <Link to='/signup'>Create an account</Link>
+        </p>
+
+        <ul className='auth-modern__micro'>
+          <li>Passbook stamps & visit log</li>
+          <li>Notes and dates per park</li>
+        </ul>
       </Card>
     </section>
   );
 };
-
-const ChiplessTitle = () => (
-  <h1 className='page-title'>Welcome back, explorer</h1>
-);
 
 export default SignInPage;

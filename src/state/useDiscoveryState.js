@@ -1,6 +1,33 @@
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+const SETTINGS_KEY = 'tb.ui.settings';
+const ALLOWED_VIEWS = new Set(['list', 'map', 'split']);
+const ALLOWED_RADII = new Set(['25', '50', '100', '200', '300']);
+
+const getStoredDiscoveryDefaults = () => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(SETTINGS_KEY);
+    if (!raw) {
+      return {};
+    }
+    const parsed = JSON.parse(raw);
+    const view = String(parsed?.defaultExploreView || '');
+    const radiusKm = String(parsed?.defaultRadiusKm || '');
+
+    return {
+      view: ALLOWED_VIEWS.has(view) ? view : undefined,
+      radiusKm: ALLOWED_RADII.has(radiusKm) ? radiusKm : undefined,
+    };
+  } catch {
+    return {};
+  }
+};
+
 const DEFAULTS = {
   q: '',
   state: '',
@@ -10,6 +37,7 @@ const DEFAULTS = {
   sort: 'relevance',
   page: '1',
   view: 'split',
+  ...getStoredDiscoveryDefaults(),
 };
 
 export const useDiscoveryState = () => {

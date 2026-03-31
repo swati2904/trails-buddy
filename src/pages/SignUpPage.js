@@ -32,25 +32,14 @@ const SignUpPage = () => {
   };
 
   return (
-    <section className='page-block auth-page auth-page--signup'>
-      <Card className='auth-card auth-card--split auth-shell-card'>
-        <div className='auth-journey'>
-          <h1 className='page-title'>Start your National Parks passbook</h1>
-          <p className='page-subtitle'>
-            Build your memory collection across all U.S. National Parks with
-            digital stamps, travel notes, and visit tracking.
-          </p>
-          <ul className='auth-benefits'>
-            <li>Save park visits and stamp entries</li>
-            <li>Track progress across National Parks</li>
-            <li>Keep a personal park passport for every trip</li>
-          </ul>
-          <p className='page-subtitle'>
-            Already have an account? <Link to='/signin'>Sign in</Link>
-          </p>
-        </div>
+    <section className='page-block auth-page auth-page--signup page-shell'>
+      <Card className='auth-card auth-card--modern auth-shell-card'>
+        <h1 className='auth-modern__title'>Create account</h1>
+        <p className='auth-modern__lede'>
+          One account for your passbook—stamps and visits stay with you.
+        </p>
 
-        <form className='auth-form' onSubmit={onSubmit}>
+        <form className='auth-form auth-form--modern' onSubmit={onSubmit}>
           <label>
             <span>Display name</span>
             <input
@@ -93,9 +82,18 @@ const SignUpPage = () => {
           ) : null}
 
           <Button type='submit' disabled={loading}>
-            {loading ? 'Creating account...' : 'Create passbook account'}
+            {loading ? 'Creating account...' : 'Create account'}
           </Button>
         </form>
+
+        <p className='auth-modern__switch'>
+          Already registered? <Link to='/signin'>Sign in</Link>
+        </p>
+
+        <ul className='auth-modern__micro'>
+          <li>Free digital stamps per visit</li>
+          <li>Edit dates and notes anytime</li>
+        </ul>
       </Card>
     </section>
   );

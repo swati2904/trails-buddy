@@ -27,14 +27,14 @@ The current route configuration is defined in `src/components/App.js`.
 | `/nearby` | Explore page (nearby intent) |
 | `/parks` | Parks listing |
 | `/parks/:slug` | Park details |
-| `/passbook` | Profile/passbook page |
+| `/passbook` | Passbook (stamps and visits) |
+| `/profile` | Profile / account |
 | `/signin` | Sign in |
 | `/signup` | Sign up |
 | `/pricing` | Pricing |
 | `/about` | About |
 | `/help` | Help |
 | `/press` | Press |
-| `/profile` | Profile |
 | `/settings` | Settings |
 | `/404` | Not found |
 
@@ -57,7 +57,8 @@ The interface is built as a single cohesive design system in **`src/index.css`**
 
 - **App shell:** `src/components/Shell/ShellLayout.js` provides the sticky header, global search, account menu, mobile navigation drawer, and active-route highlighting for primary links.
 - **Primitives:** Reusable building blocks live under `src/components/ui/` (for example `Button`, `Card`, `Chip`, `Skeleton`).
-- **Page polish:** Route pages add scoped class names where helpful (auth split layout, lists, list detail, settings, passbook sections) so layouts stay consistent without duplicating structure.
+- **Passbook vs profile:** `/passbook` is **`PassbookPage`** (stamps, visit log, progress). `/profile` is **`ProfilePage`** (account summary, links to passbook and settings, sign out). They are separate routes and UIs.
+- **Page layout:** Many screens use the **`page-shell`** width constraint and **`page-shell__*`** intro headings for consistent hierarchy; typography defaults are tuned for dense, readable layouts.
 - **Accessibility:** Visible focus styles for interactive elements; animation intensity respects `prefers-reduced-motion` where global motion is used.
 
 ## API Integration

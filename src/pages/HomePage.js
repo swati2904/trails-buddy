@@ -7,6 +7,7 @@ import { getSearchSuggestions } from '../api/v1/discovery';
 import { searchNearbyParks, searchParks } from '../api/v1/parks';
 import { getApiErrorMessage } from '../api/v1/errorMessages';
 import { useAuth } from '../state/AuthContext';
+import { excerptPlainText } from '../utils/excerpt';
 
 const FALLBACK_PARK_IMAGE =
   'https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1400&q=60';
@@ -31,6 +32,19 @@ const formatParkLocation = (park) => {
   }
 
   return 'U.S. National Park';
+};
+
+const showCategoryChip = (park) => {
+  const cat = String(park?.category || '').trim();
+  if (!cat) {
+    return false;
+  }
+  const name = String(park?.name || '').toLowerCase();
+  const catLower = cat.toLowerCase();
+  if (catLower === 'national park' && name.includes('national park')) {
+    return false;
+  }
+  return true;
 };
 
 const HomePage = () => {
@@ -64,12 +78,16 @@ const HomePage = () => {
         }
       } catch (loadError) {
         if (isMounted) {
-          setError(
-            getApiErrorMessage(
-              loadError,
-              'Unable to load national park highlights.',
-            ),
-          );
+          const isNetwork =
+            loadError?.message === 'Failed to fetch' ||
+            loadError?.name === 'TypeError';
+          const message = isNetwork
+            ? 'Cannot reach the park data service. Start the API (see README) or check your network, then refresh.'
+            : getApiErrorMessage(
+                loadError,
+                'Unable to load national park highlights.',
+              );
+          setError(message);
         }
       }
 
@@ -248,7 +266,7 @@ const HomePage = () => {
       <div className='home-hero home-hero--parks'>
         <div className='home-hero__overlay' />
         <div className='home-hero__content'>
-          <Chip tone='warm'>U.S. National Parks Explorer</Chip>
+          <p className='home-hero__kicker'>National Parks Explorer</p>
           <h1 className='page-title'>Explore U.S. National Parks</h1>
           <p className='page-subtitle'>
             Search by park name, state, city, ZIP, or nearby location and build
@@ -256,11 +274,13 @@ const HomePage = () => {
           </p>
 
           <form className='hero-search' onSubmit={onSearchSubmit}>
+            <div className='home-hero__panel'>
             <div className='search-input-stack'>
               <input
                 id='home-search-input'
                 value={searchInput}
-                placeholder='Search parks by name, state, city, or ZIP'
+                placeholder='Search parks'
+                autoComplete='off'
                 onChange={(event) => setSearchInput(event.target.value)}
                 onKeyDown={onSearchKeyDown}
                 role='combobox'
@@ -313,11 +333,12 @@ const HomePage = () => {
                 Parks near me
               </Button>
             </div>
+            </div>
           </form>
         </div>
       </div>
 
-      {error ? <p className='error-copy'>{error}</p> : null}
+      {error ? <p className='home-error-banner'>{error}</p> : null}
 
       <section className='home-section'>
         <div className='home-section__head'>
@@ -334,13 +355,18 @@ const HomePage = () => {
                 loading='lazy'
                 onError={onImageError}
               />
-              <h3>{park.name}</h3>
-              <p className='page-subtitle'>
-                {park.summary ||
-                  'A beautiful destination for your next national park adventure.'}
+              <h3 className='park-card__title'>{park.name}</h3>
+              <p className='park-card__excerpt'>
+                {excerptPlainText(
+                  park.summary ||
+                    'Scenic trails, wildlife, and iconic landscapes worth the trip.',
+                  176,
+                )}
               </p>
-              <div className='chip-row'>
-                <Chip tone='nature'>{park.category || 'National Park'}</Chip>
+              <div className='chip-row chip-row--tight'>
+                {showCategoryChip(park) ? (
+                  <Chip tone='nature'>{park.category}</Chip>
+                ) : null}
                 <Chip tone='sky'>{formatParkLocation(park)}</Chip>
                 {park.zipCode ? (
                   <Chip tone='warm'>ZIP {park.zipCode}</Chip>
@@ -370,8 +396,8 @@ const HomePage = () => {
                   loading='lazy'
                   onError={onImageError}
                 />
-                <h3>{park.name}</h3>
-                <p className='page-subtitle'>{formatParkLocation(park)}</p>
+                <h3 className='park-card__title'>{park.name}</h3>
+                <p className='park-card__meta'>{formatParkLocation(park)}</p>
                 <div className='feature-actions'>
                   <Link to={`/parks/${park.slug}`}>Park details</Link>
                 </div>
@@ -392,16 +418,13 @@ const HomePage = () => {
         )}
       </section>
 
-      <section className='home-section'>
-        <Card className='passbook-cta-card'>
-          <h2>Start your park passbook</h2>
-          <p className='page-subtitle'>{passbookSummary}</p>
-          <div className='feature-actions'>
-            <Link to='/passbook'>Open passbook</Link>
-            {!isAuthenticated ? <Link to='/signup'>Create account</Link> : null}
-          </div>
-        </Card>
-      </section>
+      <div className='home-passbook-strip' role='region' aria-label='Passbook'>
+        <p className='home-passbook-strip__text'>{passbookSummary}</p>
+        <div className='home-passbook-strip__actions'>
+          <Link to='/passbook'>Passbook</Link>
+          {!isAuthenticated ? <Link to='/signup'>Sign up</Link> : null}
+        </div>
+      </div>
     </section>
   );
 };

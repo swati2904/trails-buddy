@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import i18n from '../i18n';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 
 const SETTINGS_KEY = 'tb.ui.settings';
 
 const defaultSettings = {
-  language: i18n.language?.startsWith('es') ? 'es' : 'en',
-  units: 'metric',
-  notifications: true,
+  defaultExploreView: 'split',
+  defaultRadiusKm: '50',
 };
 
 const SettingsPage = () => {
@@ -24,9 +22,6 @@ const SettingsPage = () => {
 
       const parsed = JSON.parse(raw);
       setSettings((current) => ({ ...current, ...parsed }));
-      if (parsed?.language) {
-        i18n.changeLanguage(parsed.language);
-      }
     } catch (error) {
       // Ignore invalid stored settings and keep defaults.
     }
@@ -39,63 +34,68 @@ const SettingsPage = () => {
 
   const saveSettings = () => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    i18n.changeLanguage(settings.language);
     setSavedNotice('Settings saved.');
   };
 
+  const resetSettings = () => {
+    setSettings(defaultSettings);
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
+    setSavedNotice('Preferences reset to defaults.');
+  };
+
   return (
-    <section className='page-block settings-page'>
+    <section className='page-block settings-page page-shell'>
       <Card className='settings-page__intro'>
-        <h1 className='page-title'>Trail preferences</h1>
+        <h1 className='page-title'>Explore defaults</h1>
         <p className='page-subtitle'>
-          Personalize language, units, and alerts for your next adventure.
+          Only real settings live here. These preferences are used directly on
+          the Explore page.
         </p>
       </Card>
 
       <Card className='auth-form settings-page__form'>
         <label>
-          <span>Language</span>
+          <span>Default Explore layout</span>
           <select
-            value={settings.language}
+            value={settings.defaultExploreView}
             onChange={(event) =>
-              updateSettings({ ...settings, language: event.target.value })
+              updateSettings({
+                ...settings,
+                defaultExploreView: event.target.value,
+              })
             }
           >
-            <option value='en'>English</option>
-            <option value='es'>Spanish</option>
+            <option value='split'>Split (list + map)</option>
+            <option value='list'>List only</option>
+            <option value='map'>Map only</option>
           </select>
         </label>
 
         <label>
-          <span>Distance Units</span>
+          <span>Default search radius</span>
           <select
-            value={settings.units}
-            onChange={(event) =>
-              updateSettings({ ...settings, units: event.target.value })
-            }
-          >
-            <option value='metric'>Metric (km, m)</option>
-            <option value='imperial'>Imperial (mi, ft)</option>
-          </select>
-        </label>
-
-        <label className='checkbox-row'>
-          <input
-            type='checkbox'
-            checked={settings.notifications}
+            value={settings.defaultRadiusKm}
             onChange={(event) =>
               updateSettings({
                 ...settings,
-                notifications: event.target.checked,
+                defaultRadiusKm: event.target.value,
               })
             }
-          />
-          <span>
-            Enable notifications for trail updates and review activity
-          </span>
+          >
+            <option value='25'>25 km</option>
+            <option value='50'>50 km</option>
+            <option value='100'>100 km</option>
+            <option value='200'>200 km</option>
+            <option value='300'>300 km</option>
+          </select>
         </label>
 
-        <Button onClick={saveSettings}>Save preferences</Button>
+        <div className='feature-actions'>
+          <Button onClick={saveSettings}>Save preferences</Button>
+          <Button variant='secondary' onClick={resetSettings}>
+            Reset
+          </Button>
+        </div>
         {savedNotice ? <p className='success-copy'>{savedNotice}</p> : null}
       </Card>
     </section>

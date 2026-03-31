@@ -21,15 +21,19 @@ const ShellLayout = () => {
   const profileToggleRef = useRef(null);
 
   const mobileDrawerNav = useMemo(
-    () => [...primaryNav, { to: '/profile', label: 'Profile' }],
+    () => [
+      ...primaryNav,
+      { to: '/profile', label: 'Profile' },
+      { to: '/settings', label: 'Settings' },
+    ],
     [],
   );
 
   const profileMenuItems = useMemo(() => {
     if (isAuthenticated) {
       return [
-        { to: '/profile', label: 'My Profile' },
-        { to: '/passbook', label: 'Passbook' },
+        { to: '/profile', label: 'Profile' },
+        { to: '/settings', label: 'Settings' },
       ];
     }
 
@@ -131,6 +135,19 @@ const ShellLayout = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
   const onSearchSubmit = (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -149,6 +166,12 @@ const ShellLayout = () => {
     setIsProfileMenuOpen((current) => !current);
     setIsMobileMenuOpen(false);
   };
+
+  const hideHeaderSearch =
+    location.pathname === '/' ||
+    location.pathname === '/explore' ||
+    location.pathname === '/search' ||
+    location.pathname === '/nearby';
 
   return (
     <div className='app-shell'>
@@ -181,7 +204,7 @@ const ShellLayout = () => {
                 National Parks Explorer
               </span>
               <span className='site-header__subtitle'>
-                Parks passbook and travel companion
+                Discover parks and your passbook
               </span>
             </span>
           </Link>
@@ -201,12 +224,15 @@ const ShellLayout = () => {
             ))}
           </nav>
 
-          <form className='site-global-search' onSubmit={onSearchSubmit}>
+          <form
+            className={`site-global-search ${hideHeaderSearch ? 'site-global-search--hidden' : ''}`.trim()}
+            onSubmit={onSearchSubmit}
+          >
             <input
               type='search'
               name='q'
-              placeholder='Search parks by name, state, city, or ZIP'
-              aria-label='Search parks by name, state, city, or ZIP'
+              placeholder='Search parks'
+              aria-label='Search parks'
             />
             <Button type='submit' className='site-global-search__button'>
               Search
@@ -269,63 +295,64 @@ const ShellLayout = () => {
             ) : null}
           </nav>
         </div>
+      </header>
 
-        {isMobileMenuOpen ? (
-          <>
-            <button
-              type='button'
-              className='site-mobile-drawer-backdrop'
-              aria-label='Close navigation drawer'
-              onClick={closeMobileMenu}
-            />
-            <aside
-              id='mobile-navigation-menu'
-              className='site-mobile-drawer'
-              role='menu'
-              aria-label='Mobile navigation menu'
-              ref={mobileMenuRef}
-            >
-              <div className='site-mobile-drawer__head'>
-                <h2 className='site-mobile-drawer__title'>Navigate</h2>
-                <button
-                  type='button'
-                  className='site-mobile-drawer__close'
+      {isMobileMenuOpen ? (
+        <>
+          <button
+            type='button'
+            className='site-mobile-drawer-backdrop'
+            aria-label='Close navigation drawer'
+            onClick={closeMobileMenu}
+          />
+          <aside
+            id='mobile-navigation-menu'
+            className='site-mobile-drawer'
+            role='navigation'
+            aria-label='Mobile navigation menu'
+            ref={mobileMenuRef}
+          >
+            <div className='site-mobile-drawer__head'>
+              <h2 className='site-mobile-drawer__title' id='mobile-nav-title'>
+                Menu
+              </h2>
+              <button
+                type='button'
+                className='site-mobile-drawer__close'
+                onClick={closeMobileMenu}
+              >
+                Close
+              </button>
+            </div>
+
+            <form className='site-mobile-search' onSubmit={onSearchSubmit}>
+              <input
+                type='search'
+                name='q'
+                placeholder='Search parks'
+                aria-label='Search parks'
+              />
+              <Button type='submit' className='site-global-search__button'>
+                Go
+              </Button>
+            </form>
+
+            <div className='site-mobile-drawer__group'>
+              <p className='site-mobile-drawer__group-label'>Main</p>
+              {mobileDrawerNav.map((item) => (
+                <Link
+                  key={item.to}
+                  className={`site-mobile-drawer__link ${isRouteActive(item.to) ? 'site-mobile-drawer__link--active' : ''}`.trim()}
+                  to={item.to}
                   onClick={closeMobileMenu}
                 >
-                  Close
-                </button>
-              </div>
-
-              <form className='site-mobile-search' onSubmit={onSearchSubmit}>
-                <input
-                  type='search'
-                  name='q'
-                  placeholder='Search parks'
-                  aria-label='Search parks'
-                />
-                <Button type='submit' className='site-global-search__button'>
-                  Go
-                </Button>
-              </form>
-
-              <div className='site-mobile-drawer__group'>
-                <p className='site-mobile-drawer__group-label'>Main</p>
-                {mobileDrawerNav.map((item) => (
-                  <Link
-                    key={item.to}
-                    className={`site-mobile-drawer__link ${isRouteActive(item.to) ? 'site-mobile-drawer__link--active' : ''}`.trim()}
-                    to={item.to}
-                    role='menuitem'
-                    onClick={closeMobileMenu}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </aside>
-          </>
-        ) : null}
-      </header>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </aside>
+        </>
+      ) : null}
 
       <main className='site-main'>
         <Outlet />

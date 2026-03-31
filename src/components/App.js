@@ -8,6 +8,7 @@ import ParksPage from '../pages/ParksPage';
 import SignInPage from '../pages/SignInPage';
 import SignUpPage from '../pages/SignUpPage';
 import ProfilePage from '../pages/ProfilePage';
+import PassbookPage from '../pages/PassbookPage';
 import SettingsPage from '../pages/SettingsPage';
 import PricingPage from '../pages/PricingPage';
 import AboutPage from '../pages/AboutPage';
@@ -28,7 +29,7 @@ const App = () => {
             <Route path='/nearby' element={<ExplorePage />} />
             <Route path='/parks' element={<ParksPage />} />
             <Route path='/parks/:slug' element={<ParkPage />} />
-            <Route path='/passbook' element={<ProfilePage />} />
+            <Route path='/passbook' element={<PassbookPage />} />
             <Route path='/signin' element={<SignInPage />} />
             <Route path='/signup' element={<SignUpPage />} />
             <Route path='/pricing' element={<PricingPage />} />

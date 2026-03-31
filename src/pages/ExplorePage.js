@@ -18,6 +18,7 @@ import {
 import { searchParks } from '../api/v1/parks';
 import { getApiErrorMessage } from '../api/v1/errorMessages';
 import { useDiscoveryState } from '../state/useDiscoveryState';
+import { excerptPlainText } from '../utils/excerpt';
 
 const PAGE_SIZE = 24;
 const BASE_RADIUS_OPTIONS = [25, 50, 100, 200, 300];
@@ -64,19 +65,6 @@ const ExplorePage = () => {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const requestedGeoRef = useRef(false);
-
-  useEffect(() => {
-    const syncFiltersPanel = () => {
-      setIsMobileFiltersOpen(window.innerWidth >= 860);
-    };
-
-    syncFiltersPanel();
-    window.addEventListener('resize', syncFiltersPanel);
-
-    return () => {
-      window.removeEventListener('resize', syncFiltersPanel);
-    };
-  }, []);
 
   useEffect(() => {
     setQueryInput(state.query || '');
@@ -358,8 +346,13 @@ const ExplorePage = () => {
         <div className='explore-headline'>
           <div>
             <h1 className='page-title'>{pageHeading}</h1>
-            <p className='page-subtitle'>{summary}</p>
-            <p className='page-subtitle'>{resultsContext}</p>
+            <p className='explore-meta-line'>
+              <span>{summary}</span>
+              <span className='explore-meta-line__sep' aria-hidden>
+                ·
+              </span>
+              <span>{resultsContext}</span>
+            </p>
           </div>
           <button
             type='button'
@@ -368,7 +361,7 @@ const ExplorePage = () => {
             aria-controls='explore-advanced-filters'
             onClick={() => setIsMobileFiltersOpen((current) => !current)}
           >
-            {isMobileFiltersOpen ? 'Hide filters' : 'Show filters'}
+            {isMobileFiltersOpen ? 'Hide extra filters' : 'City / ZIP / state'}
           </button>
           <div className='explore-view-toggle'>
             <Button
@@ -400,7 +393,7 @@ const ExplorePage = () => {
             <input
               id='explore-search-input'
               value={queryInput}
-              placeholder='Search by park name, state, city, or ZIP'
+              placeholder='Search parks'
               onChange={(event) => setQueryInput(event.target.value)}
               onKeyDown={onQueryKeyDown}
               role='combobox'
@@ -477,10 +470,30 @@ const ExplorePage = () => {
           </div>
         </div>
 
+        {activeFilters.length ? (
+          <div className='active-filter-row explore-active-chips'>
+            {activeFilters.map((filter) => (
+              <button
+                key={filter.key}
+                type='button'
+                className='active-filter-chip'
+                onClick={() => setParam(filter.key, '')}
+                aria-label={`Remove ${filter.label}`}
+              >
+                {filter.label} ×
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <div
           id='explore-advanced-filters'
           className={`explore-filter-panel ${isMobileFiltersOpen ? 'explore-filter-panel--open' : 'explore-filter-panel--closed'}`}
         >
+          <p className='explore-filter-panel__hint'>
+            Optional: narrow by city, ZIP, or two-letter state when the main
+            search is not enough.
+          </p>
           <div className='filter-row filter-row--search-secondary'>
             <input
               value={state.city}
@@ -506,22 +519,6 @@ const ExplorePage = () => {
               aria-label='Filter by state'
             />
           </div>
-
-          {activeFilters.length ? (
-            <div className='active-filter-row'>
-              {activeFilters.map((filter) => (
-                <button
-                  key={filter.key}
-                  type='button'
-                  className='active-filter-chip'
-                  onClick={() => setParam(filter.key, '')}
-                  aria-label={`Remove ${filter.label}`}
-                >
-                  {filter.label} ×
-                </button>
-              ))}
-            </div>
-          ) : null}
         </div>
       </Card>
 
@@ -580,15 +577,24 @@ const ExplorePage = () => {
                     onClick={() => setActiveParkId(park.id)}
                   />
                   <div className='search-trail-card__body'>
-                    <h2>{park.name}</h2>
-                    <p className='search-trail-card__park'>{park.category}</p>
+                    <h2 className='search-trail-card__title'>{park.name}</h2>
                     <p className='search-trail-card__meta'>
                       {formatLocation(park)}
                     </p>
-                    <div className='chip-row'>
-                      <Chip tone='nature'>
-                        {park.category || 'National Park'}
-                      </Chip>
+                    <div className='chip-row chip-row--tight'>
+                      {(() => {
+                        const cat = String(park.category || '').trim();
+                        const name = String(park.name || '').toLowerCase();
+                        const showCat =
+                          cat &&
+                          !(
+                            cat.toLowerCase() === 'national park' &&
+                            name.includes('national park')
+                          );
+                        return showCat ? (
+                          <Chip tone='nature'>{cat}</Chip>
+                        ) : null;
+                      })()}
                       {park.state ? <Chip tone='sky'>{park.state}</Chip> : null}
                       {park.zipCode ? (
                         <Chip tone='warm'>ZIP {park.zipCode}</Chip>
@@ -599,9 +605,12 @@ const ExplorePage = () => {
                         </Chip>
                       ) : null}
                     </div>
-                    <p className='page-subtitle'>
-                      {park.summary ||
-                        'A destination worth adding to your park passbook.'}
+                    <p className='search-trail-card__summary'>
+                      {excerptPlainText(
+                        park.summary ||
+                          'Scenic destination with trails, overlooks, and ranger programs.',
+                        200,
+                      )}
                     </p>
                   </div>
                   <div className='feature-actions search-trail-card__actions'>
@@ -644,6 +653,12 @@ const ExplorePage = () => {
                 activeTrailId={activeParkId}
                 onPickTrail={setActiveParkId}
                 markerLimit={120}
+                originLat={
+                  state.latitude ? Number(state.latitude) : undefined
+                }
+                originLon={
+                  state.longitude ? Number(state.longitude) : undefined
+                }
               />
             </div>
           ) : null}

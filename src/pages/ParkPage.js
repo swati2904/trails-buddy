@@ -4,7 +4,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Chip from '../components/ui/Chip';
 import Skeleton from '../components/ui/Skeleton';
-import { getParkBySlug, searchNearbyParks } from '../api/v1/parks';
+import { getParkBySlug, searchNearbyParks, searchParks } from '../api/v1/parks';
 import { addVisitedPark, getVisitedParks } from '../api/v1/user';
 import TrailExploreMap from '../components/Map/TrailExploreMap';
 import {
@@ -42,6 +42,25 @@ const formatVisitDate = (value) => {
   });
 };
 
+const showCategoryChip = (park) => {
+  const cat = String(park?.category || '').trim();
+  if (!cat) {
+    return false;
+  }
+  const name = String(park?.name || '').toLowerCase();
+  const catLower = cat.toLowerCase();
+  if (catLower === 'national park' && name.includes('national park')) {
+    return false;
+  }
+  return true;
+};
+
+const hasCoordinate = (item) =>
+  Number.isFinite(item?.lat) && Number.isFinite(item?.lon);
+
+const formatCoord = (value) =>
+  Number.isFinite(Number(value)) ? Number(value).toFixed(5) : 'N/A';
+
 const ParkPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -59,34 +78,86 @@ const ParkPage = () => {
   const [visitNote, setVisitNote] = useState('');
   const [visitsForPark, setVisitsForPark] = useState([]);
   const [lastStampCode, setLastStampCode] = useState('');
+  const [viewerLat, setViewerLat] = useState(null);
+  const [viewerLon, setViewerLon] = useState(null);
+  const [routeMeta, setRouteMeta] = useState(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      return undefined;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setViewerLat(pos.coords.latitude);
+        setViewerLon(pos.coords.longitude);
+      },
+      () => {
+        setViewerLat(null);
+        setViewerLon(null);
+      },
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 12_000 },
+    );
+
+    return undefined;
+  }, [slug]);
 
   useEffect(() => {
     const run = async () => {
       setLoading(true);
       setError('');
+      setRouteMeta(null);
 
       try {
         const data = await getParkBySlug(slug);
-        setPark(data);
+        let resolvedPark = data;
 
-        if (Number.isFinite(data?.lat) && Number.isFinite(data?.lon)) {
+        if (!hasCoordinate(data)) {
+          try {
+            const fallback = await searchParks({
+              q: data?.name || slug,
+              page: 1,
+              pageSize: 20,
+            });
+            const fallbackItems = Array.isArray(fallback?.items)
+              ? fallback.items
+              : [];
+            const matched =
+              fallbackItems.find((item) => item.slug === data.slug) ||
+              fallbackItems.find((item) => item.id === data.id) ||
+              fallbackItems.find((item) => item.name === data.name);
+            if (matched && hasCoordinate(matched)) {
+              resolvedPark = {
+                ...data,
+                lat: matched.lat,
+                lon: matched.lon,
+              };
+            }
+          } catch {
+            // Keep rendering detail page even when coordinate fallback search fails.
+          }
+        }
+
+        setPark(resolvedPark);
+
+        if (hasCoordinate(resolvedPark)) {
           const nearby = await searchNearbyParks({
-            lat: data.lat,
-            lon: data.lon,
+            lat: resolvedPark.lat,
+            lon: resolvedPark.lon,
             radiusKm: 280,
             page: 1,
             pageSize: 8,
           });
 
           const nearbyItems = Array.isArray(nearby?.items)
-            ? nearby.items.filter((item) => item.slug !== data.slug)
+            ? nearby.items.filter((item) => item.slug !== resolvedPark.slug)
             : [];
 
           setNearbyParks(nearbyItems);
-          setActiveParkId(nearbyItems?.[0]?.id || data.id || '');
+          setActiveParkId(resolvedPark.id || '');
         } else {
           setNearbyParks([]);
-          setActiveParkId(data.id || '');
+          setActiveParkId(resolvedPark.id || '');
         }
       } catch (loadError) {
         setError(getApiErrorMessage(loadError, 'Unable to load park details.'));
@@ -196,6 +267,16 @@ const ParkPage = () => {
   }
 
   const mapItems = [park, ...nearbyParks];
+  const hasParkCoordinate = hasCoordinate(park);
+  const hasMapData = mapItems.some(hasCoordinate);
+  const showNearbySection = nearbyParks.length > 0;
+  const hasViewerLocation =
+    Number.isFinite(viewerLat) && Number.isFinite(viewerLon);
+
+  const heroLocationLine =
+    [park.city, park.state].filter(Boolean).join(', ') ||
+    park.state ||
+    'United States';
 
   return (
     <section className='park-detail-page'>
@@ -210,14 +291,11 @@ const ParkPage = () => {
         <div className='trail-detail-hero__overlay' />
         <div className='trail-detail-hero__content'>
           <h1 className='page-title'>{park.name}</h1>
-          <p className='page-subtitle'>
-            {[park.city, park.state].filter(Boolean).join(', ') ||
-              park.state ||
-              'United States'}{' '}
-            • {park.category || 'National Park'}
-          </p>
-          <div className='chip-row'>
-            <Chip tone='nature'>{park.category || 'National Park'}</Chip>
+          <p className='page-subtitle'>{heroLocationLine}</p>
+          <div className='chip-row chip-row--tight'>
+            {showCategoryChip(park) ? (
+              <Chip tone='nature'>{park.category}</Chip>
+            ) : null}
             {park.state ? <Chip tone='sky'>{park.state}</Chip> : null}
             {park.zipCode ? <Chip tone='warm'>ZIP {park.zipCode}</Chip> : null}
             {alreadyVisited ? <Chip tone='warm'>Visited</Chip> : null}
@@ -235,115 +313,149 @@ const ParkPage = () => {
         </div>
       </Card>
 
-      <Card>
-        <h2>Park story</h2>
-        <p className='page-subtitle'>
-          {park.summary ||
-            'A beautiful stop on your national parks journey. Add your visit and keep the memory in your passbook.'}
-        </p>
-      </Card>
+      <div className='park-detail-layout'>
+        <div className='park-detail-layout__main'>
+          <Card>
+            <h2>Park story</h2>
+            <p className='park-story__body'>
+              {park.summary ||
+                'Scenic trails, overlooks, and ranger programs make this park worth the trip. Add your visit to keep the memory in your passbook.'}
+            </p>
+          </Card>
 
-      <Card>
-        <h2>Mark this park as visited</h2>
-        <p className='page-subtitle'>
-          Add a date, save a note, and collect your digital stamp.
-        </p>
-        <form className='auth-form' onSubmit={markVisited}>
-          <label>
-            <span>Visit date</span>
-            <input
-              type='date'
-              value={visitDate}
-              onChange={(event) => setVisitDate(event.target.value)}
-            />
-          </label>
-          <label>
-            <span>Memory note (optional)</span>
-            <input
-              value={visitNote}
-              onChange={(event) => setVisitNote(event.target.value)}
-              placeholder='What made this park visit unforgettable?'
-              maxLength={280}
-            />
-          </label>
-          <Button type='submit' disabled={visitStatus === 'saving'}>
-            {!isAuthenticated
-              ? 'Sign in to stamp this park'
-              : visitStatus === 'saving'
-                ? 'Stamping park...'
-                : 'Add to passbook'}
-          </Button>
-        </form>
-      </Card>
+          <Card className='park-route-card'>
+            <div className='park-route-card__head'>
+              <h2>Route map</h2>
+              {hasParkCoordinate ? (
+                <span className='ui-chip ui-chip--sky'>
+                  End: {park.lat.toFixed(4)}, {park.lon.toFixed(4)}
+                </span>
+              ) : null}
+            </div>
+            <p className='page-subtitle'>
+              {hasViewerLocation
+                ? 'Showing route from your current location to the selected park pin.'
+                : 'Allow location to show your route to this park.'}
+            </p>
+            <div className='park-route-meta'>
+              <span className='ui-chip ui-chip--nature'>
+                Start lat/lon: {formatCoord(viewerLat)}, {formatCoord(viewerLon)}
+              </span>
+              <span className='ui-chip ui-chip--warm'>
+                End lat/lon: {formatCoord(park.lat)}, {formatCoord(park.lon)}
+              </span>
+              {routeMeta ? (
+                <span className='ui-chip ui-chip--sky'>
+                  Drive: {routeMeta.distanceKm.toFixed(1)} km •{' '}
+                  {Math.max(1, Math.round(routeMeta.durationMin))} min
+                </span>
+              ) : null}
+            </div>
+            {hasMapData ? (
+              <TrailExploreMap
+                trails={mapItems}
+                activeTrailId={activeParkId}
+                onPickTrail={setActiveParkId}
+                markerLimit={120}
+                originLat={viewerLat}
+                originLon={viewerLon}
+                onRouteMetaChange={setRouteMeta}
+              />
+            ) : (
+              <p className='page-subtitle park-route-card__empty'>
+                Map data is not available for this park yet.
+              </p>
+            )}
+          </Card>
 
-      <Card>
-        <h2>Map preview</h2>
-        <p className='page-subtitle'>
-          See this park in context and discover nearby national parks.
-        </p>
-        <TrailExploreMap
-          trails={mapItems}
-          activeTrailId={activeParkId}
-          onPickTrail={setActiveParkId}
-          markerLimit={120}
-        />
-      </Card>
+          {visitsForPark.length ? (
+            <Card>
+              <h2>Your visits here</h2>
+              <div className='park-trails-list'>
+                {visitsForPark.map((visit, index) => (
+                  <article
+                    key={`${visit.visitId || 'visit'}-${visit.createdAt || visit.visitDate || 'date'}-${index}`}
+                    className='park-trail-row'
+                  >
+                    <div>
+                      <h3>{formatVisitDate(visit.visitDate)}</h3>
+                      <p className='page-subtitle'>
+                        {visit.note || 'No note added yet.'}
+                      </p>
+                    </div>
+                    {visit.stampCode ? (
+                      <Chip tone='warm'>{visit.stampCode}</Chip>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+        </div>
 
-      <Card>
-        <h2>Nearby parks to add next</h2>
-        {nearbyParks.length ? (
-          <div className='park-trails-list'>
-            {nearbyParks.map((nearbyPark, index) => (
-              <article
-                key={`${nearbyPark.id || nearbyPark.slug || 'nearby'}-${nearbyPark.slug || 'park'}-${index}`}
-                className='park-trail-row'
-              >
-                <div>
-                  <h3>{nearbyPark.name}</h3>
-                  <p className='page-subtitle'>
-                    {[nearbyPark.city, nearbyPark.state]
-                      .filter(Boolean)
-                      .join(', ') ||
-                      nearbyPark.state ||
-                      'United States'}
-                  </p>
-                </div>
-                <Link to={`/parks/${nearbyPark.slug}`}>
-                  <Button variant='secondary'>View park</Button>
-                </Link>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className='page-subtitle'>
-            Nearby park suggestions are unavailable for this location.
-          </p>
-        )}
-      </Card>
+        <aside className='park-detail-layout__aside'>
+          <Card>
+            <h2>Mark this park as visited</h2>
+            <p className='page-subtitle'>
+              Add a date, save a note, and collect your digital stamp.
+            </p>
+            <form className='auth-form' onSubmit={markVisited}>
+              <label>
+                <span>Visit date</span>
+                <input
+                  type='date'
+                  value={visitDate}
+                  onChange={(event) => setVisitDate(event.target.value)}
+                />
+              </label>
+              <label>
+                <span>Memory note (optional)</span>
+                <input
+                  value={visitNote}
+                  onChange={(event) => setVisitNote(event.target.value)}
+                  placeholder='What made this park visit unforgettable?'
+                  maxLength={280}
+                />
+              </label>
+              <Button type='submit' disabled={visitStatus === 'saving'}>
+                {!isAuthenticated
+                  ? 'Sign in to stamp this park'
+                  : visitStatus === 'saving'
+                    ? 'Stamping park...'
+                    : 'Add to passbook'}
+              </Button>
+            </form>
+          </Card>
 
-      {visitsForPark.length ? (
-        <Card>
-          <h2>Your visits here</h2>
-          <div className='park-trails-list'>
-            {visitsForPark.map((visit, index) => (
-              <article
-                key={`${visit.visitId || 'visit'}-${visit.createdAt || visit.visitDate || 'date'}-${index}`}
-                className='park-trail-row'
-              >
-                <div>
-                  <h3>{formatVisitDate(visit.visitDate)}</h3>
-                  <p className='page-subtitle'>
-                    {visit.note || 'No note added yet.'}
-                  </p>
-                </div>
-                {visit.stampCode ? (
-                  <Chip tone='warm'>{visit.stampCode}</Chip>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        </Card>
-      ) : null}
+          {showNearbySection ? (
+            <Card>
+              <h2>Nearby parks to add next</h2>
+              <div className='park-trails-list'>
+                {nearbyParks.map((nearbyPark, index) => (
+                  <article
+                    key={`${nearbyPark.id || nearbyPark.slug || 'nearby'}-${nearbyPark.slug || 'park'}-${index}`}
+                    className='park-trail-row'
+                  >
+                    <div>
+                      <h3>{nearbyPark.name}</h3>
+                      <p className='page-subtitle'>
+                        {[nearbyPark.city, nearbyPark.state]
+                          .filter(Boolean)
+                          .join(', ') ||
+                          nearbyPark.state ||
+                          'United States'}
+                      </p>
+                    </div>
+                    <Link to={`/parks/${nearbyPark.slug}`}>
+                      <Button variant='secondary'>View park</Button>
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+        </aside>
+      </div>
 
       {error ? <p className='error-copy'>{error}</p> : null}
     </section>
