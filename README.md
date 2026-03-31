@@ -2,7 +2,7 @@
 
 Frontend for a U.S. National Parks explorer: search and browse parks, open a park page with a map (including a driving route from your location when coordinates exist), and keep a **passbook** of visits with stamps. It talks to the Trails Buddy backend over a v1 JSON API—auth, parks, discovery/autocomplete, trails, reviews, passbook.
 
-Stack is React (CRA), React Router, Leaflet maps, Bootstrap-ish styling mostly driven from `src/index.css` (CSS variables + shared layout classes). English/Spanish strings live under `src/locales/`.
+Stack is React (CRA), React Router, Leaflet maps, and global styling in `src/index.css` (CSS variables, cards, layout). Copy is plain strings in the components—no translation layer wired up yet.
 
 **Backend:** [trails-buddy-services](https://github.com/swati2904/trails-buddy-services) — run it on port **8080** for local dev unless you point the app elsewhere with env vars.
 
@@ -66,7 +66,6 @@ src/
   components/      Shell (nav/layout), Map (Leaflet), ui/ primitives
   pages/           route screens
   state/           AuthContext, discovery URL state, etc.
-  locales/         i18n JSON
   index.css        global theme + page patterns
 ```
 
@@ -107,9 +106,3 @@ Pushing an image by hand is optional; only do it when you actually want a regist
 ## Vercel
 
 Import the GitHub repo, preset **Create React App**, deploy. Set `REACT_APP_API_URL` to your public API if the backend isn’t same-origin.
-
----
-
-## i18n
-
-`src/i18n.js` — fallback `en`, also `es`, browser detection on. Files: `src/locales/en/translation.json`, `src/locales/es/translation.json`.
